@@ -163,6 +163,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 return this.BadRequest(errorMessage);
             }
+
             /*var updateSentNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 notification.Id);*/
@@ -186,7 +187,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
-                MessageVersion = "",
+                MessageVersion = string.Empty,
                 Succeeded = 0,
                 Failed = 0,
                 Throttled = 0,
@@ -200,7 +201,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             // Update user app id if proactive installation is enabled.
             // await this.UpdateUserAppIdAsync();
-
             var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
             {
                 NotificationId = id,

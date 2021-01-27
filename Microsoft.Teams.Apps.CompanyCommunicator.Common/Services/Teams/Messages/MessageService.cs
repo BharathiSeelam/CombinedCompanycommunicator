@@ -94,7 +94,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                     try
                     {
                         // Send message.
-                        var messageResponse= await policy.ExecuteAsync(async () => await turnContext.SendActivityAsync(message));
+                        var messageResponse = await policy.ExecuteAsync(async () => await turnContext.SendActivityAsync(message));
 
                         // Success.
                         response.ResultType = SendMessageResult.Succeeded;
@@ -172,7 +172,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 
             // return response;
         }
-
 
         private AsyncRetryPolicy GetRetryPolicy(int maxAttempts, ILogger log)
         {
