@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Microsoft.Teams.Apps.CompanyCommunicator.Data.Func": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
+      "httpPort": 32380,
+      "useSSL": false
+    }
+  }
+}
