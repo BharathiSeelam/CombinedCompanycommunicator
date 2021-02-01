@@ -10,13 +10,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
     public class ChannelData
     {
         /// <summary>
-        /// Gets or sets group Id.
+        /// Gets or sets ChannelId.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets name.
+        /// Gets or sets ChannelName value.
         /// </summary>
         public string ChannelName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelDescription value.
+        /// </summary>
+        public string ChannelDescription { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelTemplate value.
+        /// </summary>
+        public string ChannelTemplate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelAdmins value.
+        /// </summary>
+        public string ChannelAdmins { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelAdminDLs value.
+        /// </summary>
+        public string ChannelAdminDLs { get; set; }
     }
 }
