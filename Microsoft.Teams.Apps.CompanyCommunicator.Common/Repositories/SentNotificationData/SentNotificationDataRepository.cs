@@ -65,7 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                                recipientId: sentNotificationDataEntity.RecipientId,
                                serviceUrl: sentNotificationDataEntity.ServiceUrl,
                                tenantId: sentNotificationDataEntity.TenantId,
-                               activityId: sentNotificationDataEntity.CreatedID);
+                               activityId: sentNotificationDataEntity.ActivtyId);
 
                     // await this.sentNotificationDataRepository.DeleteAsync(notification);
                 }
