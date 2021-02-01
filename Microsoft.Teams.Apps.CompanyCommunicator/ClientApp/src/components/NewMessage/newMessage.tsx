@@ -571,7 +571,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         className="hideToggle"
                                         hidden={!this.state.groupsOptionSelected || !this.state.groupAccess}
                                         placeholder={this.localize("SendToGroupsPlaceHolder")}
-                                        search={this.onGroupSearch}
+                                      //  search={this.onGroupSearch}
+                                        search
                                         multiple
                                         loading={this.state.loading}
                                         loadingMessage={this.localize("LoadingText")}
@@ -581,7 +582,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         onSelectedChange={this.onGroupsChange}
                                         noResultsMessage={this.state.noResultMessage}
                                         unstable_pinned={this.state.unstablePinned}
-                                    />
+                                    /> */
                                     <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
                                             <Text error content={this.localize("SendToGroupsNote")} />
@@ -638,10 +639,11 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     private isNextBtnDisabled = () => {
         const channel = this.state.selectedChannel;
+       var channelvalue= Object.values(channel);
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
         const btnLink = this.state.btnLink;
-        return (!(channel && title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
+        return (!(channelvalue.length && title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
     }
     private getChannels = () => {
      
