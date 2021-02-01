@@ -43,7 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         /// <param name="statusCode">Status code.</param>
         /// <param name="allSendStatusCodes">A comma separated list representing all of the status code responses received when trying
         /// to send the notification to the recipient.</param>
-        /// <param name="createdTime">The createdtime to store in the database.</param>
+        /// <param name="activityID">The createdtime to store in the database.</param>
         /// <param name="errorMessage">The error message to store in the database.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task UpdateSentNotification(
@@ -52,7 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
             int totalNumberOfSendThrottles,
             int statusCode,
             string allSendStatusCodes,
-            string createdTime,
+            string activityID,
             string errorMessage);
 
         /// <summary>
