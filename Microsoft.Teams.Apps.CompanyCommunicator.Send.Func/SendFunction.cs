@@ -121,7 +121,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                         totalNumberOfSendThrottles: 0,
                         statusCode: SentNotificationDataEntity.FinalFaultedStatusCode,
                         allSendStatusCodes: $"{SentNotificationDataEntity.FinalFaultedStatusCode},",
-                        createdTime: messageContent.ActivtiyId,
+                        activityID: messageContent.ActivtiyId,
                         errorMessage: this.localizer.GetString("AppNotInstalled"));
                     return;
                 }

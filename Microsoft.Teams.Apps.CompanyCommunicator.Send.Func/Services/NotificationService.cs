@@ -97,7 +97,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
         {
             // Current time as sent date time.
             var sentDateTime = DateTime.UtcNow;
-          
             var notification = await this.sentNotificationDataRepository.GetAsync(
                 partitionKey: notificationId,
                 rowKey: recipientId);
@@ -110,7 +109,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Services
             notification.ErrorMessage = errorMessage;
             notification.NumberOfFunctionAttemptsToSend = notification.NumberOfFunctionAttemptsToSend + 1;
             notification.AllSendStatusCodes = $"{notification.AllSendStatusCodes ?? string.Empty}{allSendStatusCodes}";
-            notification.CreatedID = createdTime;
+            notification.ActivtyId = createdTime;
 
             if (statusCode == (int)HttpStatusCode.Created)
             {
