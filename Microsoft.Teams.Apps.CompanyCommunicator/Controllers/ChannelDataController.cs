@@ -46,6 +46,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                     Id = entity.Id,
                     ChannelName = entity.ChannelName,
+                    ChannelAdminDLs = entity.ChannelAdminDLs,
                 };
                 result.Add(channel);
             }
@@ -73,6 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 Id = channelDataEntity.Id,
                 ChannelName = channelDataEntity.ChannelName,
+                ChannelAdminDLs = channelDataEntity.ChannelAdminDLs,
             };
 
             return this.Ok(result);
