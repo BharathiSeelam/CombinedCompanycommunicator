@@ -80,9 +80,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         public static readonly string Retrying = "Retrying";
 
         /// <summary>
-        /// Gets or sets the createdtime.
+        /// Gets or sets the ActivityID for cognizant enhancement.
         /// </summary>
-        public string CreatedID { get; set; }
+        public string ActivtyId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating which type of recipient the notification was sent to
