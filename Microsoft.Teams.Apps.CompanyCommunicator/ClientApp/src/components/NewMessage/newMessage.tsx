@@ -582,7 +582,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         onSelectedChange={this.onGroupsChange}
                                         noResultsMessage={this.state.noResultMessage}
                                         unstable_pinned={this.state.unstablePinned}
-                                    /> */
+                                    /> 
                                     <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
                                         <div className="noteText">
                                             <Text error content={this.localize("SendToGroupsNote")} />
