@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Configuration from './components/config';
 import TabContainer from './components/TabContainer/tabContainer';
 import NewMessage from './components/NewMessage/newMessage';
+import NewChannel from './components/NewChannel/newChannel';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
 import './App.scss';
 import { Provider, themes } from '@stardust-ui/react';
@@ -112,6 +113,8 @@ class App extends React.Component<{}, IAppState> {
                 <Route exact path="/messages" component={TabContainer} />
                 <Route exact path="/newmessage" component={NewMessage} />
                 <Route exact path="/newmessage/:id" component={NewMessage} />
+                <Route exact path="/newchannel" component={NewChannel} />
+                <Route exact path="/newchannel/:id" component={NewChannel} />
                 <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
                 <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
                 <Route exact path="/errorpage" component={ErrorPage} />
