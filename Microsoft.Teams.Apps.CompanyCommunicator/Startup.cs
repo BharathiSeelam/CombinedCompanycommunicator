@@ -24,6 +24,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTemplateData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DLUserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -170,7 +173,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
+            services.AddSingleton<IDLUserDataRepository, DLUserDataRepository>();
+            services.AddSingleton<IChannelTemplateDataRepository, ChannelTemplateDataRepository>();
             services.AddSingleton<IChannelDataRepository, ChannelDataRepository>();
+            services.AddSingleton<IDistributionListDataRepository, DistributionListDataRepository>();
 
             // Add service bus message queues.
             services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
