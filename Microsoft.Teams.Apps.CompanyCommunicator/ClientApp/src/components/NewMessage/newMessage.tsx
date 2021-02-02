@@ -8,7 +8,8 @@ import { Button, Loader, Dropdown, Text, DropdownItem } from '@stardust-ui/react
 import * as microsoftTeams from "@microsoft/teams-js";
 import './newMessage.scss';
 import './teamTheme.scss';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups,verifyGroupAccess, getChannels,getChannnelID} from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess} from '../../apis/messageListApi';
+import { getChannel, getChannels} from '../../apis/channelListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -369,7 +370,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 const response = await getDraftNotification(id);
                 const draftMessageDetail = response.data;
 
-                const responseChannel = await getChannnelID(draftMessageDetail.channel);
+                const responseChannel = await getChannel(draftMessageDetail.channel);
                 const channelDetails = responseChannel.data;
                 let selectedRadioButton = "teams";
                 if (draftMessageDetail.rosters.length > 0) {
