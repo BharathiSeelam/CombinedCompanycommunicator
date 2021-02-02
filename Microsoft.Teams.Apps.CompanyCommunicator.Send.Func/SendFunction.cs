@@ -172,7 +172,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     totalNumberOfSendThrottles: 0,
                     statusCode: statusCode,
                     allSendStatusCodes: $"{statusCode},",
-                    createdTime: messageContent.ActivtiyId,
+                    activityID: messageContent.ActivtiyId,
                     errorMessage: errorMessage);
 
                 throw;
@@ -209,7 +209,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
                     totalNumberOfSendThrottles: sendMessageResponse.TotalNumberOfSendThrottles,
                     statusCode: sendMessageResponse.StatusCode,
                     allSendStatusCodes: sendMessageResponse.AllSendStatusCodes,
-                    createdTime: sendMessageResponse.ActivityId,
+                    activityID: sendMessageResponse.ActivityId,
                     errorMessage: sendMessageResponse.ErrorMessage);
 
             // Throttled
