@@ -11,7 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
     using Microsoft.Extensions.Options;
 
     /// <summary>
-    /// Repository of the export data stored in the table storage.
+    /// Repository of the channel data in the table storage.
     /// </summary>
     public class ChannelDataRepository : BaseRepository<ChannelDataEntity>, IChannelDataRepository
     {

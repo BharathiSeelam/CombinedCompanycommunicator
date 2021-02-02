@@ -32,16 +32,6 @@ export const getsentGroups = async (id: number): Promise<any> => {
     return await axios.get(url);
 }
 
-export const getChannels = async (): Promise<any> => {
-    let url = baseAxiosUrl + "/channeldata";
-    return await axios.get(url);
-}
-
-export const getChannnelID = async (id: number): Promise<any> => {
-    let url = baseAxiosUrl + "/channeldata/" + id;
-    return await axios.get(url);
-}
-
 export const searchGroups = async (query: string): Promise<any> => {
     let url = baseAxiosUrl + "/groupdata/search/" + query;
     return await axios.get(url);

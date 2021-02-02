@@ -1,0 +1,125 @@
+.taskModule {
+    .formContainer {
+        overflow-y: auto;
+        position: absolute;
+        top: 0rem;
+        bottom: 8.4rem;
+        width: 100%;
+
+        h3 {
+            font-size: 1.6rem;
+            margin: 2rem 3.2rem 0rem 3.2rem;
+        }
+
+        h4 {
+            margin: 0.6rem 3.2rem 1rem 3.2rem;
+            font-size: 1.4rem;
+            font-weight: 100;
+        }
+
+        .formChannelContainer {
+            .label {
+                background-color: transparent;
+                font-size: 1.2rem;
+            }
+
+            p {
+                margin: 1.5rem 0rem;
+            }
+
+            .newTemplateLink {
+                float: right;
+                margin-right: 30px;
+            }
+
+            .channelDropdown {
+                margin: 0rem 3.2rem;
+
+                div {
+                    width: 100%;
+                }
+
+                li {
+                    div {
+                        width: inherit;
+                    }
+                }
+                ul{
+                    width:inherit;
+                }
+            }
+
+            .noteText {
+                margin: 1rem 0rem 1rem 2.5rem;
+            }
+
+            .hide {
+                display: none;
+            }
+
+            .inputField {
+                margin: 0rem 3.2rem;
+
+                span {
+                    font-size: 1.2rem;
+                    display: block;
+                    margin: 0.8rem 0rem 0.4rem 0rem;
+                }
+
+                input {
+                    height: 3.2rem;
+                    padding: 0.6rem 1.2rem;
+                    font-size: 1.4rem;
+                    margin: auto 0;
+                }
+
+                i {
+                    bottom: 0.5rem;
+                }
+            }
+
+            .textArea {
+                margin: 0rem 3.2rem;
+
+                span {
+                    font-size: 1.2rem;
+                    display: block;
+                    margin: 0.8rem 0rem 0.4rem 0rem;
+
+                    &:nth-child(2) {
+                        color: #C4314B;
+                    }
+                }
+
+                textarea {
+                    height: 10.6rem;
+                    padding: 0.6rem 1.2rem;
+                    font-size: 1.4rem;
+                    margin: auto 0;
+                }
+
+                i {
+                    bottom: 2.5rem;
+                }
+            }
+        }
+    }
+
+    .footerContainer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        padding: 2rem 0rem 3.2rem 0rem;
+        width: 100%;
+
+        .buttonContainer {
+            display: inline;
+            float: right;
+            margin-right: 3.2rem;
+
+            #saveBtn {
+                margin-left: 0.8rem;
+            }
+        }
+    }
+}

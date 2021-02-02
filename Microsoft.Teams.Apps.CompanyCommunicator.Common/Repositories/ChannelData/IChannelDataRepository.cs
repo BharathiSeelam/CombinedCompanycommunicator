@@ -9,7 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
     using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
-    /// Interface for Team Data Repository.
+    /// interface for Channel data Repository.
     /// </summary>
     public interface IChannelDataRepository : IRepository<ChannelDataEntity>
     {

@@ -40,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Update Sent Notification.
         /// </summary>
         /// <param name="updateSentNotificationDataEntity">The draft notification instance to be moved to the sent partition.</param>
-        /// <param name="id">The draft notification instance Id</param>
+        /// <param name="id">Id.</param>
         /// <returns>The new SentNotification ID.</returns>
         public Task<string> UpdateSentNotificationAsync(NotificationDataEntity updateSentNotificationDataEntity, string id);
 
