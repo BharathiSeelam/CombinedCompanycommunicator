@@ -21,8 +21,24 @@ export const draftmessagesListReducer = (draftMessages = [], action: { type: str
     return draftMessages;
 };
 
+export const channelListReducer = (channels = [], action: { type: string; payload: any; }) => {
+    if (action.type === 'FETCH_CHANNELS') {
+        return action.payload
+    }
+    return channels;
+};
+
+export const selectedChannelReducer = (selectedChannel = null, action: { type: string; payload: any; }) => {
+    if (action.type === 'CHANNEL_SELECTED') {
+        return action.payload;
+    }
+    return selectedChannel;
+}
+
 export default combineReducers({
     messagesList: messagesListReducer,
     draftMessagesList: draftmessagesListReducer,
     selectedMessage: selectedMessageReducer,
+    channelList: channelListReducer,
+    selectedChannel: selectedChannelReducer
 });
