@@ -46,11 +46,7 @@
     <WCFMetadata Include="Connected Services" />
   </ItemGroup>
 
-  <ItemGroup>
-    <TypeScriptCompile Update="ClientApp\src\components\ChannelAdmins\ChannelAdmin.tsx">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-  </ItemGroup>
+ 
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
     <!-- Ensure Node.js is installed -->
