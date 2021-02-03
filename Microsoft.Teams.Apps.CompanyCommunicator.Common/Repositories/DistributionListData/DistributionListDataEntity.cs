@@ -19,7 +19,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Distribut
         /// <summary>
         /// Gets or sets DLID.
         /// </summary>
-        public string Id { get; set; }
+        public string DLID { get; set; }
 
         /// <summary>
         /// Gets or sets DLName value.
