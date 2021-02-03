@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 var distributionLists = new DistributionList
                 {
-                    Id = distributionListEntity.Id,
+                    DLID = distributionListEntity.DLID,
                     DLName = distributionListEntity.DLName,
                     DLMail = distributionListEntity.DLMail,
                     GroupType = distributionListEntity.GroupType,

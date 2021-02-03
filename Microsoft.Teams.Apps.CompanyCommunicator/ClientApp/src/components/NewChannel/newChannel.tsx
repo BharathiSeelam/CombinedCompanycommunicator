@@ -12,6 +12,7 @@ import { getChannel, createChannel, updateChannel, getTeams } from '../../apis/c
 import { getDLUsers } from '../../apis/dlUserListApi';
 import { getBaseUrl } from '../../configVariables';
 import { getChannelTemplates } from '../../apis/channelTemplateListApi';
+import { getDistributionLists } from '../../apis/distributionListApi';
 import {
     getInitAdaptiveCard
 } from '../AdaptiveCard/adaptiveCard';
@@ -99,6 +100,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
         this.getAdminData();
         this.getTemplateData();
+        this.getDLData();
     }
 
     public async componentDidMount() {
@@ -214,12 +216,12 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         if (items) {            
             items.forEach((element) => {
                 resultedTeams.push({
-                    key: element.teamsID,
+                    key: element.dlid,
                     header: element.dlName,
                     content: "",
                     image: ImageUtil.makeInitialImage(element.dlName),
                     team: {
-                        id: element.teamsID
+                        id: element.dlid
                     },
                 });
             });
@@ -279,23 +281,15 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
     }
 
-    private getDLData = async (selectedAdmins:any[]) => {
-        let filterdAdmins: any[] = [];
-        this.getAdminData()
-        let allAdmins: any[];
+    private getDLData = async () => {
         try {
-            const response = await getDLUsers();
-            allAdmins = response.data
-            selectedAdmins.forEach((element) => {
-                let result = allAdmins.filter(admin => admin.userName == element);
-                filterdAdmins.push(result);
-            })
+            const response = await getDistributionLists();
             this.setState({
-                dls: filterdAdmins.flat()
+                dls: response.data
             });
         }
         catch (error) {
-            return error;
+
         }
     }
     private getItem = async (id: number) => {
@@ -365,7 +359,6 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                                     unstable_pinned={this.state.unstablePinned}
                                     noResultsMessage={this.localize("NoMatchMessage")}
                                 />  
-                                {/*<a href="" className="newTemplateLink" onClick={this.onNewTemplate}>Create new</a>*/}
                                 <br />
                                 <Label className="inputField label">{this.localize("AdminsForThisChannel")}</Label>
                                 <Dropdown
@@ -535,7 +528,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                 dlAdminLabel: dlAdminLabelString
             });              
         }        
-        this.getDLData(dlAdminLabel);
+        
     }
 
     private onBack = (event: any) => {

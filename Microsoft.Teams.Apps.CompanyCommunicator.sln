@@ -31,6 +31,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.Compan
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test", "Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test\Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test.csproj", "{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Microsoft.Teams.Apps.CompanyCommunicator.DL.LogicApp", "Microsoft.Teams.Apps.CompanyCommunicator.DL.LogicApp\Microsoft.Teams.Apps.CompanyCommunicator.DL.LogicApp.deployproj", "{66B00F0E-3E69-49FB-A651-F6FCDAB23B57}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -65,6 +67,10 @@ Global
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7426FDC6-72E9-41BA-8686-A881F1DCBAAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{66B00F0E-3E69-49FB-A651-F6FCDAB23B57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{66B00F0E-3E69-49FB-A651-F6FCDAB23B57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{66B00F0E-3E69-49FB-A651-F6FCDAB23B57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{66B00F0E-3E69-49FB-A651-F6FCDAB23B57}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
