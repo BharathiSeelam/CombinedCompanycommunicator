@@ -2,7 +2,7 @@ import * as React from 'react';
 import { withTranslation, WithTranslation } from "react-i18next";
 import Messages from '../Messages/messages';
 import Channels from '../Channels/channels';
-import ChannelAdmins from '../Channels/ChannelAdmin';
+import ChannelAdmins from '../ChannelAdmins/ChannelAdmin';
 import DraftMessages from '../DraftMessages/draftMessages';
 import './tabContainer.scss';
 import './rc-tabs.scss';
