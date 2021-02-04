@@ -25,7 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the title text of the notification's content.
+        /// Gets or sets the channel text of the notification's content.
         /// </summary>
         public string Channel { get; set; }
 
