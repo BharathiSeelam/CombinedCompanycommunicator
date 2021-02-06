@@ -1,15 +1,11 @@
 ﻿import * as React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import { Loader, List, Flex, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
-
 import './channelAdmins.scss';
-import Overflow from '../OverFlow/channelOverflow';
-import { getBaseUrl } from '../../configVariables';
-import { selectChannel, getChannelsList } from '../../actions';
+import { getChannelsList } from '../../actions';
 import { TFunction } from "i18next";
 
 
@@ -95,14 +91,12 @@ class ChannelAdmins extends React.Component<IChannelAdminProps, IChannelAdminSta
                         <Flex.Item size="size.small" variables={{ 'size.small': '43%' }} shrink={0}>
                             <Text>{channel.channelAdminDLs}</Text>
                         </Flex.Item>
-                        <Flex.Item shrink={0} hAlign="end" vAlign="center">
-                            <Overflow channel={channel} title="" />
-                        </Flex.Item>
+                   
                     </Flex>
                 ),
                 styles: { margin: '0.2rem 0.2rem 0 0' },
                 onClick: (): void => {
-                    let url = getBaseUrl() + "/newchannel/" + channel.id + "?locale={locale}";
+                  //  let url = getBaseUrl() + "/newchannel/" + channel.id + "?locale={locale}";
                     //this.onOpenTaskModule(null, url, this.localize("EditChannel"));
                 },
             };

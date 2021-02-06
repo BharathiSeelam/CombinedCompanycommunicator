@@ -43,7 +43,8 @@ export interface IChannel {
     channelDescription: string,
     channelAdmins: string,
     channelTemplate: string,
-    channelAdminDLs: string
+    channelAdminDLs: string,
+    channelAdminEmail:string
 }
 
 export interface formState {
@@ -65,6 +66,8 @@ export interface formState {
     selectedAdmins: dropdownItem[],
     selectedTemplates: dropdownItem[],
     selectedDLs: dropdownItem[],
+    selectedAdminEmail:[],
+    dlAdminEmail:string,
     templateUrl?:string
 }
 
@@ -96,6 +99,8 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             noResultMessage: "",
             unstablePinned: true,
             dlAdminLabel: "",
+            dlAdminEmail:"",
+           selectedAdminEmail:[],
             templateUrl: getBaseUrl() + "/newchannel?locale={locale}"
         }
         this.getAdminData();
@@ -122,6 +127,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                         selectedDLs: selectedDLs,
                         selectedAdmins: selectedAdmins,
                         selectedTemplates: selectedTemplates,
+                      selectedAdminEmail:this.state.selectedAdminEmail,
                     })
                 });               
             } else {
@@ -292,7 +298,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
 
         }
     }
-    private getItem = async (id: number) => {
+    private getItem = async (id: string) => {
         try {
             const response = await getChannel(id);
             const ChannelDetail = response.data;                   
@@ -302,6 +308,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                 selectedAdmins: ChannelDetail.channelAdmins, 
                 selectedTemplates: ChannelDetail.channelTemplate,
                 selectedDLs: ChannelDetail.channelAdminDLs,
+              selectedAdminEmail: ChannelDetail.channelAdminEmail,
                 loader: false
             });
         } catch (error) {
@@ -430,6 +437,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
 
     private onSave = () => {
         let channelAdmins: any[] = this.state.selectedAdmins.map(a => a.header);
+        let channelAdminsEmail: any[] = this.state.selectedAdmins.map(a => a.content);
         let channelAdminDLs: any[] = this.state.selectedDLs.map(a => a.header);
         let channelTemplate: any[] = this.state.selectedTemplates.map(a => a.header);
         const channel: IChannel = {
@@ -439,6 +447,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             channelAdmins: channelAdmins.join(','), 
             channelAdminDLs: channelAdminDLs.join(','),
             channelTemplate: channelTemplate.join(','),
+            channelAdminEmail: channelAdminsEmail.join(',')
         };
 
         if (this.state.exists) {
@@ -518,14 +527,19 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             page: "DLSelection"
         });
         let dlAdminLabel: any[] = [];
-        let dlAdminLabelString: string = ""
+        let dlAdminEmail: any[] = [];
+        let dlAdminLabelString: string = "";
+        let dlAdminEmailLabelString: string = ""
         if (this.state.selectedAdmins.length !== 0) {
             this.state.selectedAdmins.forEach((element) => {
                 dlAdminLabel.push(element.header); 
+                dlAdminEmail.push(element.content);
             });
-            dlAdminLabelString = dlAdminLabel.join(',')
+            dlAdminLabelString = dlAdminLabel.join(',');
+            dlAdminEmailLabelString = dlAdminEmail.join(',');
             this.setState({
-                dlAdminLabel: dlAdminLabelString
+                dlAdminLabel: dlAdminLabelString,
+                dlAdminEmail:dlAdminEmailLabelString
             });              
         }        
         
@@ -557,15 +571,20 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             selectedAdmins: itemsData.value,
         });
         let dlAdminLabel: any[] = [];
-        let dlAdminLabelString: string =""
+        let dlAdminEmail: any[] = [];
+        let dlAdminLabelString: string = "";
+        let dlAdminEmailLabelString: string = ""
         if (this.state.selectedAdmins.length !== 0) {
             this.state.selectedAdmins.forEach((element) => {
                 dlAdminLabel.push(element.key);
+                dlAdminEmail.push(element.content);
             });
-            dlAdminLabelString =dlAdminLabel.join(',')
+            dlAdminLabelString = dlAdminLabel.join(',');
+            dlAdminEmailLabelString = dlAdminEmail.join(',');
             this.setState({
-                dlAdminLabel: dlAdminLabelString
-            });
+                dlAdminLabel: dlAdminLabelString,
+                dlAdminEmail: dlAdminEmailLabelString
+            }); ;
         }       
     } 
     private static MAX_SELECTED_TEMPLATES_NUM: number = 1;

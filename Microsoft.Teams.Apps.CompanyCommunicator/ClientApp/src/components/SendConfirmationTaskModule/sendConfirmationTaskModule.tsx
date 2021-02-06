@@ -217,7 +217,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
     private onSendMessage = () => {
         let spanner = document.getElementsByClassName("sendingLoader");
         spanner[0].classList.remove("hiddenLoader");
-        if (this.state.selectedPublishBtn == "publishNow") {
+        if (this.state.selectedPublishBtn === "publishNow") {
             sendDraftNotification(this.state.message).then(() => {
                 microsoftTeams.tasks.submitTask();
             });

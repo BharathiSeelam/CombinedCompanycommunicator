@@ -36,6 +36,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 ChannelTemplate = channel.ChannelTemplate,
                 ChannelAdmins = channel.ChannelAdmins,
                 ChannelAdminDLs = channel.ChannelAdminDLs,
+                ChannelAdminEmail = channel.ChannelAdminEmail,
             };
 
             await channelRepository.CreateOrUpdateAsync(channelEntity);

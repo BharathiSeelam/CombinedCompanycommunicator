@@ -52,6 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     ChannelTemplate = channelEntity.ChannelTemplate,
                     ChannelAdmins = channelEntity.ChannelAdmins,
                     ChannelAdminDLs = channelEntity.ChannelAdminDLs,
+                    ChannelAdminEmail = channelEntity.ChannelAdminEmail,
                 };
 
                 result.Add(channels);
@@ -68,7 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// The returning value is wrapped in a ActionResult object.
         /// If the passed in id is invalid, it returns 404 not found error.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<ChannelData>> GetChannelByIdAsync(string id)
+        public async Task<IActionResult> GetChannelByIdAsync(string id)
         {
             var channelEntity = await this.channelDataRepository.GetAsync(
                 ChannelDataTableName.ChannelDataPartition,
@@ -86,7 +87,39 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ChannelTemplate = channelEntity.ChannelTemplate,
                 ChannelAdmins = channelEntity.ChannelAdmins,
                 ChannelAdminDLs = channelEntity.ChannelAdminDLs,
+                ChannelAdminEmail = channelEntity.ChannelAdminEmail,
             };
+
+            return this.Ok(result);
+        }
+
+        /// <summary>
+        /// Get a channel by AdminEmail.
+        /// </summary>
+        /// <param name="channelAdmin">Channel AdminEmail.</param>
+        /// <returns>It returns the channel with the passed in AdminEmail.
+        /// The returning value is wrapped in a ActionResult object.
+        /// If the passed in Email is invalid, it returns 404 not found error.</returns>
+        [HttpGet("{channelAdmin}")]
+        public async Task<IActionResult> GetChannelByAdminEmailAsync(string channelAdmin)
+        {
+            var channelEntities = await this.channelDataRepository.GetWithFilterAsync("ChannelAdminEmail eq '" + channelAdmin + "'", "Default");
+
+            var result = new List<ChannelData>();
+            foreach (var channelEntity in channelEntities)
+            {
+                var channels = new ChannelData
+                {
+                    Id = channelEntity.Id,
+                    ChannelName = channelEntity.ChannelName,
+                    ChannelDescription = channelEntity.ChannelDescription,
+                    ChannelTemplate = channelEntity.ChannelTemplate,
+                    ChannelAdmins = channelEntity.ChannelAdmins,
+                    ChannelAdminDLs = channelEntity.ChannelAdminDLs,
+                    ChannelAdminEmail = channelEntity.ChannelAdminEmail,
+                };
+                result.Add(channels);
+            }
 
             return this.Ok(result);
         }
@@ -122,6 +155,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ChannelTemplate = channel.ChannelTemplate,
                 ChannelAdmins = channel.ChannelAdmins,
                 ChannelAdminDLs = channel.ChannelAdminDLs,
+                ChannelAdminEmail = channel.ChannelAdminEmail,
             };
 
             await this.channelDataRepository.CreateOrUpdateAsync(channelEntity);

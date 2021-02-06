@@ -173,6 +173,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                 RowKey = notification.Id,
                 Id = notification.Id,
+                Channel = notification.Channel,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -280,6 +281,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var result = new SentNotification
             {
                 Id = notificationEntity.Id,
+                Channel = notificationEntity.Channel,
                 Title = notificationEntity.Title,
                 ImageLink = notificationEntity.ImageLink,
                 Summary = notificationEntity.Summary,

@@ -45,5 +45,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
         /// Gets or sets the ChannelAdminDLs value.
         /// </summary>
         public string ChannelAdminDLs { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ChannelAdminEmail value.
+        /// </summary>
+        public string ChannelAdminEmail { get; set; }
     }
 }
