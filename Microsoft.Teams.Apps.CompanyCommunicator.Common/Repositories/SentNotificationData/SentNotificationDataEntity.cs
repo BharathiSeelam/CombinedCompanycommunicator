@@ -84,12 +84,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// </summary>
         public string ActivtyId { get; set; }
 
-       /// <summary>
-        /// Gets or sets a value indicating which type of recipient the notification was sent to
-        /// using the recipient type strings at the top of this class.
-        /// </summary>
-        public string Channel { get; set; }
-
         /// <summary>
         /// Gets or sets the Channel for cognizant enhancement.
         /// </summary>
