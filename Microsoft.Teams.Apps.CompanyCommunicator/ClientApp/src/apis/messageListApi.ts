@@ -13,18 +13,7 @@ export const getDraftSentNotification = async (id: number): Promise<any> => {
     return await axios.get(url);
 }
 
-export const getChannel = async (id: string): Promise<any> => {
-    let url = baseAxiosUrl + "/channeldata/" + id;
-    return await axios.get(url);
-}
-export const getChannels = async (): Promise<any> => {
-    let url = baseAxiosUrl + "/channeldata";
-    return await axios.get(url);
-}
-export const getAdminChannels = async (channelAdmin: string): Promise<any> => {
-    let url = baseAxiosUrl + "/channeldata" + channelAdmin;
-    return await axios.get(url);
-}
+
 export const getDraftNotifications = async (): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications";
     return await axios.get(url);
@@ -35,12 +24,12 @@ export const verifyGroupAccess = async (): Promise<any> => {
     return await axios.get(url, false);
 }
 
-export const getGroups = async (id: number): Promise<any> => {
+export const getGroups = async (id: string): Promise<any> => {
     let url = baseAxiosUrl + "/groupdata/" + id;
     return await axios.get(url);
 }
 
-export const getsentGroups = async (id: number): Promise<any> => {
+export const getsentGroups = async (id: string): Promise<any> => {
     let url = baseAxiosUrl + "/groupdata/sent/" + id;
     return await axios.get(url);
 }

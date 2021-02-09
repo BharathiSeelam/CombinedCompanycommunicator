@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <returns>A list of <see cref="ChannelData"/> instances.</returns>
         [HttpGet]
-        public async Task<IActionResult> GetAllChannelDataAsync()
+        public async Task<ActionResult<ChannelData>> GetAllChannelDataAsync()
         {
             var channelEntities = await this.channelDataRepository.GetAllSortedAlphabeticallyByNameAsync();
 
@@ -96,14 +96,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Get a channel by AdminEmail.
         /// </summary>
-        /// <param name="channelAdmin">Channel AdminEmail.</param>
+        /// <param name="channelAdminEmail">Channel AdminEmail.</param>
+        /// <param name="channelName">ChannelName.</param>
         /// <returns>It returns the channel with the passed in AdminEmail.
         /// The returning value is wrapped in a ActionResult object.
         /// If the passed in Email is invalid, it returns 404 not found error.</returns>
-        [HttpGet("{channelAdmin}")]
-        public async Task<IActionResult> GetChannelByAdminEmailAsync(string channelAdmin)
+        [HttpGet("channelAdmin/{channelAdminEmail}/{channelName}")]
+        public async Task<ActionResult<ChannelData>> GetChannelByAdminEmailAsync(string channelAdminEmail, string channelName)
         {
-            var channelEntities = await this.channelDataRepository.GetWithFilterAsync("ChannelAdminEmail eq '" + channelAdmin + "'", "Default");
+            var channelEntities = await this.channelDataRepository.GetWithFilterAsync("ChannelAdminEmail eq '" + channelAdminEmail + "' and ChannelName eq '" + channelName + "'", "Default");
 
             var result = new List<ChannelData>();
             foreach (var channelEntity in channelEntities)

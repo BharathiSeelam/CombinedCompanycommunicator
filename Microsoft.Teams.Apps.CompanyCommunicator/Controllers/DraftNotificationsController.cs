@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -35,12 +36,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IGroupsService groupsService;
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly IDistributionListDataRepository distributionListDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository instance.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
@@ -48,6 +51,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
+            IDistributionListDataRepository distributionListDataRepository,
             DraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
@@ -55,6 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
             this.draftNotificationPreviewService = draftNotificationPreviewService ?? throw new ArgumentNullException(nameof(draftNotificationPreviewService));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
@@ -74,12 +79,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.BadRequest(errorMessage);
             }
 
-            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
-            if (containsHiddenMembership)
-            {
-                return this.Forbid();
-            }
-
+            // var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+            //   if (containsHiddenMembership)
+            //  {
+            //     return this.Forbid();
+            //  }
             var notificationId = await this.notificationDataRepository.CreateDraftNotificationAsync(
                 notification,
                 this.HttpContext.User?.Identity?.Name);
@@ -160,12 +164,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateDraftNotificationAsync([FromBody] DraftNotification notification)
         {
-            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
-            if (containsHiddenMembership)
-            {
-                return this.Forbid();
-            }
-
+          // var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+           // if (containsHiddenMembership)
+          //  {
+           //     return this.Forbid();
+         //   }
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
                 return this.BadRequest(errorMessage);
@@ -297,17 +300,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groupNames = await this.groupsService
-                .GetByIdsAsync(notificationEntity.Groups)
-                .Select(x => x.DisplayName).
-                ToListAsync();
-
+           // var groupNames = await this.groupsService
+           //     .GetByIdsAsync(notificationEntity.Groups)
+           //    .Select(x => x.DisplayName).
+           //   ToListAsync();
             var result = new DraftNotificationSummaryForConsent
             {
                 NotificationId = notificationId,
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
-                GroupNames = groupNames,
+                GroupNames = await this.distributionListDataRepository.GetDLsByIdsAsync(notificationEntity.Groups),
                 AllUsers = notificationEntity.AllUsers,
             };
 

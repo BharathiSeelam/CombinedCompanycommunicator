@@ -18,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -40,6 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly ITeamDataRepository teamDataRepository;
+        private readonly IDistributionListDataRepository distributionListDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
         private readonly IDataQueue dataQueue;
         private readonly double forceCompleteMessageDelayInSeconds;
@@ -57,6 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
+        /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
@@ -70,6 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             INotificationDataRepository notificationDataRepository,
             ISentNotificationDataRepository sentNotificationDataRepository,
             ITeamDataRepository teamDataRepository,
+            IDistributionListDataRepository distributionListDataRepository,
             IPrepareToSendQueue prepareToSendQueue,
             IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
@@ -88,6 +92,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
+            this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
             this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
             this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
@@ -153,11 +158,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateSentNotificationAsync([FromBody] DraftNotification notification)
         {
-            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
-            if (containsHiddenMembership)
-            {
-                return this.Forbid();
-            }
+           // var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+          //  if (containsHiddenMembership)
+           // {
+           //     return this.Forbid();
+           // }
 
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
@@ -270,11 +275,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groupNames = await this.groupsService.
-                GetByIdsAsync(notificationEntity.Groups).
-                Select(x => x.DisplayName).
-                ToListAsync();
-
+           // var groupNames = await this.groupsService.
+               // GetByIdsAsync(notificationEntity.Groups).
+             //   Select(x => x.DisplayName).
+               // ToListAsync();
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var userNotificationDownload = await this.exportDataRepository.GetAsync(userId, id);
 
@@ -295,7 +299,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Unknown = this.GetUnknownCount(notificationEntity),
                 TeamNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Teams),
                 RosterNames = await this.teamDataRepository.GetTeamNamesByIdsAsync(notificationEntity.Rosters),
-                GroupNames = groupNames,
+                GroupNames = await this.distributionListDataRepository.GetDLsByIdsAsync(notificationEntity.Groups),
                 AllUsers = notificationEntity.AllUsers,
                 SendingStartedDate = notificationEntity.SendingStartedDate,
                 ErrorMessage = notificationEntity.ErrorMessage,

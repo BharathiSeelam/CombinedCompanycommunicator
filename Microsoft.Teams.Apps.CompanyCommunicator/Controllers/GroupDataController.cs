@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
@@ -23,17 +24,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly IGroupsService groupsService;
+        private readonly IDistributionListDataRepository distributionListDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupDataController"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository instance.</param>
         /// <param name="groupsService">Microsoft Graph service instance.</param>
+        /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         public GroupDataController(
             INotificationDataRepository notificationDataRepository,
+            IDistributionListDataRepository distributionListDataRepository,
             IGroupsService groupsService)
         {
             this.notificationDataRepository = notificationDataRepository;
+            this.distributionListDataRepository = distributionListDataRepository;
             this.groupsService = groupsService;
         }
 
@@ -78,7 +83,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Draft notification Id.</param>
         /// <returns>List of Group Names.</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<GroupData>>> GetGroupsAsync(string id)
+        public async Task<ActionResult<IEnumerable<DistributionList>>> GetGroupsAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.DraftNotificationsPartition,
@@ -88,13 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groups = await this.groupsService.GetByIdsAsync(notificationEntity.Groups)
-                .Select(group => new GroupData()
-                {
-                    Id = group.Id,
-                    Name = group.DisplayName,
-                    Mail = group.Mail,
-                }).ToListAsync();
+            var groups = await this.distributionListDataRepository.GetDLsByIdsAsync(notificationEntity.Groups);
             return this.Ok(groups);
         }
 
@@ -104,7 +103,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="id">Sent notification Id.</param>
         /// <returns>List of Group Names.</returns>
         [HttpGet("sent/{id}")]
-        public async Task<ActionResult<IEnumerable<GroupData>>> GetSentGroupsAsync(string id)
+        public async Task<ActionResult<IEnumerable<DistributionList>>> GetSentGroupsAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                   NotificationDataTableNames.SentNotificationsPartition,
@@ -114,13 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var groups = await this.groupsService.GetByIdsAsync(notificationEntity.Groups)
-                .Select(group => new GroupData()
-                {
-                    Id = group.Id,
-                    Name = group.DisplayName,
-                    Mail = group.Mail,
-                }).ToListAsync();
+            var groups = await this.distributionListDataRepository.GetDLsByIdsAsync(notificationEntity.Groups);
             return this.Ok(groups);
         }
     }

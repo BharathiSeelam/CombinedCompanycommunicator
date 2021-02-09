@@ -17,10 +17,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Distribut
         /// </summary>
         public TableRowKeyGenerator TableRowKeyGenerator { get; }
 
+
+        /// <summary>
+        /// Get DLs by Ids.
+        /// </summary>
+        /// <param name="ids">DL ids.</param>
+        /// <returns>Names of the DLs matching incoming ids.</returns>
+        public Task<IEnumerable<string>> GetDLsByIdsAsync(IEnumerable<string> ids);
+
         /// <summary>
         /// Get all distribution list entities from the table storage.
         /// </summary>
         /// <returns>All distribution list entities.</returns>
         public Task<IEnumerable<DistributionListDataEntity>> GetAllDistributionListsAsync();
+
     }
 }
