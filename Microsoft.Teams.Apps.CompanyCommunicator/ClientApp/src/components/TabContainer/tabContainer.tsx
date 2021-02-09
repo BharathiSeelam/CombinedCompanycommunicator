@@ -98,7 +98,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                             <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
                         </div>
                     </TabPane>
-                    <TabPane tab="Function/BU Groups" key="2">
+                    <TabPane tab="Account" key="2">
                         <div className="newPostBtn">
                             <Button className="new" content={this.localize("NewChannel")} onClick={this.onNewChannel} primary />
                         </div>
@@ -106,7 +106,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                             <Channels></Channels>
                         </div>
                     </TabPane>
-                    <TabPane tab="Group Admin" key="3">
+                    <TabPane tab="Account Admin" key="3">
                         <div className="channelAdminContainer">
                             <ChannelAdmins></ChannelAdmins>
                         </div>
