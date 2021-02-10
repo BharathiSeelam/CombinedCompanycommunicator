@@ -6,6 +6,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
 {
     using System;
     using System.Threading.Tasks;
+    using Microsoft.Bot.Builder;
+    using Microsoft.Bot.Schema;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
@@ -37,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                   defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
                   ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
-            this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+          // this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
         }
 
         /// <inheritdoc/>
