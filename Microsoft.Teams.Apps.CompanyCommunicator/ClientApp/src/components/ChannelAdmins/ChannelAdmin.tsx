@@ -76,6 +76,7 @@ class ChannelAdmins extends React.Component<IChannelAdminProps, IChannelAdminSta
     }
     public render(): JSX.Element {
         let keyCount = 0;
+        let reg = /(\(.*?\))/gi;
         const processItem = (channel: any) => {
             keyCount++;
             const out = {
@@ -89,7 +90,7 @@ class ChannelAdmins extends React.Component<IChannelAdminProps, IChannelAdminSta
                             <Text>{channel.channelAdmins}</Text>
                         </Flex.Item>
                         <Flex.Item size="size.small" variables={{ 'size.small': '43%' }} shrink={0}>
-                            <Text>{channel.channelAdminDLs}</Text>
+                            <Text>{channel.channelAdminDLs.replace(reg, "")}</Text>
                         </Flex.Item>
                    
                     </Flex>
