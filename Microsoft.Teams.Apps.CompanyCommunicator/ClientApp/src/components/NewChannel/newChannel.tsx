@@ -66,7 +66,7 @@ export interface formState {
     selectedAdmins: dropdownItem[],
     selectedTemplates: dropdownItem[],
     selectedDLs: dropdownItem[],
-    selectedAdminEmail:[],
+    selectedAdminEmail:any[],
     dlAdminEmail:string,
     templateUrl?:string
 }
@@ -100,7 +100,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             unstablePinned: true,
             dlAdminLabel: "",
             dlAdminEmail:"",
-           selectedAdminEmail:[],
+            selectedAdminEmail: [],
             templateUrl: getBaseUrl() + "/newchannel?locale={locale}"
         }
         this.getAdminData();
@@ -119,7 +119,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                 let id = params['id'];
                 this.getItem(id).then(() => { 
                     const selectedDLs = this.makeDLDropdownItemList(this.state.selectedDLs, this.state.teams);
-                    const selectedAdmins = this.makeDropdownItemList(this.state.selectedAdmins, this.state.teams);
+                    const selectedAdmins = this.makeDropdownItemList(this.state.selectedAdmins, this.state.selectedAdminEmail, this.state.teams);
                     const selectedTemplates = this.makeTemplateDropdownItemList(this.state.selectedTemplates, this.state.teams);
                     this.setState({
                         exists: true,
@@ -127,7 +127,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                         selectedDLs: selectedDLs,
                         selectedAdmins: selectedAdmins,
                         selectedTemplates: selectedTemplates,
-                      selectedAdminEmail:this.state.selectedAdminEmail,
+                        selectedAdminEmail:this.state.selectedAdminEmail,
                     })
                 });               
             } else {
@@ -162,15 +162,16 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
         return resultedTeams;
     }
-    private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
+    private makeDropdownItemList = (items: any[],emailItems:any[], fromItems: any[] | undefined) => {
         items = items.toString().split(',');
+        emailItems = emailItems.toString().split(',');
         const dropdownItemList: dropdownItem[] = [];
         if (items) {
-            items.forEach((element) => {
+            items.forEach((element,index) => {
                 dropdownItemList.push({
                     key: element,
                     header: element,
-                    content: "",
+                    content: emailItems[index],
                     image: ImageUtil.makeInitialImage(element),
                     team: {
                         id: element
@@ -202,7 +203,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         items = items.toString().split(',');
         const dropdownItemList: dropdownItem[] = [];
         if (items) {
-            items.forEach((element) => {
+            items.forEach((element,index) => {
                 dropdownItemList.push({
                     key: element,
                     header: element,
@@ -218,13 +219,18 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         return dropdownItemList;
     }
     private makeDLDropdownItems = (items: any[] | undefined) => {
-        const resultedTeams: dropdownItem[] = [];  
+        const resultedTeams: dropdownItem[] = []; 
+        let allAdmins: any;
+        this.getAdminData();
+        allAdmins = this.state.admins;
+        let adminArray = allAdmins.map(a => a.dlName);
         if (items) {            
             items.forEach((element) => {
+                let dlMemberCount = adminArray.filter(x =>  x == element.dlName).length;
                 resultedTeams.push({
                     key: element.dlid,
-                    header: element.dlName,
-                    content: "",
+                    header: element.dlName+"("+dlMemberCount+")",
+                    content: element.dlMail,
                     image: ImageUtil.makeInitialImage(element.dlName),
                     team: {
                         id: element.dlid
@@ -308,7 +314,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                 selectedAdmins: ChannelDetail.channelAdmins, 
                 selectedTemplates: ChannelDetail.channelTemplate,
                 selectedDLs: ChannelDetail.channelAdminDLs,
-              selectedAdminEmail: ChannelDetail.channelAdminEmail,
+                selectedAdminEmail: ChannelDetail.channelAdminEmail,
                 loader: false
             });
         } catch (error) {
