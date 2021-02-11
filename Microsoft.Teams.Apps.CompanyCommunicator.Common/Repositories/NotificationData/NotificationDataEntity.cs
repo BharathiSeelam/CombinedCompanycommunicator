@@ -75,6 +75,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public DateTime? SentDate { get; set; }
 
         /// <summary>
+        /// Gets or sets the DateTime the notification's edited was completed.
+        /// </summary>
+        public DateTime? Edited { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the notification is a draft.
         /// </summary>
         public bool IsDraft { get; set; }
