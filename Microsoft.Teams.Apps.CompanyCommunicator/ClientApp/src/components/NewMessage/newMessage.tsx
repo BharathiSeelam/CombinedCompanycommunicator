@@ -519,6 +519,11 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             );
         } else {
             if (this.state.page === "CardCreation") {
+                var Inotificationtype = window.location.search.split('Notification=')[1]
+                let isSent;
+                if (Inotificationtype === "sent") {
+                    isSent = true;
+                }
                 return (
                     <div className="taskModule">
                         <div className="formContainer">
@@ -597,7 +602,11 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
                         <div className="footerContainer">
                             <div className="buttonContainer">
-                                <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                {isSent
+                                    ? <Button content={this.localize("Send")} disabled={this.isSaveBtnDisabled()} id="sendBtn" onClick={this.onSend} primary />
+                                    : <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
+                                }
+                                
                             </div>
                         </div>
                     </div>
