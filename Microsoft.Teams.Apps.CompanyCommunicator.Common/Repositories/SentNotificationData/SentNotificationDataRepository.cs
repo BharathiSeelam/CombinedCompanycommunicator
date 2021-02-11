@@ -1,4 +1,4 @@
-﻿// <copyright file="SentNotificationDataRepository.cs" company="Microsoft">
+// <copyright file="SentNotificationDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -39,7 +39,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                   defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
                   ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
-          // this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+           if (messageService == null)
+            {
+                throw new ArgumentNullException(nameof(messageService));
+                //this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+            }
+
+           this.messageService = messageService;
         }
 
         /// <inheritdoc/>
@@ -53,8 +59,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         }
 
         /// <inheritdoc/>
+        public async Task UpdateFromPostAsync(string notificationId, NotificationDataEntity isentNotificationDataEntity)
+        {
+            var sentNotificationDataEntites = await this.GetWithFilterAsync("PartitionKey eq '" + notificationId + "' ", notificationId);
+
+            if (sentNotificationDataEntites != null)
+            {
+                //var notificationDataEntites = await this.GetWithFilterAsync("PartitionKey eq '" + notificationId + "' ", notificationId);
+                foreach (var sentNotificationDataEntity in sentNotificationDataEntites)
+                {
+                    await this.messageService.UpdatePostSentNotification(
+                    notificationDataEntity: isentNotificationDataEntity,
+                    notificationId: sentNotificationDataEntity.ConversationId,
+                    recipientId: sentNotificationDataEntity.RecipientId,
+                    serviceUrl: sentNotificationDataEntity.ServiceUrl,
+                    tenantId: sentNotificationDataEntity.TenantId,
+                    activityId: sentNotificationDataEntity.ActivtyId);
+                }
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task DeleteFromPostAsync(string notificationId)
         {
+            
             var sentNotificationDataEntites = await this.GetWithFilterAsync("DeliveryStatus eq 'Succeeded'", notificationId);
             if (sentNotificationDataEntites != null)
             {
