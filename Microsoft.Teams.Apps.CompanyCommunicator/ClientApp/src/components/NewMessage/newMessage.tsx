@@ -359,7 +359,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 let responesofdl: any[] = [];
                 var promises = [];
 
-                let userResponse = await getAdminChannels(loggedinUser, channelDetails["channelName"]);
+                let userResponse = await getAdminChannels(loggedinUser, channelDetails["id"]);
                 if (userResponse.data.length > 0) {
                     let userDls = userResponse.data[0]["channelAdminDLs"];
 
@@ -436,7 +436,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 let responesofdl: any[] = [];
                 var promises = [];
 
-                let userResponse = await getAdminChannels(loggedinUser, channelDetails["channelName"]);
+                let userResponse = await getAdminChannels(loggedinUser, channelDetails["id"]);
                 if (userResponse.data.length > 0) {
                     let userDls = userResponse.data[0]["channelAdminDLs"];
 
@@ -798,7 +798,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let responesofdl: any[] = [];
         var promises = [];
 
-        let userResponse = await getAdminChannels(loggedinUser, itemsData.value["header"]);
+        let userResponse = await getAdminChannels(loggedinUser, itemsData.value["key"]);
         if (userResponse.data.length > 0) {
             let userDls = userResponse.data[0]["channelAdminDLs"];
        

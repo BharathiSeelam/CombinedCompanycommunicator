@@ -7,8 +7,8 @@ export const getChannel = async (id: string): Promise<any> => {
     let url = baseAxiosUrl + "/channeldata/" + id;
     return await axios.get(url);
 }
-export const getAdminChannels = async (channelAdminEmail: string, channelName : string): Promise<any> => {
-    let url = baseAxiosUrl + "/channeldata/channelAdmin/" + channelAdminEmail + "/" + channelName;
+export const getAdminChannels = async (id : string, channelName : string): Promise<any> => {
+    let url = baseAxiosUrl + "/channeldata/channelAdmin/" + id + "/" + channelName;
     return await axios.get(url);
 }
 export const getChannels = async (): Promise<any> => {
