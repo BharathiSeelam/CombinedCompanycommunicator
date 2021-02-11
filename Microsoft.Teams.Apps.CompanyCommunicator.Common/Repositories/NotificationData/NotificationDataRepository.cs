@@ -1,4 +1,4 @@
-﻿// <copyright file="NotificationDataRepository.cs" company="Microsoft">
+// <copyright file="NotificationDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -127,7 +127,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                     RowKey = updateSentNotificationDataEntity.Id,
                     Id = updateSentNotificationDataEntity.Id,
-                    Channel = updateSentNotificationDataEntity.Channel,
                     Title = updateSentNotificationDataEntity.Title,
                     ImageLink = updateSentNotificationDataEntity.ImageLink,
                     Summary = updateSentNotificationDataEntity.Summary,
@@ -136,19 +135,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     ButtonLink = updateSentNotificationDataEntity.ButtonLink,
                     CreatedBy = updateSentNotificationDataEntity.CreatedBy,
                     CreatedDate = updateSentNotificationDataEntity.CreatedDate,
-                    SentDate = null,
+                    SentDate = DateTime.UtcNow,
+                    Edited = DateTime.UtcNow,
                     IsDraft = false,
                     Teams = updateSentNotificationDataEntity.Teams,
                     Rosters = updateSentNotificationDataEntity.Rosters,
                     Groups = updateSentNotificationDataEntity.Groups,
                     AllUsers = updateSentNotificationDataEntity.AllUsers,
                     MessageVersion = updateSentNotificationDataEntity.MessageVersion,
-                    Succeeded = 0,
+                    Succeeded = updateSentNotificationDataEntity.Succeeded,
                     Failed = 0,
                     Throttled = 0,
                     TotalMessageCount = updateSentNotificationDataEntity.TotalMessageCount,
                     SendingStartedDate = DateTime.UtcNow,
-                    Status = NotificationStatus.Queued.ToString(),
+                    Status = NotificationStatus.Sent.ToString(),
                 };
                 await this.CreateOrUpdateAsync(sentNotificationEntity);
 
