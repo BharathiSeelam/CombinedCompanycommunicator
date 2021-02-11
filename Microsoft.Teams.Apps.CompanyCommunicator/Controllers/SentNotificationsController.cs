@@ -1,4 +1,4 @@
-﻿// <copyright file="SentNotificationsController.cs" company="Microsoft">
+// <copyright file="SentNotificationsController.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -158,27 +158,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateSentNotificationAsync([FromBody] DraftNotification notification)
         {
-           // var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
-          //  if (containsHiddenMembership)
-           // {
-           //     return this.Forbid();
-           // }
+            var containsHiddenMembership = await this.groupsService.ContainsHiddenMembershipAsync(notification.Groups);
+            if (containsHiddenMembership)
+            {
+                return this.Forbid();
+            }
 
             if (!notification.Validate(this.localizer, out string errorMessage))
             {
                 return this.BadRequest(errorMessage);
             }
 
-            /*var updateSentNotificationDataEntity = await this.notificationDataRepository.GetAsync(
+            var senttNotificationDataEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
-                notification.Id);*/
+                notification.Id);
 
             var updateSentNotificationDataEntity = new NotificationDataEntity
             {
                 PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                 RowKey = notification.Id,
                 Id = notification.Id,
-                Channel = notification.Channel,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -187,43 +186,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ButtonLink = notification.ButtonLink,
                 CreatedBy = this.HttpContext.User?.Identity?.Name,
                 CreatedDate = DateTime.UtcNow,
-                SentDate = null,
+                SentDate = DateTime.UtcNow,
+                Edited = DateTime.UtcNow,
                 IsDraft = false,
                 Teams = notification.Teams,
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
-                MessageVersion = string.Empty,
-                Succeeded = 0,
+                MessageVersion = senttNotificationDataEntity.MessageVersion,
+                Succeeded = senttNotificationDataEntity.Succeeded,
                 Failed = 0,
                 Throttled = 0,
-                TotalMessageCount = 0,
+                TotalMessageCount = senttNotificationDataEntity.TotalMessageCount,
                 SendingStartedDate = DateTime.UtcNow,
-                Status = NotificationStatus.Queued.ToString(),
+                Status = NotificationStatus.Sent.ToString(),
             };
             var id = updateSentNotificationDataEntity.Id;
             var sentNotificationId = await this.notificationDataRepository.UpdateSentNotificationAsync(updateSentNotificationDataEntity, id);
             await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
-
-            // Update user app id if proactive installation is enabled.
-            // await this.UpdateUserAppIdAsync();
-            var prepareToSendQueueMessageContent = new PrepareToSendQueueMessageContent
-            {
-                NotificationId = id,
-            };
-            await this.prepareToSendQueue.SendAsync(prepareToSendQueueMessageContent);
-
-            // Send a "force complete" message to the data queue with a delay to ensure that
-            // the notification will be marked as complete no matter the counts
-            var forceCompleteDataQueueMessageContent = new DataQueueMessageContent
-            {
-                NotificationId = id,
-                ForceMessageComplete = true,
-            };
-            await this.dataQueue.SendDelayedAsync(
-                forceCompleteDataQueueMessageContent,
-                this.forceCompleteMessageDelayInSeconds);
-
+            await this.sentNotificationDataRepository.UpdateFromPostAsync(sentNotificationId, updateSentNotificationDataEntity);
             return this.Ok();
         }
 
