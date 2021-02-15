@@ -47,7 +47,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ChannelDataEntity>> GetFilterAsync(string filter,string partitionkey)
+        public async Task<IEnumerable<ChannelDataEntity>> GetFilterAsync(string filter, string partitionkey)
         {
             var channelDataEntities = await this.GetWithFilterAsync(filter, partitionkey);
             return channelDataEntities;

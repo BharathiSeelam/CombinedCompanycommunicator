@@ -1,4 +1,4 @@
-﻿// <copyright file="ISentNotificationDataRepository.cs" company="Microsoft">
+﻿// <copyright file="ISentUpdateandDeleteNotificationDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 

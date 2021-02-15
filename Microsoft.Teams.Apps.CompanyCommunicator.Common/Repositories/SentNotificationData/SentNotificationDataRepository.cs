@@ -18,19 +18,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     /// </summary>
     public class SentNotificationDataRepository : BaseRepository<SentNotificationDataEntity>, ISentNotificationDataRepository
     {
-        private readonly IMessageService messageService;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationDataRepository"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">The notification service.</param>
         /// <param name="logger">The logging service.</param>
-        /// <param name="messageService">The messaging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
         public SentNotificationDataRepository(
              INotificationDataRepository notificationDataRepository,
              ILogger<SentNotificationDataRepository> logger,
-             IMessageService messageService,
              IOptions<RepositoryOptions> repositoryOptions)
             : base(
                   logger,

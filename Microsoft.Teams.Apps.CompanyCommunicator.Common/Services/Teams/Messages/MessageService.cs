@@ -45,6 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             BotFrameworkHttpAdapter botAdapter)
         {
             this.microsoftAppId = botOptions?.Value?.UserAppId ?? throw new ArgumentNullException(nameof(botOptions));
+
             // this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
         }

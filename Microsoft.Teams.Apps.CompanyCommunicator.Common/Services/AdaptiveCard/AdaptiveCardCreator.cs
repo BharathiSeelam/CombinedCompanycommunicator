@@ -5,11 +5,11 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
     using System;
+    using System.Collections.Generic;
     using AdaptiveCards;
     using AdaptiveCards.Templating;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
-    using System.Collections.Generic;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -46,7 +46,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Summary,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
-                notificationDataEntity.ButtonLink,jsonformat);
+                notificationDataEntity.ButtonLink,
+                jsonformat);
         }
 
         /// <summary>
@@ -58,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
         /// <param name="author">The adaptive card's author value.</param>
         /// <param name="buttonTitle">The adaptive card's button title value.</param>
         /// <param name="buttonUrl">The adaptive card's button url value.</param>
-        ///  <param name="jsonfromat">The adaptive card's payload.</param>
+        /// <param name="jsonfromat">The adaptive card's payload.</param>
         /// <returns>The created adaptive card instance.</returns>
         public string CreateAdaptiveCardWithoutHeader(
             string title,
@@ -66,7 +67,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string summary,
             string author,
             string buttonTitle,
-            string buttonUrl,string jsonfromat)
+            string buttonUrl,
+            string jsonfromat)
         {
             var templateJson = jsonfromat;
             AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
@@ -77,7 +79,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 Summary = summary,
                 Author = author,
             };
-           string cardJson = template.Expand(myData);
+            string cardJson = template.Expand(myData);
 
             return cardJson;
         }
@@ -152,7 +154,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
             }
-
 
             return card;
         }
