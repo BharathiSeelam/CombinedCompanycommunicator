@@ -1,4 +1,4 @@
-﻿// <copyright file="DistributionList.cs" company="Microsoft">
+// <copyright file="DistributionList.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -25,6 +25,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the DLMail value.
         /// </summary>
         public string DLMail { get; set; }
+
+        /// <summary>
+        /// Gets or sets the DLMemberCount value.
+        /// </summary>
+        public Int32 DLMemberCount { get; set; }
 
         /// <summary>
         /// Gets or sets the GroupType value.
