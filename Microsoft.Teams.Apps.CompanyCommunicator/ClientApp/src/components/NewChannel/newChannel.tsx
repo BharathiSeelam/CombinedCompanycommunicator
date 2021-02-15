@@ -28,15 +28,6 @@ type dropdownItem = {
         id: string,
     },
 }
-interface ITemplateTaskInfo {
-    title?: string;
-    height?: number;
-    width?: number;
-    url?: string;
-    card?: string;
-    fallbackUrl?: string;
-    completionBotId?: string;
-}
 export interface IChannel {
     id?: string,
     channelName: string,
@@ -68,7 +59,6 @@ export interface formState {
     selectedDLs: dropdownItem[],
     selectedAdminEmail:any[],
     dlAdminEmail:string,
-    templateUrl?:string
 }
 
 export interface INewChannelProps extends RouteComponentProps, WithTranslation {
@@ -100,8 +90,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             unstablePinned: true,
             dlAdminLabel: "",
             dlAdminEmail:"",
-            selectedAdminEmail: [],
-            templateUrl: getBaseUrl() + "/newchannel?locale={locale}"
+            selectedAdminEmail: []
         }
         this.getAdminData();
         this.getTemplateData();
@@ -220,16 +209,11 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
     }
     private makeDLDropdownItems = (items: any[] | undefined) => {
         const resultedTeams: dropdownItem[] = []; 
-        let allAdmins: any;
-        this.getAdminData();
-        allAdmins = this.state.admins;
-        let adminArray = allAdmins.map(a => a.dlName);
         if (items) {            
             items.forEach((element) => {
-                let dlMemberCount = adminArray.filter(x =>  x == element.dlName).length;
                 resultedTeams.push({
                     key: element.dlid,
-                    header: element.dlName+"("+dlMemberCount+")",
+                    header: element.dlName+"("+element.dlMemberCount+")",
                     content: element.dlMail,
                     image: ImageUtil.makeInitialImage(element.dlName),
                     team: {
@@ -511,21 +495,6 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         if (event.keyCode === 27 || (event.key === "Escape")) {
             microsoftTeams.tasks.submitTask();
         }
-    }
-    public onNewTemplate = () => {
-        let channelTaskInfo: ITemplateTaskInfo = {
-            url: this.state.templateUrl,
-            title: this.localize("NewTemplate"),
-            height: 530,
-            width: 1000,
-            fallbackUrl: this.state.templateUrl,
-        }
-
-        let submitHandler = (err: any, result: any) => {
-            this.props.getChannelsList();
-        };
-
-        microsoftTeams.tasks.startTask(channelTaskInfo, submitHandler);
     }
 
     private onNext = (event: any) => {
