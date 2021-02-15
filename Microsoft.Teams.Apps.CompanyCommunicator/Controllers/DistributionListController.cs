@@ -54,6 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     DLID = distributionListEntity.DLID,
                     DLName = distributionListEntity.DLName,
                     DLMail = distributionListEntity.DLMail,
+                    DLMemberCount = distributionListEntity.DLMemberCount,
                     GroupType = distributionListEntity.GroupType,
                 };
 
@@ -83,6 +84,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     DLID = distributionListEntity.DLID,
                     DLName = distributionListEntity.DLName,
                     DLMail = distributionListEntity.DLMail,
+                    DLMemberCount = distributionListEntity.DLMemberCount,
                     GroupType = distributionListEntity.GroupType,
                 };
 
@@ -112,6 +114,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     DLID = distributionListEntity.DLID,
                     DLName = distributionListEntity.DLName,
                     DLMail = distributionListEntity.DLMail,
+                    DLMemberCount = distributionListEntity.DLMemberCount,
                     GroupType = distributionListEntity.GroupType,
                 };
 
