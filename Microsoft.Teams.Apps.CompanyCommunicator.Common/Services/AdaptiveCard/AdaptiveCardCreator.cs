@@ -6,7 +6,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
     using System;
     using AdaptiveCards;
+    using AdaptiveCards.Templating;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -27,6 +30,56 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink);
+        }
+
+        /// <summary>
+        /// Creates an adaptive card without header.
+        /// </summary>
+        /// <param name="notificationDataEntity">Notification data entity.</param>
+        /// <param name="jsonformat">jsonformat.</param>
+        /// <returns>An adaptive card.</returns>
+        public virtual string CreateAdaptiveCardWithoutHeader(NotificationDataEntity notificationDataEntity, string jsonformat)
+        {
+            return this.CreateAdaptiveCardWithoutHeader(
+                notificationDataEntity.Title,
+                notificationDataEntity.ImageLink,
+                notificationDataEntity.Summary,
+                notificationDataEntity.Author,
+                notificationDataEntity.ButtonTitle,
+                notificationDataEntity.ButtonLink,jsonformat);
+        }
+
+        /// <summary>
+        /// Create an adaptive card instance.
+        /// </summary>
+        /// <param name="title">The adaptive card's title value.</param>
+        /// <param name="imageUrl">The adaptive card's image URL.</param>
+        /// <param name="summary">The adaptive card's summary value.</param>
+        /// <param name="author">The adaptive card's author value.</param>
+        /// <param name="buttonTitle">The adaptive card's button title value.</param>
+        /// <param name="buttonUrl">The adaptive card's button url value.</param>
+        ///  <param name="jsonfromat">The adaptive card's payload.</param>
+        /// <returns>The created adaptive card instance.</returns>
+        public string CreateAdaptiveCardWithoutHeader(
+            string title,
+            string imageUrl,
+            string summary,
+            string author,
+            string buttonTitle,
+            string buttonUrl,string jsonfromat)
+        {
+            var templateJson = jsonfromat;
+            AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
+            var myData = new
+            {
+                Title = title,
+                ImageUrl = imageUrl,
+                Summary = summary,
+                Author = author,
+            };
+           string cardJson = template.Expand(myData);
+
+            return cardJson;
         }
 
         /// <summary>
@@ -53,10 +106,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             card.Body.Add(new AdaptiveTextBlock()
             {
                 Text = title,
-                Size = AdaptiveTextSize.ExtraLarge,
+                Size = AdaptiveTextSize.Default,
                 Weight = AdaptiveTextWeight.Bolder,
                 Wrap = true,
             });
+            card.Speak = title;
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
@@ -98,6 +152,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Url = new Uri(buttonUrl, UriKind.RelativeOrAbsolute),
                 });
             }
+
 
             return card;
         }

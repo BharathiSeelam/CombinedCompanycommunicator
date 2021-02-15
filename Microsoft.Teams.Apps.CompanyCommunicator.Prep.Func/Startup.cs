@@ -20,6 +20,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Graph;
     using Microsoft.Identity.Client;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -122,6 +123,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             // Add repositories.
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            builder.Services.AddSingleton<IChannelDataRepository, ChannelDataRepository>();
             builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
             builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();

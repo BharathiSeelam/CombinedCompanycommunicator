@@ -23,5 +23,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
         /// </summary>
         /// <returns>The channel data entities sorted alphabetically by name.</returns>
         public Task<IEnumerable<ChannelDataEntity>> GetAllSortedAlphabeticallyByNameAsync();
+
+        /// <summary>
+        /// Get all channel data entities, and sort the result alphabetically by name.
+        /// </summary>
+        /// <param name="filter">The channel entity filter.</param>
+        /// <param name="partitionkey">partitionkey.</param>
+        /// <returns>The channel data entities of filter condition.</returns>
+        public Task<IEnumerable<ChannelDataEntity>> GetFilterAsync(string filter, string partitionkey);
     }
 }

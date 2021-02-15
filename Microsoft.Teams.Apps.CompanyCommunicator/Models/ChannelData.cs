@@ -43,5 +43,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the ChannelAdminEmail value.
         /// </summary>
         public string ChannelAdminEmail { get; set; }
+
+        /// <summary>
+        /// Gets or sets the TemplateJson value.
+        /// </summary>
+        public string TemplateJson { get; set; }
     }
 }

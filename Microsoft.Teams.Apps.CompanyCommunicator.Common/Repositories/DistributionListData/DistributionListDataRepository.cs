@@ -18,7 +18,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Distribut
     /// </summary>
     public class DistributionListDataRepository : BaseRepository<DistributionListDataEntity>, IDistributionListDataRepository
     {
-       
         private readonly IDistributionListDataRepository distributionListDataRepository;
 
         /// <summary>

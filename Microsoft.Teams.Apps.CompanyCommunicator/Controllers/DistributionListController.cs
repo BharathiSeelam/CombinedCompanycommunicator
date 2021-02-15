@@ -102,7 +102,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("draft/{dLID}")]
         public async Task<ActionResult<DistributionList>> GetDLByIDAsync(string dLID)
         {
-          
             var distributionListEntities = await this.distributionListDataRepository.GetWithFilterAsync("DLID eq '" + dLID + "'", "Default");
 
             var result = new List<DistributionList>();

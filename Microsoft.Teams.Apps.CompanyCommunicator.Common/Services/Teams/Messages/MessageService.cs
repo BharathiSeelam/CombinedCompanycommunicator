@@ -37,6 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// Initializes a new instance of the <see cref="MessageService"/> class.
         /// </summary>
         /// <param name="botOptions">The bot options.</param>
+        /// <param name="adaptiveCardCreator">The adaptiveCardCreator.</param>
         /// <param name="botAdapter">The bot adapter.</param>
         public MessageService(
             IOptions<BotOptions> botOptions,
@@ -44,7 +45,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             BotFrameworkHttpAdapter botAdapter)
         {
             this.microsoftAppId = botOptions?.Value?.UserAppId ?? throw new ArgumentNullException(nameof(botOptions));
-            this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
+            // this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
         }
 

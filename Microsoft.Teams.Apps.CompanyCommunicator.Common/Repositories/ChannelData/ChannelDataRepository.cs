@@ -46,6 +46,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
             return sortedSet;
         }
 
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ChannelDataEntity>> GetFilterAsync(string filter,string partitionkey)
+        {
+            var channelDataEntities = await this.GetWithFilterAsync(filter, partitionkey);
+            return channelDataEntities;
+        }
+
         private class ChannelDataEntityComparer : IComparer<ChannelDataEntity>
         {
             public int Compare(ChannelDataEntity x, ChannelDataEntity y)

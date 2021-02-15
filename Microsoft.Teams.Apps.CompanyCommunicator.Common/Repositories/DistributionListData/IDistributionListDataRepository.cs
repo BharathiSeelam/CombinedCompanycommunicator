@@ -17,7 +17,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Distribut
         /// </summary>
         public TableRowKeyGenerator TableRowKeyGenerator { get; }
 
-
         /// <summary>
         /// Get DLs by Ids.
         /// </summary>
@@ -30,6 +29,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Distribut
         /// </summary>
         /// <returns>All distribution list entities.</returns>
         public Task<IEnumerable<DistributionListDataEntity>> GetAllDistributionListsAsync();
-
     }
 }

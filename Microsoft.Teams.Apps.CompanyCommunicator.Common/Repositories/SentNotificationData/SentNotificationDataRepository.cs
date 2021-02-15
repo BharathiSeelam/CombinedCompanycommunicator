@@ -39,13 +39,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                   defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
                   ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
-           if (messageService == null)
-            {
-                throw new ArgumentNullException(nameof(messageService));
-                //this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
-            }
-
-           this.messageService = messageService;
+                // this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+               // this.messageService = messageService;
         }
 
         /// <inheritdoc/>
@@ -55,50 +50,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
             if (!exists)
             {
                 await this.Table.CreateAsync();
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task UpdateFromPostAsync(string notificationId, NotificationDataEntity isentNotificationDataEntity)
-        {
-            var sentNotificationDataEntites = await this.GetWithFilterAsync("PartitionKey eq '" + notificationId + "' ", notificationId);
-
-            if (sentNotificationDataEntites != null)
-            {
-                //var notificationDataEntites = await this.GetWithFilterAsync("PartitionKey eq '" + notificationId + "' ", notificationId);
-                foreach (var sentNotificationDataEntity in sentNotificationDataEntites)
-                {
-                    await this.messageService.UpdatePostSentNotification(
-                    notificationDataEntity: isentNotificationDataEntity,
-                    notificationId: sentNotificationDataEntity.ConversationId,
-                    recipientId: sentNotificationDataEntity.RecipientId,
-                    serviceUrl: sentNotificationDataEntity.ServiceUrl,
-                    tenantId: sentNotificationDataEntity.TenantId,
-                    activityId: sentNotificationDataEntity.ActivtyId);
-                }
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task DeleteFromPostAsync(string notificationId)
-        {
-            
-            var sentNotificationDataEntites = await this.GetWithFilterAsync("DeliveryStatus eq 'Succeeded'", notificationId);
-            if (sentNotificationDataEntites != null)
-            {
-                foreach (var sentNotificationDataEntity in sentNotificationDataEntites)
-                {
-                        // var indent = new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Kind);
-                        // var messageid = Convert.ToInt32(sentNotificationDataEntity.SentDate);
-                        await this.messageService.DeleteSentNotification(
-                               notificationId: sentNotificationDataEntity.ConversationId,
-                               recipientId: sentNotificationDataEntity.RecipientId,
-                               serviceUrl: sentNotificationDataEntity.ServiceUrl,
-                               tenantId: sentNotificationDataEntity.TenantId,
-                               activityId: sentNotificationDataEntity.ActivtyId);
-
-                    // await this.sentNotificationDataRepository.DeleteAsync(notification);
-                }
             }
         }
     }

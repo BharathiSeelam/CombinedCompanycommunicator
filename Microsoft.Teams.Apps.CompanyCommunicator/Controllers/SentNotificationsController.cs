@@ -39,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class SentNotificationsController : ControllerBase
     {
         private readonly INotificationDataRepository notificationDataRepository;
-        private readonly ISentNotificationDataRepository sentNotificationDataRepository;
+        private readonly ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
@@ -71,7 +71,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="loggerFactory">The logger factory.</param>
         public SentNotificationsController(
             INotificationDataRepository notificationDataRepository,
-            ISentNotificationDataRepository sentNotificationDataRepository,
+            ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDistributionListDataRepository distributionListDataRepository,
             IPrepareToSendQueue prepareToSendQueue,
