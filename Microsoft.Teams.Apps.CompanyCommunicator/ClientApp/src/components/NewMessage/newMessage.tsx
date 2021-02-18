@@ -11,7 +11,7 @@ import './teamTheme.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess} from '../../apis/messageListApi';
 import { getChannel, getChannels, getAdminChannels } from '../../apis/channelListApi';
 import { getDistributionListsByName, getDistributionListsByID } from '../../apis/distributionListApi';
-import { getChannelTemplates } from '../../apis/channelTemplateListApi';
+import { getTemplates } from '../../apis/templateListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -370,7 +370,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
     }
     private getTemplateData = async () => {
         try {
-            const response = await getChannelTemplates();
+            const response = await getTemplates();
             this.setState({
                 templates: response.data
             });
