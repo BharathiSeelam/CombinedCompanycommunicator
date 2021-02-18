@@ -40,6 +40,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the Channel value.
         /// </summary>
         public string Channel { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the TemplateID tet of the notification's content.
+        /// </summary>
+        public string TemplateID { get; set; }
 
         /// <summary>
         /// Gets or sets the Button Title value.
