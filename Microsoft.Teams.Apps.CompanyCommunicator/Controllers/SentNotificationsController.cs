@@ -42,7 +42,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository;
-        private readonly ISentNotificationDataRepository sentNotificationDataRepstry;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
@@ -64,7 +63,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
-        /// <param name="sentNotificationDataRepstry">Sent notification data repository from Sent Notification Data.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
@@ -81,7 +79,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public SentNotificationsController(
             INotificationDataRepository notificationDataRepository,
             ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository,
-            ISentNotificationDataRepository sentNotificationDataRepstry,
             ITeamDataRepository teamDataRepository,
             IDistributionListDataRepository distributionListDataRepository,
             IPrepareToSendQueue prepareToSendQueue,
@@ -103,7 +100,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
-            this.sentNotificationDataRepstry = sentNotificationDataRepstry ?? throw new ArgumentNullException(nameof(sentNotificationDataRepstry));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
             this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
@@ -193,6 +189,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                 RowKey = notification.Id,
                 Id = notification.Id,
+                Channel = notification.Channel,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -218,8 +215,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
             var id = updateSentNotificationDataEntity.Id;
             var sentNotificationId = await this.notificationDataRepository.UpdateSentNotificationAsync(updateSentNotificationDataEntity, id);
-            await this.sentNotificationDataRepository.EnsureSentNotificationDataTableExistsAsync();
-            await this.sentNotificationDataRepository.UpdateFromPostAsync(sentNotificationId, updateSentNotificationDataEntity);
+            await this.sentNotificationUpdateDataRepository.EnsureSentNotificationDataTableExistsAsync();
+            await this.sentNotificationUpdateDataRepository.UpdateFromPostAsync(sentNotificationId, updateSentNotificationDataEntity);
             return this.Ok();
         }
 

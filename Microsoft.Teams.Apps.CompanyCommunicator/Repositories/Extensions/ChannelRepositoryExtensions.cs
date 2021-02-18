@@ -33,7 +33,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 Id = newId,
                 ChannelName = channel.ChannelName,
                 ChannelDescription = channel.ChannelDescription,
-                ChannelTemplate = channel.ChannelTemplate,
                 ChannelAdmins = channel.ChannelAdmins,
                 ChannelAdminDLs = channel.ChannelAdminDLs,
                 ChannelAdminEmail = channel.ChannelAdminEmail,

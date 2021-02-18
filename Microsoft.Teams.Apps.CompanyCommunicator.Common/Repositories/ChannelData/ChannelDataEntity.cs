@@ -32,11 +32,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
         public string ChannelDescription { get; set; }
 
         /// <summary>
-        /// Gets or sets the ChannelTemplate value.
-        /// </summary>
-        public string ChannelTemplate { get; set; }
-
-        /// <summary>
         /// Gets or sets the ChannelAdmins value.
         /// </summary>
         public string ChannelAdmins { get; set; }
@@ -50,10 +45,5 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelDa
         /// Gets or sets the ChannelAdminEmail value.
         /// </summary>
         public string ChannelAdminEmail { get; set; }
-
-        /// <summary>
-        /// Gets or sets the channelTemplate value.
-        /// </summary>
-        public string TemplateJson { get; set; }
     }
 }
