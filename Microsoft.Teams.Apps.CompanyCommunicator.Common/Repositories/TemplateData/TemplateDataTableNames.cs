@@ -1,34 +1,22 @@
-// <copyright file="TemplateDataEntity.cs" company="Microsoft">
+// <copyright file="TemplateDataTableNames.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData
 {
-    using System;
-    using System.Collections.Generic;
-    using Microsoft.Azure.Cosmos.Table;
-    using Newtonsoft.Json;
-
     /// <summary>
-    /// template data entity class.
-    /// This entity type holds the data for templates
-    /// It holds the data for the content of the templates.
+    /// Templates table names.
     /// </summary>
-    public class TemplateDataEntity : TableEntity
+    public static class TemplateDataTableNames
     {
         /// <summary>
-        /// Gets or sets TemplateId.
+        /// Table name for the template data table.
         /// </summary>
-        public string TemplateID { get; set; }
+        public static readonly string TableName = "Templates";
 
         /// <summary>
-        /// Gets or sets TemplateName value.
+        ///  template partition key name.
         /// </summary>
-        public string TemplateName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the TemplateJSON value.
-        /// </summary>
-        public string TemplateJSON { get; set; }
+        public static readonly string TemplatePartition = "Default";
     }
 }
