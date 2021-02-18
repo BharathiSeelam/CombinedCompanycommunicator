@@ -24,7 +24,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTemplateData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DLUserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
@@ -177,7 +177,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
             services.AddSingleton<IDLUserDataRepository, DLUserDataRepository>();
-            services.AddSingleton<IChannelTemplateDataRepository, ChannelTemplateDataRepository>();
+            services.AddSingleton<ITemplateDataRepository, TemplateDataRepository>();
             services.AddSingleton<IChannelDataRepository, ChannelDataRepository>();
             services.AddSingleton<IDistributionListDataRepository, DistributionListDataRepository>();
 
