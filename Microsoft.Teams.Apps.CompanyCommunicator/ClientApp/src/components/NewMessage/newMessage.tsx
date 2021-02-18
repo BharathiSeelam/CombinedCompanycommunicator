@@ -11,6 +11,7 @@ import './teamTheme.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess} from '../../apis/messageListApi';
 import { getChannel, getChannels, getAdminChannels } from '../../apis/channelListApi';
 import { getDistributionListsByName, getDistributionListsByID } from '../../apis/distributionListApi';
+import { getChannelTemplates } from '../../apis/channelTemplateListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -42,7 +43,8 @@ export interface IDraftMessage {
     teams: any[],
     rosters: any[],
     groups: any[],
-    allUsers: boolean
+    allUsers: boolean,
+    messageTemplate: string,
 }
 
 export interface formState {
@@ -64,6 +66,7 @@ export interface formState {
     groups?: any[],
     dls?:any[],
     exists?: boolean,
+    templates?: any[],
     messageId: string,
     loader: boolean,
     groupAccess: boolean,
@@ -74,7 +77,8 @@ export interface formState {
     selectedRostersNum: number,
     selectedGroupsNum: number,
     selectedRadioBtn: string,
-     selectedChannel: dropdownItem[],
+    selectedChannel: dropdownItem[],
+    selectedTemplates: dropdownItem[],
     selectedTeams: dropdownItem[],
     selectedRosters: dropdownItem[],
     selectedGroups: dropdownItem[],
@@ -123,6 +127,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroupsNum: 0,
             selectedRadioBtn: "teams",
             selectedChannel: [],
+            selectedTemplates: [], 
             selectedTeams: [],
             selectedRosters: [],
             selectedGroups: [],
@@ -130,6 +135,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
         }
+        this.getTemplateData();
     }
 
     public async componentDidMount() {
@@ -154,6 +160,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
                    const selectedChannel = this.makeDropdownItemListChannel(this.state.selectedChannel);
                    const selectedGroups = this.makeDropdownDLItems(this.state.selectedGroups);
+                   const selectedTemplates = this.makeTemplateDropdownItemList(this.state.selectedTemplates, this.state.teams);
                    this.setState({
                         exists: true,
                         messageId: id,
@@ -161,6 +168,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         selectedRosters: selectedRosters,
                        selectedChannel: selectedChannel,
                        selectedGroups: selectedGroups,
+                       selectedTemplates: selectedTemplates
                     })
                })
                    //.then(() => {
@@ -228,6 +236,23 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         }
         return resultedTeams;
     }
+    private makeTemplateDropdownItems = (items: any[] | undefined) => {
+        const resultedTeams: dropdownItem[] = [];
+        if (items) {
+            items.forEach((element) => {
+                resultedTeams.push({
+                    key: element.templateID,
+                    header: element.templateName,
+                    content: "",
+                    image: "",
+                    team: {
+                        id: element.templateID,
+                    },
+                });
+            });
+        }
+        return resultedTeams;
+    }
     private makeDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
         const dropdownItemList: dropdownItem[] = [];
         items.forEach(element =>
@@ -263,6 +288,25 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         return dropdownItemList;
     }
 
+    private makeTemplateDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
+        items = items.toString().split(',');
+        const dropdownItemList: dropdownItem[] = [];
+        if (items) {
+            items.forEach((element, index) => {
+                dropdownItemList.push({
+                    key: element,
+                    header: element,
+                    content: "",
+                    image: "",
+                    team: {
+                        id: ""
+                    },
+                })
+
+            });
+        }
+        return dropdownItemList;
+    }
     public setDefaultCard = (card: any) => {
         const titleAsString = this.localize("TitleText");
         const summaryAsString = this.localize("Summary");
@@ -327,6 +371,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         });
     }
 
+    private getTemplateData = async () => {
+        try {
+            const response = await getChannelTemplates();
+            this.setState({
+                templates: response.data
+            });
+        }
+        catch (error) {
+            return error;
+        }
+    }
     private getGroupData = async (id: string) => {
         try {
             var Notifitype = window.location.search.split('Notification=')[1]
@@ -419,6 +474,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     btnLink: draftMessageDetail.buttonLink,
                     imageLink: draftMessageDetail.imageLink,
                     btnTitle: draftMessageDetail.buttonTitle,
+                    selectedTemplates: draftMessageDetail.messageTemplate,
                     author: draftMessageDetail.author,
                     allUsersOptionSelected: draftMessageDetail.allUsers,
                     loader: false
@@ -539,6 +595,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     noResultsMessage={this.localize("NoMatchMessage")}
 
                                 />
+                                <Text
+                                    content={this.localize("SelectAMessageTemplate")} />
+                                <Dropdown
+
+                                    placeholder={this.localize("MessageTemplate")}
+                                    items={this.getMessageTemplateItems()}
+                                    value={this.state.selectedTemplates}
+                                    onSelectedChange={this.onMessageTemplateChanged.bind(this)}
+                                    noResultsMessage={this.localize("NoMatchMessage")}
+                                />
+ 
                                 <Input
                                     className="inputField"
                                     value={this.state.title}
@@ -752,7 +819,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         return resultedChannels;
     
     }
-
+    private getMessageTemplateItems = () => {
+        if (this.state.templates) {
+            return this.makeTemplateDropdownItems(this.state.templates);
+        }
+        const templateDropdownItems: dropdownItem[] = [];
+        return templateDropdownItems;
+    }
     private getItems = () => {
         const resultedTeams: dropdownItem[] = [];
         if (this.state.teams) {
@@ -793,7 +866,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroupsNum: 0
         })
     }
-   
+    private static MAX_SELECTED_TEMPLATES_NUM: number = 1;
+    private onMessageTemplateChanged = (event: any, itemsData: any) => {
+        if (itemsData.value.length > NewMessage.MAX_SELECTED_TEMPLATES_NUM) return;
+        this.setState({
+            selectedTemplates: itemsData.value,
+        });
+    }
     private onChannelChange = async (event: any, itemsData: any) => {
         let responesofdl: any[] = [];
         var promises = [];
@@ -899,7 +978,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let selectedChannel: string[] =[];
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
-       this.state.selectedGroups.forEach(x => selectedGroups.push(x.key));
+        this.state.selectedGroups.forEach(x => selectedGroups.push(x.key));
+        let messageTemplate: any[] = this.state.selectedTemplates.map(a => a.header);
        // this.state.selectedChannel.forEach(x => selectedChannel.push(x.key));
           selectedChannel = this.state.selectedChannel['key'];
         //selectedChannel = new Map();
@@ -914,6 +994,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
+            messageTemplate: messageTemplate.join(','),
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
@@ -937,6 +1018,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
         this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
         let selectedChannel = this.state.selectedChannel['key'];
+        let messageTemplate: any[] = this.state.selectedTemplates.map(a => a.header);
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
             channel: selectedChannel,
@@ -947,6 +1029,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
+            messageTemplate: messageTemplate.join(','),
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
