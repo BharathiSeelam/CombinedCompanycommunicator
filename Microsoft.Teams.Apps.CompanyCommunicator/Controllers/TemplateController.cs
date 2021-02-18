@@ -27,7 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplateController"/> class.
         /// </summary>
-        /// <param name="TemplateDataRepository">template data repository instance.</param>
+        /// <param name="templateDataRepository">template data repository instance.</param>
         public TemplateController(
             ITemplateDataRepository templateDataRepository)
         {

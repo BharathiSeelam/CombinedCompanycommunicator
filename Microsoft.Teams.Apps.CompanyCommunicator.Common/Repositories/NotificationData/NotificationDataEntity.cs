@@ -28,7 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// Gets or sets the channel text of the notification's content.
         /// </summary>
         public string Channel { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the TemplateID tet of the notification's content.
         /// </summary>
