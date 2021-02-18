@@ -114,6 +114,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 RowKey = notification.Id,
                 Id = notification.Id,
                 Channel = notification.Channel,
+                TemplateID = notification.TemplateID,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -180,6 +181,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 RowKey = notification.Id,
                 Id = notification.Id,
                 Channel = notification.Channel,
+                TemplateID = notification.TemplateID,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -265,6 +267,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 Id = notificationEntity.Id,
                 Channel = notificationEntity.Channel,
+                TemplateID = notificationEntity.TemplateID,
                 Title = notificationEntity.Title,
                 ImageLink = notificationEntity.ImageLink,
                 Summary = notificationEntity.Summary,
