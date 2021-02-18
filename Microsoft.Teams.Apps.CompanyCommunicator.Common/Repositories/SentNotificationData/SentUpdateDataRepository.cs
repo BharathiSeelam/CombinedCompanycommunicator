@@ -1,4 +1,4 @@
-﻿// <copyright file="SentUpdateandDeleteDataRepository.cs" company="Microsoft">
+﻿// <copyright file="SentUpdateDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -16,21 +16,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     /// <summary>
     /// Repository of the notification data in the table storage.
     /// </summary>
-    public class SentUpdateandDeleteDataRepository : BaseRepository<SentNotificationDataEntity>, ISentUpdateandDeleteNotificationDataRepository
+    public class SentUpdateDataRepository : BaseRepository<SentNotificationDataEntity>, ISentUpdateDataRepository
     {
-        private readonly IMessageService messageService;
+        private readonly IUpdateMessageService messageService;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SentUpdateandDeleteDataRepository"/> class.
+        /// Initializes a new instance of the <see cref="SentUpdateDataRepository"/> class.
         /// </summary>
         /// <param name="notificationDataRepository">The notification service.</param>
         /// <param name="logger">The logging service.</param>
         /// <param name="messageService">The messaging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
-        public SentUpdateandDeleteDataRepository(
+        public SentUpdateDataRepository(
              INotificationDataRepository notificationDataRepository,
              ILogger<SentNotificationDataRepository> logger,
-             IMessageService messageService,
+             IUpdateMessageService messageService,
              IOptions<RepositoryOptions> repositoryOptions)
             : base(
                   logger,
@@ -39,7 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                   defaultPartitionKey: SentNotificationDataTableNames.DefaultPartition,
                   ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
-                           this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
+            this.messageService = messageService ?? throw new ArgumentNullException(nameof(messageService));
         }
 
         /// <inheritdoc/>
@@ -52,24 +52,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
             }
         }
 
-       /// <inheritdoc/>
-        public async Task DeleteFromPostAsync(string notificationId)
+        /// <inheritdoc/>
+        public async Task UpdateFromPostAsync(string notificationId, NotificationDataEntity isentNotificationDataEntity)
         {
-            var sentNotificationDataEntites = await this.GetWithFilterAsync("DeliveryStatus eq 'Succeeded'", notificationId);
+            var sentNotificationDataEntites = await this.GetWithFilterAsync("PartitionKey eq '" + notificationId + "' ", notificationId);
+
             if (sentNotificationDataEntites != null)
             {
+                // var notificationDataEntites = await this.GetWithFilterAsync("PartitionKey eq '" + notificationId + "' ", notificationId);
                 foreach (var sentNotificationDataEntity in sentNotificationDataEntites)
                 {
-                    // var indent = new DateTime(d.Year, d.Month, d.Day, d.Hour, d.Minute, d.Second, d.Millisecond, d.Kind);
-                    // var messageid = Convert.ToInt32(sentNotificationDataEntity.SentDate);
-                    await this.messageService.DeleteSentNotification(
-                           notificationId: sentNotificationDataEntity.ConversationId,
-                           recipientId: sentNotificationDataEntity.RecipientId,
-                           serviceUrl: sentNotificationDataEntity.ServiceUrl,
-                           tenantId: sentNotificationDataEntity.TenantId,
-                           activityId: sentNotificationDataEntity.ActivtyId);
-
-                    // await this.sentNotificationDataRepository.DeleteAsync(notification);
+                    await this.messageService.UpdatePostSentNotification(
+                    notificationDataEntity: isentNotificationDataEntity,
+                    notificationId: sentNotificationDataEntity.ConversationId,
+                    recipientId: sentNotificationDataEntity.RecipientId,
+                    serviceUrl: sentNotificationDataEntity.ServiceUrl,
+                    tenantId: sentNotificationDataEntity.TenantId,
+                    activityId: sentNotificationDataEntity.ActivtyId);
                 }
             }
         }

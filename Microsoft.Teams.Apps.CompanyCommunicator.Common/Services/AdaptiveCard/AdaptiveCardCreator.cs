@@ -10,6 +10,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
     using AdaptiveCards.Templating;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Adaptive Card Creator service.
@@ -70,17 +72,60 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             string buttonUrl,
             string jsonfromat)
         {
-            var templateJson = jsonfromat;
-            AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
-            var myData = new
-            {
-                Title = title,
-                ImageUrl = imageUrl,
-                Summary = summary,
-                Author = author,
-            };
-            string cardJson = template.Expand(myData);
+            var mSummary = string.Empty;
+            var mauthor = string.Empty;
+            var mimageUrl = string.Empty;
 
+            var templateJson = jsonfromat;
+            if (!string.IsNullOrWhiteSpace(summary))
+            {
+                mSummary = summary;
+            }
+
+            if (!string.IsNullOrWhiteSpace(author))
+            {
+                mauthor = author;
+            }
+
+            if (!string.IsNullOrWhiteSpace(imageUrl))
+            {
+                mimageUrl = imageUrl;
+            }
+
+            JObject obj = JObject.Parse(templateJson);
+            (obj["body"] as JArray).RemoveAt(1);
+            AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
+
+            string cardJson;
+            if (string.IsNullOrWhiteSpace(imageUrl))
+            {
+                var myData = new
+                {
+                    Title = title,
+
+                    // ImageUrl = mimageUrl,
+                    Summary = mSummary,
+                    Author = mauthor,
+                };
+                cardJson = template.Expand(myData);
+            }
+            else
+            {
+                var myData = new
+                {
+                    Title = title,
+                    ImageUrl = mimageUrl,
+                    Summary = mSummary,
+                    Author = mauthor,
+                };
+                cardJson = template.Expand(myData);
+            }
+
+            JObject.Parse(cardJson);
+
+            var jobj = JToken.Parse(cardJson).ToString(Formatting.Indented);
+
+            // string cardJson = template.Expand(myData);
             return cardJson;
         }
 

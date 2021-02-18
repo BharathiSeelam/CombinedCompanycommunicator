@@ -936,7 +936,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
         this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
-        let selectedChannel = this.state.selectedChannel['key'];
+        let selectedChannel;
+        if (this.state.selectedChannel['key'] === undefined) {
+            selectedChannel = this.state.selectedChannel[0]['key'];
+        }
+        else { selectedChannel = this.state.selectedChannel['key'];}
+           
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
             channel: selectedChannel,

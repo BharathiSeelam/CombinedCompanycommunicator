@@ -165,11 +165,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddSingleton<CompanyCommunicatorBotAdapter>();
             services.AddSingleton<BotFrameworkHttpAdapter>();
             services.AddTransient<IMessageService, MessageService>();
+            services.AddTransient<IUpdateMessageService, MessageUpdateService>();
 
             // Add repositories.
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
             services.AddSingleton<IUserDataRepository, UserDataRepository>();
             services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+            services.AddSingleton<ISentUpdateDataRepository, SentUpdateDataRepository>();
             services.AddSingleton<ISentUpdateandDeleteNotificationDataRepository, SentUpdateandDeleteDataRepository>();
             services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             services.AddSingleton<IExportDataRepository, ExportDataRepository>();

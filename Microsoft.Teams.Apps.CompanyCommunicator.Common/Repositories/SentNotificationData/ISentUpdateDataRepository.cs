@@ -1,4 +1,4 @@
-﻿// <copyright file="ISentUpdateandDeleteNotificationDataRepository.cs" company="Microsoft">
+﻿// <copyright file="ISentUpdateDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -8,9 +8,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
     /// <summary>
-    /// Interface for Sent Notification data Repository.
+    /// Interface for Sent update Notification data Repository.
     /// </summary>
-    public interface ISentUpdateandDeleteNotificationDataRepository : IRepository<SentNotificationDataEntity>
+    public interface ISentUpdateDataRepository : IRepository<SentNotificationDataEntity>
     {
         /// <summary>
         /// This method ensures the SentNotificationData table is created in the storage.
@@ -25,9 +25,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         /// Save exception error message in a notification data entity.
         /// </summary>
         /// <param name="notificationId">Notification data entity id.</param>
+        /// <param name="updateSentNotificationDataEntity">updateSentNotificationDataEntity.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         // <returns><see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        public Task DeleteFromPostAsync(
-            string notificationId);
+        public Task UpdateFromPostAsync(
+            string notificationId,
+            NotificationDataEntity updateSentNotificationDataEntity);
     }
 }

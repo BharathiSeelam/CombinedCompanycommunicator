@@ -127,6 +127,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
                     PartitionKey = NotificationDataTableNames.SentNotificationsPartition,
                     RowKey = updateSentNotificationDataEntity.Id,
                     Id = updateSentNotificationDataEntity.Id,
+                    Channel = updateSentNotificationDataEntity.Channel,
                     Title = updateSentNotificationDataEntity.Title,
                     ImageLink = updateSentNotificationDataEntity.ImageLink,
                     Summary = updateSentNotificationDataEntity.Summary,
