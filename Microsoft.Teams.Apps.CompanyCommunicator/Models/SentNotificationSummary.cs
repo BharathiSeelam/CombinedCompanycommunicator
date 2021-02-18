@@ -61,5 +61,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets notification status. <see cref="NotificationStatus"/> for possible values.
         /// </summary>
         public string Status { get; set; }
+
+        /// <summary>
+        /// Gets or sets Likes Count. <see cref="NotificationStatus"/> for possible values.
+        /// </summary>
+        public string Likes { get; set; }
     }
 }

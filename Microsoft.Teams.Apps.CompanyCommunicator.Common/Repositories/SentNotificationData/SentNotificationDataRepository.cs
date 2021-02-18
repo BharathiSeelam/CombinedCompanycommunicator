@@ -48,5 +48,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
                 await this.Table.CreateAsync();
             }
         }
+
+        public async Task<SentNotificationDataEntity> GetActivityIDAsync(string notificationID)
+        {
+            SentNotificationDataEntity sentNotificationDatResult = null;
+            var sentNotificationDataEntites = await this.GetAllAsync(notificationID);
+            if (sentNotificationDataEntites != null)
+            {
+                foreach (var sentNotificationDataEntity in sentNotificationDataEntites)
+                {
+                    sentNotificationDatResult = sentNotificationDataEntity;
+                }
+            }
+
+            return sentNotificationDatResult;
+        }
     }
 }

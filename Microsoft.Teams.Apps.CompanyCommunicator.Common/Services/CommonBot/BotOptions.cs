@@ -28,5 +28,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// Gets or sets the Microsoft app password for the author bot.
         /// </summary>
         public string AuthorAppPassword { get; set; }
+
+        /// <summary>
+        /// Gets or sets the GrantType.
+        /// </summary>
+        public string GrantType { get; set; }
+        /// <summary>
+        /// Gets or sets the Scope.
+        /// </summary>
+        public string Scope { get; set; }
+        /// <summary>
+        /// Gets or sets the Tenant ID.
+        /// </summary>
+        public string TenantId { get; set; }
     }
 }
