@@ -1,8 +1,8 @@
-﻿// <copyright file="ChannelTemplateDataRepository.cs" company="Microsoft">
+// <copyright file="TemplateDataRepository.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTemplateData
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData
 {
     using System;
     using System.Collections.Generic;
@@ -11,25 +11,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTe
     using Microsoft.Extensions.Options;
 
     /// <summary>
-    /// Repository of the channel tempalte data in the table storage.
+    /// Repository of the tempalte data in the table storage.
     /// </summary>
-    public class ChannelTemplateDataRepository : BaseRepository<ChannelTemplateDataEntity>, IChannelTemplateDataRepository
+    public class TemplateDataRepository : BaseRepository<TemplateDataEntity>, ITemplateDataRepository
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChannelTemplateDataRepository"/> class.
+        /// Initializes a new instance of the <see cref="TemplateDataRepository"/> class.
         /// </summary>
         /// <param name="logger">The logging service.</param>
         /// <param name="repositoryOptions">Options used to create the repository.</param>
         /// <param name="tableRowKeyGenerator">Table row key generator service.</param>
-        public ChannelTemplateDataRepository(
-        ILogger<ChannelTemplateDataRepository> logger,
+        public TemplateDataRepository(
+        ILogger<TemplateDataRepository> logger,
         IOptions<RepositoryOptions> repositoryOptions,
         TableRowKeyGenerator tableRowKeyGenerator)
             : base(
                   logger,
                   storageAccountConnectionString: repositoryOptions.Value.StorageAccountConnectionString,
-                  tableName: ChannelTemplateDataTableNames.TableName,
-                  defaultPartitionKey: ChannelTemplateDataTableNames.ChannelTemplatePartition,
+                  tableName: TemplateDataTableNames.TableName,
+                  defaultPartitionKey: TemplateDataTableNames.TemplatePartition,
                   ensureTableExists: repositoryOptions.Value.EnsureTableExists)
         {
             this.TableRowKeyGenerator = tableRowKeyGenerator;
@@ -39,9 +39,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTe
         public TableRowKeyGenerator TableRowKeyGenerator { get; }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<ChannelTemplateDataEntity>> GetAllChannelTemplatesAsync()
+        public async Task<IEnumerable<TemplateDataEntity>> GetAllTemplatesAsync()
         {
-            var result = await this.GetAllAsync(ChannelTemplateDataTableNames.ChannelTemplatePartition);
+            var result = await this.GetAllAsync(TemplateDataTableNames.TemplatePartition);
 
             return result;
         }
