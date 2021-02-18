@@ -3,26 +3,26 @@ import { getBaseUrl } from '../configVariables';
 
 let baseAxiosUrl = getBaseUrl() + '/api';
 
-export const getChannelTemplate = async (id: number): Promise<any> => {
-    let url = baseAxiosUrl + "/channelTemplate/" + id;
+export const getTemplate = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/template/" + id;
     return await axios.get(url);
 }
-export const getChannelTemplates = async (): Promise<any> => {
-    let url = baseAxiosUrl + "/channelTemplate";
+export const getTemplates = async (): Promise<any> => {
+    let url = baseAxiosUrl + "/template";
     return await axios.get(url);
 }
-export const deleteChannelTemplate = async (id: number): Promise<any> => {
-    let url = baseAxiosUrl + "/channelTemplate/" + id;
+export const deleteTemplate = async (id: number): Promise<any> => {
+    let url = baseAxiosUrl + "/template/" + id;
     return await axios.delete(url);
 }
 
-export const updateChannelTemplate = async (payload: {}): Promise<any> => {
-    let url = baseAxiosUrl + "/channelTemplate";
+export const updateTemplate = async (payload: {}): Promise<any> => {
+    let url = baseAxiosUrl + "/template";
     return await axios.put(url, payload);
 }
 
-export const createChannelTemplate = async (payload: {}): Promise<any> => {
-    let url = baseAxiosUrl + "/channelTemplate";
+export const createTemplate = async (payload: {}): Promise<any> => {
+    let url = baseAxiosUrl + "/template";
     return await axios.post(url, payload);
 }
 
