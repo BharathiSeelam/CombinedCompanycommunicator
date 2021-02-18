@@ -1,8 +1,8 @@
-﻿// <copyright file="ChannelTemplateDataEntity.cs" company="Microsoft">
+// <copyright file="TemplateDataEntity.cs" company="Microsoft">
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTemplateData
+namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData
 {
     using System;
     using System.Collections.Generic;
@@ -11,10 +11,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelTe
 
     /// <summary>
     /// Channel template data entity class.
-    /// This entity type holds the data for channel templates
-    /// It holds the data for the content of the channel templates.
+    /// This entity type holds the data for templates
+    /// It holds the data for the content of the templates.
     /// </summary>
-    public class ChannelTemplateDataEntity : TableEntity
+    public class TemplateDataEntity : TableEntity
     {
         /// <summary>
         /// Gets or sets ChannelTemplateId.
