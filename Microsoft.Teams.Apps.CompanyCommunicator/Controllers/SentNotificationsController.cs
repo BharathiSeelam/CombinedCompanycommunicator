@@ -42,6 +42,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     {
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository;
+        private readonly ISentUpdateDataRepository sentNotificationUpdateDataRepository;
+        private readonly ISentNotificationDataRepository sentNotificationDataRepstry;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
@@ -63,6 +65,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
+        /// <param name="sentNotificationDataRepstry">Sent notification data repository to Get Likes.</param>
+        /// <param name="sentNotificationUpdateDataRepository">Sent notification data repository to update mentions.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
@@ -78,6 +82,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="loggerFactory">The logger factory.</param>
         public SentNotificationsController(
             INotificationDataRepository notificationDataRepository,
+            ISentUpdateDataRepository sentNotificationUpdateDataRepository,
+            ISentNotificationDataRepository sentNotificationDataRepstry,
             ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDistributionListDataRepository distributionListDataRepository,
@@ -100,6 +106,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
+            this.sentNotificationUpdateDataRepository = sentNotificationUpdateDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationUpdateDataRepository));
+            this.sentNotificationDataRepstry = sentNotificationDataRepstry ?? throw new ArgumentNullException(nameof(sentNotificationDataRepstry));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
             this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
