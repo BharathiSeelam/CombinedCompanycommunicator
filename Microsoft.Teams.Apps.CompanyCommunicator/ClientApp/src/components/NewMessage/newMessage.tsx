@@ -941,7 +941,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedChannel = this.state.selectedChannel[0]['key'];
         }
         else { selectedChannel = this.state.selectedChannel['key'];}
-           
+
+
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
             channel: selectedChannel,
