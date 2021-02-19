@@ -6,8 +6,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
 {
     using AdaptiveCards;
     using FluentAssertions;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend;
     using Moq;
@@ -22,7 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
     {
         private readonly Mock<AdaptiveCardCreator> adaptiveCardCreator = new Mock<AdaptiveCardCreator>();
         private readonly Mock<ISendingNotificationDataRepository> sendingNotificationDataRepository = new Mock<ISendingNotificationDataRepository>();
-        private readonly Mock<IChannelDataRepository> channelDataRepository = new Mock<IChannelDataRepository>();
+        private readonly Mock<ITemplateDataRepository> templateDataRepositiory = new Mock<ITemplateDataRepository>();
 
         /// <summary>
         /// Constructor tests.
@@ -32,8 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         {
             // Arrange
             Action action1 = () => new StoreMessageActivity(null /*notificationRepo*/, null , adaptiveCardCreator.Object);
-            Action action2 = () => new StoreMessageActivity(sendingNotificationDataRepository.Object, channelDataRepository.Object , null /*cardCreator*/);
-            Action action3 = () => new StoreMessageActivity(sendingNotificationDataRepository.Object, channelDataRepository.Object , adaptiveCardCreator.Object);
+            Action action2 = () => new StoreMessageActivity(sendingNotificationDataRepository.Object, templateDataRepositiory.Object , null /*cardCreator*/);
+            Action action3 = () => new StoreMessageActivity(sendingNotificationDataRepository.Object, templateDataRepositiory.Object , adaptiveCardCreator.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationRepo is null.");
@@ -102,7 +102,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.PreparingToSen
         /// <returns>return the instance of StoreMessageActivity</returns>
         private StoreMessageActivity GetStoreMessageActivity()
         {
-            return new StoreMessageActivity(sendingNotificationDataRepository.Object, channelDataRepository.Object, adaptiveCardCreator.Object);
+            return new StoreMessageActivity(sendingNotificationDataRepository.Object, templateDataRepositiory.Object, adaptiveCardCreator.Object);
         }
     }
 }

@@ -128,6 +128,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedRadioBtn: "teams",
             selectedChannel: [],
             selectedTeams: [],
+            selectedTemplates:[],
             selectedRosters: [],
             selectedGroups: [],
             selectedDLs: [],

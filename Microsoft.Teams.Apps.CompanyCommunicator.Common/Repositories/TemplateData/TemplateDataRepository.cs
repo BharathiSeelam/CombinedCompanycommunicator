@@ -45,5 +45,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateD
 
             return result;
         }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<TemplateDataEntity>> GetFilterAsync(string filter, string partitionkey)
+        {
+            var templateDataEntities = await this.GetWithFilterAsync(filter, partitionkey);
+            return templateDataEntities;
+        }
     }
 }

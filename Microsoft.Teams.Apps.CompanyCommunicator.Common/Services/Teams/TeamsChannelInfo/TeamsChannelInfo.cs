@@ -41,7 +41,7 @@
         public async Task<string> GetTeamsChannelInfoAsync(string teamId, string tenantId, string serviceUrl, string teamsName)
         {
             TokenGeneratorExtension tokenHelper = new TokenGeneratorExtension();
-            GraphServiceClient graphClient = tokenHelper.GenerateGraphClient(this.authorAppId, this.scope, this.authorSecret, this.grantType, this.TenantId);
+            GraphServiceClient graphClient = tokenHelper.GenerateGraphClient(this.authorAppId, this.scope, this.authorSecret, this.grantType, this.tenantID);
             graphClient.BaseUrl = graphClient.BaseUrl.Replace("v1.0", "beta");
             var teams = graphClient.Groups.Request().Filter("resourceProvisioningOptions/Any(x:x eq 'Team') and displayname eq '" + teamsName + "'").GetAsync().Result;
             var grp = new List<Group>(teams as IEnumerable<Group>);
