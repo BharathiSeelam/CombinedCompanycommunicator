@@ -49,6 +49,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
             }
         }
 
+        /// <inheritdoc/>
         public async Task<SentNotificationDataEntity> GetActivityIDAsync(string notificationID)
         {
             SentNotificationDataEntity sentNotificationDatResult = null;

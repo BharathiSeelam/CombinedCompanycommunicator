@@ -29,7 +29,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// <summary>
         /// Gets or sets the DLMemberCount value.
         /// </summary>
-        public Int32 DLMemberCount { get; set; }
+        public int DLMemberCount { get; set; }
 
         /// <summary>
         /// Gets or sets the GroupType value.
