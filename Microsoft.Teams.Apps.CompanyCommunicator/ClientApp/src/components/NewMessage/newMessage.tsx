@@ -1035,7 +1035,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
-            messageTemplate: messageTemplate.join(','),
+            messageTemplate: this.state.selectedTemplates["key"],
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
