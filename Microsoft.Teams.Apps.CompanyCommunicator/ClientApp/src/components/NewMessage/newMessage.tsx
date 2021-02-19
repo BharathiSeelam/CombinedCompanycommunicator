@@ -878,7 +878,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let userResponse = await getAdminChannels(loggedinUser, itemsData.value["key"]);
         if (userResponse.data.length > 0) {
             let userDls = userResponse.data[0]["channelAdminDLs"];
-       
+            let reg = /(\(.*?\))/gi;
+           userDls= userDls.replace(reg, "");
         let eachUser = userDls.split(",");
         eachUser.map(async (Element) : Promise <any> => {
             let userDLs = await getDistributionListsByName(Element);
@@ -973,11 +974,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         const selectedGroups: string[] = [];
-        let selectedChannel: string[] =[];
+        let selectedChannel: string[] = [];
+        let messageTemplate: string[] = [];
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
        this.state.selectedGroups.forEach(x => selectedGroups.push(x.key));
-        let messageTemplate: any[] = this.state.selectedTemplates.map(a => a.header);
+       // this.state.selectedTemplates.forEach(a => messageTemplate.push(a.header));
        // this.state.selectedChannel.forEach(x => selectedChannel.push(x.key));
           selectedChannel = this.state.selectedChannel['key'];
         //selectedChannel = new Map();
@@ -992,7 +994,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
-            messageTemplate: messageTemplate.join(','),
+            messageTemplate: this.state.selectedTemplates["key"],
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected

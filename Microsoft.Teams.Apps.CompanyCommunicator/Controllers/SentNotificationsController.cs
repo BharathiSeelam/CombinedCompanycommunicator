@@ -28,10 +28,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
     /// <summary>
     /// Controller for the sent notification data.
@@ -43,16 +41,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository;
         private readonly ISentUpdateDataRepository sentNotificationUpdateDataRepository;
-        private readonly ISentNotificationDataRepository sentNotificationDataRepstry;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
         private readonly IDataQueue dataQueue;
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly IGroupsService groupsService;
-        private readonly ITeamMembersService memberService;
-        private readonly ITeamsChannelInfo teamsChannelInfo;
-        private readonly IMessageReactionService reactionService;
         private readonly IExportDataRepository exportDataRepository;
         private readonly IAppCatalogService appCatalogService;
         private readonly IAppSettingsService appSettingsService;
@@ -65,16 +59,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
-        /// <param name="sentNotificationDataRepstry">Sent notification data repository to Get Likes.</param>
-        /// <param name="sentNotificationUpdateDataRepository">Sent notification data repository to update mentions.</param>
+        /// <param name="sentNotificationUpdateDataRepository">Sent update notification data repository.</param>
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="groupsService">The groups service.</param>
-        /// <param name="teamsChannelInfo">The Teamchannel info service service.</param>
-        /// <param name="reactionService">The reaction of message service.</param>
         /// <param name="exportDataRepository">The Export data repository instance.</param>
         /// <param name="appCatalogService">App catalog service.</param>
         /// <param name="appSettingsService">App settings service.</param>
@@ -82,17 +73,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="loggerFactory">The logger factory.</param>
         public SentNotificationsController(
             INotificationDataRepository notificationDataRepository,
-            ISentUpdateDataRepository sentNotificationUpdateDataRepository,
-            ISentNotificationDataRepository sentNotificationDataRepstry,
             ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository,
+            ISentUpdateDataRepository sentNotificationUpdateDataRepository,
             ITeamDataRepository teamDataRepository,
             IDistributionListDataRepository distributionListDataRepository,
             IPrepareToSendQueue prepareToSendQueue,
             IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
             IGroupsService groupsService,
-            IMessageReactionService reactionService,
-            ITeamsChannelInfo teamsChannelInfo,
             IExportDataRepository exportDataRepository,
             IAppCatalogService appCatalogService,
             IAppSettingsService appSettingsService,
@@ -106,15 +94,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
-            this.sentNotificationUpdateDataRepository = sentNotificationUpdateDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationUpdateDataRepository));
-            this.sentNotificationDataRepstry = sentNotificationDataRepstry ?? throw new ArgumentNullException(nameof(sentNotificationDataRepstry));
+            this.sentNotificationUpdateDataRepository = sentNotificationUpdateDataRepository ?? throw new ArgumentException(nameof(sentNotificationUpdateDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
             this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
             this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
-            this.reactionService = reactionService ?? throw new ArgumentNullException(nameof(reactionService));
-            this.teamsChannelInfo = teamsChannelInfo ?? throw new ArgumentNullException(nameof(teamsChannelInfo));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
             this.appCatalogService = appCatalogService ?? throw new ArgumentNullException(nameof(appCatalogService));
@@ -198,7 +183,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 RowKey = notification.Id,
                 Id = notification.Id,
                 Channel = notification.Channel,
-                TemplateID = notification.TemplateID,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,
@@ -241,7 +225,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
             {
-                string likes = await this.GetActivityIDandLikes(notificationEntity);
                 var summary = new SentNotificationSummary
                 {
                     Id = notificationEntity.Id,
@@ -254,7 +237,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
                     Status = notificationEntity.GetStatus(),
-                    Likes = likes,
                 };
 
                 result.Add(summary);
@@ -290,7 +272,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 Id = notificationEntity.Id,
                 Channel = notificationEntity.Channel,
-                TemplateID = notificationEntity.TemplateID,
                 Title = notificationEntity.Title,
                 ImageLink = notificationEntity.ImageLink,
                 Summary = notificationEntity.Summary,
@@ -336,7 +317,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 Id = notificationEntity.Id,
                 Channel = notificationEntity.Channel,
-                TemplateID = notificationEntity.TemplateID,
                 Title = notificationEntity.Title,
                 ImageLink = notificationEntity.ImageLink,
                 Summary = notificationEntity.Summary,
@@ -372,45 +352,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             await this.notificationDataRepository.DeleteAsync(notificationEntity);
             await this.sentNotificationDataRepository.DeleteFromPostAsync(id);
             return this.Ok();
-        }
-
-        private async Task<string> GetActivityIDandLikes(NotificationDataEntity notificationEntity)
-        {
-            var tenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
-            var serviceUrl = await this.appSettingsService.GetServiceUrlAsync();
-
-            int likes = 0;
-            var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);
-            if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
-            {
-                var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
-                if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
-                {
-                    foreach (var teamsData in teamsDataEntity)
-                    {
-                        string teamsID = await this.teamsChannelInfo.GetTeamsChannelInfoAsync(sentNotificationEntity.ConversationId, sentNotificationEntity.TenantId, sentNotificationEntity.ServiceUrl, teamsData.Name);
-                        if (!string.IsNullOrEmpty(teamsID))
-                        {
-                            var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
-                            int likeCount = 0;
-                            if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
-                            {
-                                foreach (var reaction in messageResponse.Reactions)
-                                {
-                                    if (reaction.ReactionType.ToString() == "like")
-                                    {
-                                        likeCount++;
-                                    }
-                                }
-
-                                likes = likeCount;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return likes.ToString();
         }
 
         private int? GetUnknownCount(NotificationDataEntity notificationEntity)
