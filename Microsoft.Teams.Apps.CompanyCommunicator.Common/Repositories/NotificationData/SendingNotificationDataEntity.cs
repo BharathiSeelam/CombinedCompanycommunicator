@@ -24,6 +24,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public string Channel { get; set; }
 
         /// <summary>
+        /// Gets or sets the template.
+        /// </summary>
+        public string TemplateID { get; set; }
+
+        /// <summary>
         /// Gets or sets the content of the notification in serialized JSON form.
         /// </summary>
         public string Content { get; set; }

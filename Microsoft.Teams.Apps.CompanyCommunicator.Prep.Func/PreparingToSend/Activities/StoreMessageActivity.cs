@@ -66,6 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
                 RowKey = notification.RowKey,
                 NotificationId = notification.Id,
                 Channel = notification.Channel,
+                TemplateID = notification.TemplateID,
                 Content = serializedContent,
             };
 

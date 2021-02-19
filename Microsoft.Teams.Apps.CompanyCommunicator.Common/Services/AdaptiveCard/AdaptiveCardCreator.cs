@@ -89,11 +89,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
+
                 mimageUrl = imageUrl;
             }
+            else
+            {
+                JObject obj = JObject.Parse(templateJson);
+                (obj["body"] as JArray).RemoveAt(1);
+                templateJson = obj.ToString();
+            }
 
-            JObject obj = JObject.Parse(templateJson);
-            (obj["body"] as JArray).RemoveAt(1);
             AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
 
             string cardJson;
@@ -104,7 +109,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                     Title = title,
 
                     // ImageUrl = mimageUrl,
-                    Summary = mSummary,
+                    Description = mSummary,
                     Author = mauthor,
                 };
                 cardJson = template.Expand(myData);
@@ -114,9 +119,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
                 var myData = new
                 {
                     Title = title,
-                    ImageUrl = mimageUrl,
-                    Summary = mSummary,
-                    Author = mauthor,
+                    ImageUri = mimageUrl,
+                    Description = mSummary,
+                    //Author = mauthor,
+                    ActionUri = buttonUrl,
                 };
                 cardJson = template.Expand(myData);
             }

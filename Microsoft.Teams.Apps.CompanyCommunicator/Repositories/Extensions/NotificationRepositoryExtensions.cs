@@ -34,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions
                 RowKey = newId,
                 Id = newId,
                 Channel = notification.Channel,
+                TemplateID = notification.TemplateID,
                 Title = notification.Title,
                 ImageLink = notification.ImageLink,
                 Summary = notification.Summary,

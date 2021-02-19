@@ -44,7 +44,7 @@ export interface IDraftMessage {
     rosters: any[],
     groups: any[],
     allUsers: boolean,
-    messageTemplate: string,   
+    templateId?: string,   
 }
 
 export interface formState {
@@ -994,7 +994,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
-            messageTemplate: this.state.selectedTemplates["key"],
+            templateId: this.state.selectedTemplates["key"],
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
@@ -1035,7 +1035,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
-            messageTemplate: this.state.selectedTemplates["key"],
+            templateId: this.state.selectedTemplates["key"],
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected

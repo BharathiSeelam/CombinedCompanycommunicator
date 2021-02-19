@@ -25,6 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
@@ -128,6 +129,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
             builder.Services.AddSingleton<IUserDataRepository, UserDataRepository>();
             builder.Services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
+            builder.Services.AddSingleton<ITemplateDataRepository, TemplateDataRepository>();
             builder.Services.AddSingleton<IExportDataRepository, ExportDataRepository>();
             builder.Services.AddSingleton<IAppConfigRepository, AppConfigRepository>();
 
