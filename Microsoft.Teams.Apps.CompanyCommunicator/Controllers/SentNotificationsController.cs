@@ -225,7 +225,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            ionvar notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
+            var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
 
             var result = new List<SentNotificationSummary>();
             foreach (var notificationEntity in notificationEntities)
