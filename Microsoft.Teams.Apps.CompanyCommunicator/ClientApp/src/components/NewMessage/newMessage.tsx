@@ -11,7 +11,7 @@ import './teamTheme.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess} from '../../apis/messageListApi';
 import { getChannel, getChannels, getAdminChannels } from '../../apis/channelListApi';
 import { getDistributionListsByName, getDistributionListsByID } from '../../apis/distributionListApi';
-import { getTemplates } from '../../apis/templateListApi';
+import { getTemplates, getTemplate } from '../../apis/templateListApi';
 import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
@@ -288,19 +288,16 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         return dropdownItemList;
     }
    private makeTemplateDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
-        items = items.toString().split(',');
         const dropdownItemList: dropdownItem[] = [];
         if (items) {
-            items.forEach((element, index) => {
                 dropdownItemList.push({
-                    key: element,
-                    header: element,
+                    key: items["templateID"],
+                    header: items["templateName"],
                     content: "",
                     image: "",
                     team: {
                         id: ""
                     },
-                })
 
             });
         }
@@ -409,13 +406,16 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
               const draftMessageDetail = response.data;
               const responseChannel = await getChannel(draftMessageDetail.channel);
                 const channelDetails = responseChannel.data;
+                const responseTemplate = await getTemplate(draftMessageDetail.templateID);
+                const templateDetails = responseTemplate.data;
                 let responesofdl: any[] = [];
                 var promises = [];
 
                 let userResponse = await getAdminChannels(loggedinUser, channelDetails["id"]);
                 if (userResponse.data.length > 0) {
                     let userDls = userResponse.data[0]["channelAdminDLs"];
-
+                    let reg = /(\(.*?\))/gi;
+                    userDls = userDls.replace(reg, "");
                     let eachUser = userDls.split(",");
                     eachUser.map(async (Element): Promise<any> => {
                         let userDLs = await getDistributionListsByName(Element);
@@ -455,7 +455,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     selectedRadioBtn: selectedRadioButton,
                     selectedTeams: draftMessageDetail.teams,
                     selectedRosters: draftMessageDetail.rosters,
-                    selectedTemplates: draftMessageDetail.messageTemplate,
                     selectedGroups: dlselectedGroups,
                     dls: responesofdl
                 });
@@ -473,7 +472,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     btnLink: draftMessageDetail.buttonLink,
                     imageLink: draftMessageDetail.imageLink,
                     btnTitle: draftMessageDetail.buttonTitle,
-                    selectedTemplates: draftMessageDetail.messageTemplate,
+                    selectedTemplates: templateDetails,
                     author: draftMessageDetail.author,
                     allUsersOptionSelected: draftMessageDetail.allUsers,
                     loader: false
@@ -488,12 +487,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 const responseChannel = await getChannel(draftMessageDetail.channel);
                 const channelDetails = responseChannel.data;
 
+                const responseTemplate = await getTemplate(draftMessageDetail.templateID);
+                const templateDetails = responseTemplate.data;
+
                 let responesofdl: any[] = [];
                 var promises = [];
 
                 let userResponse = await getAdminChannels(loggedinUser, channelDetails["id"]);
                 if (userResponse.data.length > 0) {
                     let userDls = userResponse.data[0]["channelAdminDLs"];
+                    let reg = /(\(.*?\))/gi;
+                    userDls = userDls.replace(reg, "");
 
                     let eachUser = userDls.split(",");
                     eachUser.map(async (Element): Promise<any> => {
@@ -549,6 +553,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     btnLink: draftMessageDetail.buttonLink,
                     imageLink: draftMessageDetail.imageLink,
                     btnTitle: draftMessageDetail.buttonTitle,
+                    selectedTemplates: templateDetails,
                     author: draftMessageDetail.author,
                     allUsersOptionSelected: draftMessageDetail.allUsers,
                     loader: false

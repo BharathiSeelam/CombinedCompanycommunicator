@@ -21,6 +21,7 @@
     "office-ui-fabric-react": "^6.188.1",
     "rc-tabs": "^11.7.3",
     "react": "^16.8.6",
+    "react-csv": "^2.0.3",
     "react-datepicker": "^3.4.1",
     "react-datetime-picker": "^3.0.4",
     "react-dom": "^16.8.6",

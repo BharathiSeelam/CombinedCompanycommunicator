@@ -3,7 +3,7 @@ import { getBaseUrl } from '../configVariables';
 
 let baseAxiosUrl = getBaseUrl() + '/api';
 
-export const getTemplate = async (id: number): Promise<any> => {
+export const getTemplate = async (id: string): Promise<any> => {
     let url = baseAxiosUrl + "/template/" + id;
     return await axios.get(url);
 }
@@ -11,7 +11,7 @@ export const getTemplates = async (): Promise<any> => {
     let url = baseAxiosUrl + "/template";
     return await axios.get(url);
 }
-export const deleteTemplate = async (id: number): Promise<any> => {
+export const deleteTemplate = async (id: string): Promise<any> => {
     let url = baseAxiosUrl + "/template/" + id;
     return await axios.delete(url);
 }
