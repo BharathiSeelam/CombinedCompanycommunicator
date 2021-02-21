@@ -33,7 +33,7 @@ type dropdownItem = {
 
 export interface IDraftMessage {
     id?: string,
-    channel?: any[],
+    channel?: string,
     title: string,
     imageLink?: string,
     summary?: string,
@@ -979,15 +979,23 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         const selectedGroups: string[] = [];
-        let selectedChannel: string[] = [];
-        let messageTemplate: string[] = [];
+        let selectedChannel: string = "";
+        let messageTemplate: string = "";
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
-       this.state.selectedGroups.forEach(x => selectedGroups.push(x.key));
-       // this.state.selectedTemplates.forEach(a => messageTemplate.push(a.header));
-       // this.state.selectedChannel.forEach(x => selectedChannel.push(x.key));
-          selectedChannel = this.state.selectedChannel['key'];
-        //selectedChannel = new Map();
+        this.state.selectedGroups.forEach(x => selectedGroups.push(x.key));
+        if (this.state.selectedTemplates instanceof Array) {
+            messageTemplate = this.state.selectedTemplates[0]['key'];
+        }
+        else {
+            messageTemplate = this.state.selectedTemplates['key'];
+        }
+        if (this.state.selectedChannel instanceof Array) {
+            selectedChannel = this.state.selectedChannel[0]['key'];
+        }
+        else {
+            selectedChannel = this.state.selectedChannel['key'];
+        }
 
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
@@ -999,7 +1007,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
-            templateId: this.state.selectedTemplates["key"],
+            templateId: messageTemplate,
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
@@ -1019,16 +1027,23 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const selectedTeams: string[] = [];
         const selctedRosters: string[] = [];
         const selectedGroups: string[] = [];
+        let messageTemplate: string = "";
+        let selectedChannel: string = "";
         this.state.selectedTeams.forEach(x => selectedTeams.push(x.team.id));
         this.state.selectedRosters.forEach(x => selctedRosters.push(x.team.id));
         this.state.selectedGroups.forEach(x => selectedGroups.push(x.team.id));
-        let messageTemplate: any[] = this.state.selectedTemplates.map(a => a.header);
-        let selectedChannel;
-        if (this.state.selectedChannel['key'] === undefined) {
+        if (this.state.selectedChannel instanceof Array) {
             selectedChannel = this.state.selectedChannel[0]['key'];
         }
-        else { selectedChannel = this.state.selectedChannel['key'];}
-
+        else {
+            selectedChannel = this.state.selectedChannel['key'];
+        }
+        if (this.state.selectedTemplates instanceof Array) {
+            messageTemplate = this.state.selectedTemplates[0]['key'];
+        }
+        else {
+            messageTemplate = this.state.selectedTemplates['key'];
+        }
 
         const draftMessage: IDraftMessage = {
             id: this.state.messageId,
@@ -1040,7 +1055,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             buttonTitle: this.state.btnTitle,
             buttonLink: this.state.btnLink,
             teams: selectedTeams,
-            templateId: this.state.selectedTemplates["key"],
+            templateId: messageTemplate,
             rosters: selctedRosters,
             groups: selectedGroups,
             allUsers: this.state.allUsersOptionSelected
