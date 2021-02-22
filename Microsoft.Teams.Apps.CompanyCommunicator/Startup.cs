@@ -209,6 +209,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IAppSettingsService, AppSettingsService>();
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
+            services.AddTransient<IMessageReactionService, MessageReactionService>();
+            services.AddTransient<ITeamsChannelInfo, TeamsChannelInfo>();
         }
 
         /// <summary>
