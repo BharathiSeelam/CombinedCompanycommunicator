@@ -52,13 +52,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
             }
 
             var templateID = notification.TemplateID;
-            var templateDataforcard = await this.templateDataRepository.GetFilterAsync("TemplateID eq '" + templateID + "'", "Default");
+            var templateDataforcard = await this.templateDataRepository.GetAsync("Default", templateID);
             var serializedContent = string.Empty;
-            foreach (var templateData in templateDataforcard)
-            {
-                        serializedContent = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(notification, templateData.TemplateJSON);
-                        break;
-            }
+
+            serializedContent = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(notification, templateDataforcard.TemplateJSON);
 
             var sendingNotification = new SendingNotificationDataEntity
             {
