@@ -18,6 +18,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Polly;
@@ -32,20 +33,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         private readonly string microsoftAppId;
         private readonly BotFrameworkHttpAdapter botAdapter;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
+        private readonly ITemplateDataRepository templateDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageUpdateService"/> class.
         /// </summary>
         /// <param name="botOptions">The bot options.</param>
         /// <param name="adaptiveCardCreator">The adaptiveCardCreator.</param>
+        /// <param name="templateDataRepository">The template data repository.</param>
         /// <param name="botAdapter">The bot adapter.</param>
         public MessageUpdateService(
             IOptions<BotOptions> botOptions,
             AdaptiveCardCreator adaptiveCardCreator,
+            ITemplateDataRepository templateDataRepository,
             BotFrameworkHttpAdapter botAdapter)
         {
             this.microsoftAppId = botOptions?.Value?.UserAppId ?? throw new ArgumentNullException(nameof(botOptions));
             this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
+            this.templateDataRepository = templateDataRepository ?? throw new ArgumentNullException(nameof(templateDataRepository));
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
         }
 
@@ -78,7 +83,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                   try
                   {
                       // Update message.
-                      var reply = this.CreateReply(notificationDataEntity);
+                      var templateDataEntityResult = await this.templateDataRepository.GetAsync("Default", notificationDataEntity.TemplateID);
+                      var reply = this.CreateReply(notificationDataEntity, templateDataEntityResult.TemplateJSON);
+                     // var reply = this.CreateReply(notificationDataEntity);
                       var attachments = reply.Attachments[0];
                       var updateCardActivity = new Activity(ActivityTypes.Message)
                       {
@@ -98,15 +105,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             // return response;
         }
 
-        private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity)
+        private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity , string templateJson)
         {
-            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
+
+            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
                 notificationDataEntity.Title,
                 notificationDataEntity.ImageLink,
                 notificationDataEntity.Summary,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
-                notificationDataEntity.ButtonLink);
+                notificationDataEntity.ButtonLink,
+                templateJson);
             /*var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
                    "Testing3",
                    "https://www.cloudsavvyit.com/thumbcache/600/340/dc6262cc4d1f985b23e2bca456d9a611/p/uploads/2020/09/8b1648fb.png",
