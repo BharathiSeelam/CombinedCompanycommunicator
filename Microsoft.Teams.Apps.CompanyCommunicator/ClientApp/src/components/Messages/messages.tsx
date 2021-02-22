@@ -237,6 +237,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                     <Text
                         truncated
                         className="semiBold"
+                        content={message.likes}
+                    />
+                </Flex.Item>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+                    <Text
+                        truncated
+                        className="semiBold"
                         content={message.sentDate}
                     />
                 </Flex.Item>
