@@ -144,13 +144,21 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '30%' }}>
                         <Text></Text>
+                    </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '30%' }} shrink={false}>
+                        <Text
+                            truncated
+                            content={this.localize("Recipients")}
+                            weight="bold"
+                        >
+                        </Text>
                     </Flex.Item>
                     <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
                         <Text
                             truncated
-                            content={this.localize("Recipients")}
+                            content={this.localize("Likes")}
                             weight="bold"
                         >
                         </Text>

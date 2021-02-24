@@ -256,6 +256,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TotalMessageCount = notificationEntity.TotalMessageCount,
                     SendingStartedDate = notificationEntity.SendingStartedDate,
                     Status = notificationEntity.GetStatus(),
+                    Likes = likes,
                 };
 
                 result.Add(summary);
@@ -381,32 +382,43 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var serviceUrl = await this.appSettingsService.GetServiceUrlAsync();
 
             int likes = 0;
-            var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);
-            if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
+            try
             {
-                var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
-                if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
+                var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);
+                if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
                 {
-                    foreach (var teamsData in teamsDataEntity)
+                    var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
+                    if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
                     {
-                        string teamsID = await this.teamsChannelInfo.GetTeamsChannelInfoAsync(sentNotificationEntity.ConversationId, sentNotificationEntity.TenantId, sentNotificationEntity.ServiceUrl, teamsData.Name);
-                        if (!string.IsNullOrEmpty(teamsID))
+                        foreach (var teamsData in teamsDataEntity)
                         {
-                            var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
-                            int likeCount = 0;
-                            if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
+                            string teamsID = await this.teamsChannelInfo.GetTeamsChannelInfoAsync(sentNotificationEntity.ConversationId, sentNotificationEntity.TenantId, sentNotificationEntity.ServiceUrl, teamsData.Name);
+                            if (!string.IsNullOrEmpty(teamsID))
                             {
-                                foreach (var reaction in messageResponse.Reactions)
+                                var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
+                                int likeCount = 0;
+                                if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
                                 {
-                                    if (reaction.ReactionType.ToString() == "like")
-                                    { likeCount++; }
+                                    foreach (var reaction in messageResponse.Reactions)
+                                    {
+                                        if (reaction.ReactionType.ToString() == "like")
+                                        {
+                                            likeCount++;
+                                        }
+                                    }
+
+                                    likes = likeCount;
                                 }
-                                likes = likeCount;
                             }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+
+            }
+
 
             return likes.ToString();
         }

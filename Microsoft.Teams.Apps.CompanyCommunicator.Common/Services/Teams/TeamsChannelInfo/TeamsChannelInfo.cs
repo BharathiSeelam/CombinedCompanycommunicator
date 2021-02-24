@@ -38,6 +38,15 @@
             this.scope = botOptions?.Value?.Scope ?? throw new ArgumentNullException(nameof(botOptions));
             this.tenantID = botOptions?.Value?.TenantId ?? throw new ArgumentNullException(nameof(botOptions));
         }
+
+        /// <summary>
+        /// Method to get Teams Id.
+        /// </summary>
+        /// <param name="teamId">Teams ID.</param>
+        /// <param name="tenantId">Tenant ID.</param>
+        /// <param name="serviceUrl">Service URL.</param>
+        /// <param name="teamsName">Teams Name.</param>
+        /// <returns>return aad id of the teams.</returns>
         public async Task<string> GetTeamsChannelInfoAsync(string teamId, string tenantId, string serviceUrl, string teamsName)
         {
             TokenGeneratorExtension tokenHelper = new TokenGeneratorExtension();
@@ -47,7 +56,6 @@
             var grp = new List<Group>(teams as IEnumerable<Group>);
             var g = grp.Find(s => s.DisplayName.Equals(teamsName));
             return g.Id;
-            //return await GetTeamsChannelsDetailsAsync(teamId, tenantId, serviceUrl, this.authorAppId,this.authorSecret).ConfigureAwait(false);
         }
 
         private async Task<TeamChannelDetails> GetTeamsChannelsDetailsAsync(string teamId, string tenantId, string serviceUrl, string appId, string password)
