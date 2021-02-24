@@ -1,5 +1,11 @@
 ﻿namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Integration.AspNet.Core;
     using Microsoft.Bot.Builder.Teams;
@@ -10,12 +16,6 @@
     using Microsoft.Extensions.Options;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     public class TeamsChannelInfo : ITeamsChannelInfo
     {

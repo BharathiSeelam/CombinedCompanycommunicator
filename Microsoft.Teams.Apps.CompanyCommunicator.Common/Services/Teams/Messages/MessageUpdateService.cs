@@ -21,6 +21,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Newtonsoft.Json;
     using Polly;
     using Polly.Contrib.WaitAndRetry;
     using Polly.Retry;
@@ -58,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         public async Task UpdatePostSentNotification(
             NotificationDataEntity notificationDataEntity,
             string conversationId,
-            string recipientId,
+            string recipientId,     
             string serviceUrl,
             string tenantId,
             string activityId)
@@ -85,13 +86,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                       // Update message.
                       var templateDataEntityResult = await this.templateDataRepository.GetAsync("Default", notificationDataEntity.TemplateID);
                       var reply = this.CreateReply(notificationDataEntity, templateDataEntityResult.TemplateJSON);
-                     // var reply = this.CreateReply(notificationDataEntity);
                       var attachments = reply.Attachments[0];
                       var updateCardActivity = new Activity(ActivityTypes.Message)
                       {
                           Id = activityId,
                           Conversation = turnContext.Activity.Conversation,
-                          Attachments = new List<Attachment> { attachments },
+                          Attachments = new List<Attachment>
+                            {
+                              new Attachment()
+                                        {
+                                            ContentType = attachments.ContentType,
+                                            Content = JsonConvert.DeserializeObject((string)attachments.Content),
+                                        },
+                            },
                       };
                       await turnContext.UpdateActivityAsync(updateCardActivity, cancellationToken);
                   }
@@ -107,7 +114,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
 
         private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity , string templateJson)
         {
-
             var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
                 notificationDataEntity.Title,
                 notificationDataEntity.ImageLink,
