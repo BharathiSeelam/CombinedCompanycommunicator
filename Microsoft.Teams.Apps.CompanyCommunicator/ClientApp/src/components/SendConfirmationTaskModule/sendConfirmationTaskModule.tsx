@@ -16,6 +16,7 @@ import {
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import dateFormat from 'dateformat';
 
 export interface IListItem {
     header: string,
@@ -204,7 +205,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
     }
 
     private onSaveMessage = () => {
-        updateDraftNotificationPublish(this.state.messageId, this.state.startDate).then(() => {
+        updateDraftNotificationPublish(this.state.messageId, dateFormat(this.state.startDate, "yyyy-mm-dd HH:MM")).then(() => {
             microsoftTeams.tasks.submitTask();
         });
     }

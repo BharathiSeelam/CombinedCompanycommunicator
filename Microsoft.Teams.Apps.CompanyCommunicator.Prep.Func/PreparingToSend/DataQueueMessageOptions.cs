@@ -13,5 +13,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.PreparingToSend
         /// Gets or sets the value for the delay to be applied to the data queue message.
         /// </summary>
         public double MessageDelayInSeconds { get; set; }
+
+        /// <summary>
+        /// Gets or sets Value to store message delay in Seconds.
+        /// </summary>
+        public double ForceCompleteMessageDelayInSeconds { get; set; }
     }
 }
