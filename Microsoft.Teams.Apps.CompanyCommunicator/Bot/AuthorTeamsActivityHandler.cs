@@ -5,7 +5,9 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
@@ -13,9 +15,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
+    using Newtonsoft.Json.Linq;
 
     /// <summary>
     /// Company Communicator Author Bot.
@@ -27,6 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private readonly TeamsFileUpload teamsFileUpload;
         private readonly IUserDataService userDataService;
         private readonly IAppSettingsService appSettingsService;
+        private readonly INotificationDataRepository notificationDataRepository;
+        private readonly IChannelDataRepository channelDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -35,16 +42,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="teamsFileUpload">File upload service.</param>
         /// <param name="userDataService">User data service.</param>
         /// <param name="appSettingsService">App Settings service.</param>
+        /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
+        /// <param name="channelDataRepository">ChannelDataRepository.</param>
         /// <param name="localizer">Localization service.</param>
         public AuthorTeamsActivityHandler(
             TeamsFileUpload teamsFileUpload,
             IUserDataService userDataService,
             IAppSettingsService appSettingsService,
+            INotificationDataRepository notificationDataRepository,
+            IChannelDataRepository channelDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.userDataService = userDataService ?? throw new ArgumentNullException(nameof(userDataService));
             this.teamsFileUpload = teamsFileUpload ?? throw new ArgumentNullException(nameof(teamsFileUpload));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
+            this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -160,6 +173,108 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             // Update service url.
             await this.appSettingsService.SetServiceUrlAsync(serviceUrl);
+        }
+
+        /// <summary>
+        /// Invoked when the user opens the messaging extension or searching any content in it.
+        /// </summary>
+        /// <param name="turnContext">Context object containing information cached for a single turn of conversation with a user.</param>
+        /// <param name="query">Contains messaging extension query keywords.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>Messaging extension response object to fill compose extension section.</returns>
+        protected override async Task<MessagingExtensionResponse> OnTeamsMessagingExtensionQueryAsync(ITurnContext<IInvokeActivity> turnContext, MessagingExtensionQuery query, CancellationToken cancellationToken)
+        {
+            turnContext = turnContext ?? throw new ArgumentNullException(nameof(turnContext));
+            var text = query?.Parameters?[0]?.Value as string ?? string.Empty;
+            var obj = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
+            var packages = obj;
+            var cattachments = new List<MessagingExtensionAttachment>();
+            foreach (var package in packages)
+            {
+                var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
+                foreach (var cname in channelEntities)
+                {
+                    var channelName = cname.ChannelName;
+                    var previewCard = new ThumbnailCard { Title = package.Title, Subtitle = package.Author, Text = channelName, Tap = new CardAction { Type = "invoke", Value = package } };
+                    if (!string.IsNullOrEmpty(package.ImageLink))
+                    {
+                        previewCard.Images = new List<CardImage>() { new CardImage(package.ImageLink, "Icon") };
+                    }
+
+                    var attachment = new MessagingExtensionAttachment
+                    {
+                        ContentType = HeroCard.ContentType,
+                        Content = new HeroCard { Title = package.Title },
+                        Preview = previewCard.ToAttachment(),
+                    };
+
+                    cattachments.Add(attachment);
+                }
+
+            }
+
+            // The list of MessagingExtensionAttachments must we wrapped in a MessagingExtensionResult wrapped in a MessagingExtensionResponse.
+            return new MessagingExtensionResponse
+            {
+                ComposeExtension = new MessagingExtensionResult
+                {
+                    Type = "result",
+                    AttachmentLayout = "list",
+                    Attachments = cattachments,
+                },
+            };
+        }
+
+        /// <summary>
+        /// Invoked when the user opens the messaging extension or select any content in it.
+        /// </summary>
+        /// <param name="turnContext">Context object containing information cached for a single turn of conversation with a user.</param>
+        /// <param name="query">Contains messaging extension query keywords.</param>
+        /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
+        /// <returns>Messaging extension response object to fill compose extension section.</returns>
+        protected override Task<MessagingExtensionResponse> OnTeamsMessagingExtensionSelectItemAsync(ITurnContext<IInvokeActivity> turnContext, JObject query, CancellationToken cancellationToken)
+        {
+            // The Preview card's Tap should have a Value property assigned, this will be returned to the bot in this event.
+            var title = (string)query["Title"];
+            var imageLink = (string)query["ImageLink"];
+            var summary = (string)query["Summary"];
+            var author = (string)query["Author"];
+            var buttonTitle = (string)query["ButtonTitle"];
+            var buttonLink = (string)query["ButtonLink"];
+
+            // We take every row of the results and wrap them in cards wrapped in in MessagingExtensionAttachment objects.
+            // The Preview is optional, if it includes a Tap, that will trigger the OnTeamsMessagingExtensionSelectItemAsync event back on this bot.
+            var card = new HeroCard
+            {
+                Title = $"{title}, {author}",
+                Subtitle = summary,
+                Buttons = new List<CardAction>
+                         {
+                             new CardAction { Type = ActionTypes.OpenUrl, Title = $"{buttonTitle}", Value = $"{buttonLink}" },
+                         },
+            };
+
+            if (!string.IsNullOrEmpty(imageLink))
+            {
+                card.Images = new List<CardImage>() { new CardImage(imageLink, "Icon") };
+            }
+
+            var attachment = new MessagingExtensionAttachment
+            {
+                ContentType = HeroCard.ContentType,
+                Content = card,
+            };
+
+            return Task.FromResult(new MessagingExtensionResponse
+            {
+                ComposeExtension = new MessagingExtensionResult
+                {
+                    Type = "result",
+                    AttachmentLayout = "list",
+                    Attachments = new List<MessagingExtensionAttachment> { attachment },
+                },
+            });
+        
         }
     }
 }
