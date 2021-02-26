@@ -33,6 +33,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
@@ -137,6 +138,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddSingleton<ISendQueue, SendQueue>();
             builder.Services.AddSingleton<IDataQueue, DataQueue>();
             builder.Services.AddSingleton<IExportQueue, ExportQueue>();
+            builder.Services.AddSingleton<IPrepareToSendQueue, PrepareToSendQueue>();
 
             // Add miscellaneous dependencies.
             builder.Services.AddTransient<TableRowKeyGenerator>();
