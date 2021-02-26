@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly UserAppOptions userAppOptions;
         private readonly ILogger<SentNotificationsController> logger;
         private readonly IStringLocalizer<Strings> localizer;
-        private string channelName;
+        private string account;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -128,7 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
-            this.channelName = string.Empty;
+            this.account = string.Empty;
         }
 
         /// <summary>
@@ -254,6 +254,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                     Id = notificationEntity.Id,
                     Title = notificationEntity.Title,
+                    Account = this.account,
                     CreatedDateTime = notificationEntity.CreatedDate,
                     SentDate = notificationEntity.SentDate,
                     Succeeded = notificationEntity.Succeeded,
@@ -393,7 +394,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationEntity.Channel + "'", null);
                 foreach (ChannelDataEntity channelData in channelDataEntity)
                 {
-                    this.channelName = channelData.ChannelName;
+                    this.account = channelData.ChannelName;
                 }
 
                 var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);

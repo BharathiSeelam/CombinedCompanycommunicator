@@ -23,9 +23,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string Title { get; set; }
 
         /// <summary>
-        /// Gets or sets Channel Name.
+        /// Gets or sets Account.
         /// </summary>
-        public string ChannelName { get; set; }
+        public string Account { get; set; }
 
         /// <summary>
         /// Gets or sets Created DateTime value.
