@@ -5,10 +5,13 @@
   "dependencies": {
     "@microsoft/teams-js": "^1.4.2",
     "@stardust-ui/react": "^0.40.7",
+    "adaptive-expressions": "^4.11.1",
     "adaptivecards": "^1.2.0",
+    "adaptivecards-templating": "^2.0.0",
     "axios": "^0.19.0",
     "bootstrap": "^4.6.0",
     "color-hash": "^1.0.3",
+    "dateformat": "^4.5.1",
     "faker": "^4.1.0",
     "font-awesome": "^4.7.0",
     "i18next": "^19.5.1",
