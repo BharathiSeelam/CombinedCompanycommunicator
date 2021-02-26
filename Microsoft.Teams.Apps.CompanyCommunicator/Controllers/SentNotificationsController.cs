@@ -39,6 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Route("api/sentNotifications")]
     public class SentNotificationsController : ControllerBase
     {
+        private readonly IChannelDataRepository channelDataRepository;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository;
         private readonly ISentUpdateDataRepository sentNotificationUpdateDataRepository;
@@ -58,10 +59,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly UserAppOptions userAppOptions;
         private readonly ILogger<SentNotificationsController> logger;
         private readonly IStringLocalizer<Strings> localizer;
+        private string channelName;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
         /// </summary>
+        /// <param name="channelDataRepository">Channel data repository service that deals with the table storage in azure.</param>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="sentNotificationDataRepository">Sent notification data repository.</param>
         /// <param name="sentNotificationUpdateDataRepository">Sent update notification data repository.</param>
@@ -81,6 +84,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="userAppOptions">User app options.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         public SentNotificationsController(
+            IChannelDataRepository channelDataRepository,
             INotificationDataRepository notificationDataRepository,
             ISentUpdateandDeleteNotificationDataRepository sentNotificationDataRepository,
             ISentUpdateDataRepository sentNotificationUpdateDataRepository,
@@ -105,6 +109,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 throw new ArgumentNullException(nameof(dataQueueMessageOptions));
             }
 
+            this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.sentNotificationUpdateDataRepository = sentNotificationUpdateDataRepository ?? throw new ArgumentException(nameof(sentNotificationUpdateDataRepository));
@@ -123,6 +128,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
+            this.channelName = string.Empty;
         }
 
         /// <summary>
@@ -385,6 +391,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             int likes = 0;
             try
             {
+                var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationEntity.Channel + "'", null);
+                foreach (ChannelDataEntity channelData in channelDataEntity)
+                {
+                    this.channelName = channelData.ChannelName;
+                }
+
                 var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);
                 if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
                 {
