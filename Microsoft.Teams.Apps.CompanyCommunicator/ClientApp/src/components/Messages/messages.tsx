@@ -27,6 +27,7 @@ export interface ITaskInfo {
 export interface IMessage {
     title: string;
     sentDate: string;
+    edited: string;
     recipients: string;
     acknowledgements?: string;
     reactions?: string;
@@ -171,6 +172,14 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+                        <Text
+                            truncated
+                            content={this.localize("Edited")}
+                            weight="bold"
+                        >
+                        </Text>
+                    </Flex.Item>
                     <Flex.Item shrink={0} >
                         <Overflow title="" />
                     </Flex.Item>
@@ -202,6 +211,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                 text = this.localize("SendingMessages", { "SentCount": formatNumber(sentCount), "TotalCount": formatNumber(message.totalMessageCount) });
                 break;
             case "Sent":
+            case "Edited":
             case "Failed":
                 text = "";
         }
@@ -253,6 +263,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         truncated
                         className="semiBold"
                         content={message.sentDate}
+                    />
+                </Flex.Item>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
+                    <Text
+                        truncated
+                        className="semiBold"
+                        content={message.edited}
                     />
                 </Flex.Item>
                 <Flex.Item shrink={0}>
