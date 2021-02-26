@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,8 +17,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using Microsoft.Teams.Apps.CompanyCommunicator.Bot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Draft notification preview service.
@@ -31,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
         private readonly string botAppId;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
         private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
+        private readonly ITemplateDataRepository templateDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationPreviewService"/> class.
@@ -38,10 +42,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
         /// <param name="botOptions">The bot options.</param>
         /// <param name="adaptiveCardCreator">Adaptive card creator service.</param>
         /// <param name="companyCommunicatorBotAdapter">Bot framework http adapter instance.</param>
+        /// <param name="templateDataRepository">The template data repository.</param>
         public DraftNotificationPreviewService(
             IOptions<BotOptions> botOptions,
             AdaptiveCardCreator adaptiveCardCreator,
-            CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter)
+            CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter,
+            ITemplateDataRepository templateDataRepository)
         {
             var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
             this.botAppId = options.Value.AuthorAppId;
@@ -51,6 +57,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             }
 
             this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
+            this.templateDataRepository = templateDataRepository ?? throw new ArgumentNullException(nameof(templateDataRepository));
             this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter ?? throw new ArgumentNullException(nameof(companyCommunicatorBotAdapter));
         }
 
@@ -140,19 +147,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             ITurnContext turnContext,
             NotificationDataEntity draftNotificationEntity)
         {
-            var reply = this.CreateReply(draftNotificationEntity);
-            await turnContext.SendActivityAsync(reply);
+            var templateDataEntityResult = await this.templateDataRepository.GetAsync("Default", draftNotificationEntity.TemplateID);
+            var reply = this.CreateReply(draftNotificationEntity, templateDataEntityResult.TemplateJSON);
+            var attachments = reply.Attachments[0];
+            var sendCardActivity = new Activity(ActivityTypes.Message)
+            {
+                Conversation = turnContext.Activity.Conversation,
+                Attachments = new List<Attachment>
+                            {
+                              new Attachment()
+                                        {
+                                            ContentType = attachments.ContentType,
+                                            Content = JsonConvert.DeserializeObject((string)attachments.Content),
+                                        },
+                            },
+            };
+            await turnContext.SendActivityAsync(sendCardActivity);
         }
 
-        private IMessageActivity CreateReply(NotificationDataEntity draftNotificationEntity)
+        private IMessageActivity CreateReply(NotificationDataEntity draftNotificationEntity, string templateJson)
         {
-            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
+            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
                 draftNotificationEntity.Title,
                 draftNotificationEntity.ImageLink,
                 draftNotificationEntity.Summary,
                 draftNotificationEntity.Author,
                 draftNotificationEntity.ButtonTitle,
-                draftNotificationEntity.ButtonLink);
+                draftNotificationEntity.ButtonLink,
+                templateJson);
 
             var attachment = new Attachment
             {
