@@ -171,6 +171,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IUpdateMessageService, MessageUpdateService>();
 
             // Add repositories.
+            services.AddSingleton<IChannelDataRepository, ChannelDataRepository>();
             services.AddSingleton<ITeamDataRepository, TeamDataRepository>();
             services.AddSingleton<IUserDataRepository, UserDataRepository>();
             services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
