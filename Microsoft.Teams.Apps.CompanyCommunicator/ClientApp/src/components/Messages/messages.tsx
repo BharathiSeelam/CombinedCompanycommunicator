@@ -124,7 +124,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             key: "csvlink",
             content: (
                 <CSVLink data={message} filename={"TeamActivity.csv"}>
-                    <CommandBarButton iconProps={{ iconName: 'ExcelLogoInverse' }} text='Export to Excel' />
+                    <CommandBarButton iconProps={{ iconName: 'ExcelLogoInverse' }} text='Export' />
                 </CSVLink>
             ),
             styles: { margin: '0.2rem 0.2rem 0 0' },
