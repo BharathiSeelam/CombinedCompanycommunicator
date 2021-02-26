@@ -102,31 +102,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
 
             string cardJson;
-            if (string.IsNullOrWhiteSpace(imageUrl))
-            {
-                var myData = new
-                {
-                    Title = title,
-
-                    // ImageUrl = mimageUrl,
-                    Description = mSummary,
-                    Author = mauthor,
-                };
-                cardJson = template.Expand(myData);
-            }
-            else
-            {
-                var myData = new
+            var myData = new
                 {
                     Title = title,
                     ImageUri = mimageUrl,
                     Description = mSummary,
-                    //Author = mauthor,
+                    Author = mauthor,
+                    ActionTitle = buttonTitle,
                     ActionUri = buttonUrl,
                 };
-                cardJson = template.Expand(myData);
-            }
-
+            cardJson = template.Expand(myData);
             JObject.Parse(cardJson);
 
             var jobj = JToken.Parse(cardJson).ToString(Formatting.Indented);

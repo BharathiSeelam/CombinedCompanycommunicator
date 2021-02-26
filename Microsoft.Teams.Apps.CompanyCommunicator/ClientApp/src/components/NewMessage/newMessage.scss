@@ -1,11 +1,12 @@
 .taskModule {
+    .ts-modal-dialog-container {
+        height: 900px;
+    }
     .formContainer {
         overflow-y: auto;
         position: absolute;
         top: 0rem;
         bottom: 8.4rem;
-        width: 100%;
-
         h3 {
             font-size: 1.6rem;
             margin: 2rem 3.2rem 0rem 3.2rem;
