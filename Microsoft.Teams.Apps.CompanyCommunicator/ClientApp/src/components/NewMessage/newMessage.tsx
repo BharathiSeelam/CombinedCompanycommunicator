@@ -876,7 +876,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedTemplates: itemsData.value,
         });
         let result = await getTemplate(itemsData.value["key"]);
-       this.card =JSON.parse(result.data.templateJSON);
+        this.card = JSON.parse(result.data.templateJSON);
     }
     private onChannelChange = async (event: any, itemsData: any) => {
         let responesofdl: any[] = [];
