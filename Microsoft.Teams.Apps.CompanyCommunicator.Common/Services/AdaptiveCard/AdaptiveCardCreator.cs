@@ -6,6 +6,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using AdaptiveCards;
     using AdaptiveCards.Templating;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
@@ -75,28 +76,104 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             var mSummary = string.Empty;
             var mauthor = string.Empty;
             var mimageUrl = string.Empty;
+            var mbuttonUrl = string.Empty;
 
             var templateJson = jsonfromat;
+
             if (!string.IsNullOrWhiteSpace(summary))
             {
                 mSummary = summary;
+            }
+           else
+            {
+                JToken jToken = JToken.Parse(templateJson);
+                var result = jToken["body"].ToList();
+                foreach (var item in result)
+                {
+                    if (item["text"] != null)
+                    {
+                        var text = item["text"];
+                        if (text.ToString() == "${Description}")
+                        {
+                            item.Remove();
+                        }
+                    }
+                }
+
+                var output = jToken.ToString(Formatting.Indented);
+                templateJson = output.ToString();
             }
 
             if (!string.IsNullOrWhiteSpace(author))
             {
                 mauthor = author;
             }
+            else
+            {
+                JToken jToken = JToken.Parse(templateJson);
+                var result = jToken["body"].ToList();
+                foreach (var item in result)
+                {
+                    if (item["text"] != null)
+                    {
+                        var text = item["text"];
+                        if (text.ToString() == "${Author}")
+                        {
+                            item.Remove();
+                        }
+                    }
+                }
+
+                var output = jToken.ToString(Formatting.Indented);
+                templateJson = output.ToString();
+            }
 
             if (!string.IsNullOrWhiteSpace(imageUrl))
             {
-
                 mimageUrl = imageUrl;
             }
             else
             {
-                JObject obj = JObject.Parse(templateJson);
-                (obj["body"] as JArray).RemoveAt(1);
-                templateJson = obj.ToString();
+                JToken jToken = JToken.Parse(templateJson);
+                var result = jToken["body"].ToList();
+                foreach (var item in result)
+                {
+                    if (item["url"] != null)
+                    {
+                        var url = item["url"];
+                        if (url.ToString() == "${ImageUri}")
+                        {
+                            item.Remove();
+                        }
+                    }
+                }
+
+                var output = jToken.ToString(Formatting.Indented);
+                templateJson = output.ToString();
+            }
+
+            if (!string.IsNullOrWhiteSpace(buttonUrl) || !string.IsNullOrWhiteSpace(buttonTitle))
+            {
+                mbuttonUrl = buttonUrl;
+            }
+            else
+            {
+                JToken jToken = JToken.Parse(templateJson);
+                var result = jToken["actions"].ToList();
+                foreach (var item in result)
+                {
+                    if (item["url"] != null)
+                    {
+                        var url = item["url"];
+                        if (url.ToString() == "${ActionUri}")
+                        {
+                            item.Remove();
+                        }
+                    }
+                }
+
+                var output = jToken.ToString(Formatting.Indented);
+                templateJson = output.ToString();
             }
 
             AdaptiveCardTemplate template = new AdaptiveCardTemplate(templateJson);
