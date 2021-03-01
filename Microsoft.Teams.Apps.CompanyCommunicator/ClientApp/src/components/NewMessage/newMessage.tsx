@@ -870,11 +870,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         })
     }
     private static MAX_SELECTED_TEMPLATES_NUM: number = 1;
-    private onMessageTemplateChanged = (event: any, itemsData: any) => {
+    private onMessageTemplateChanged = async (event: any, itemsData: any) => {
         if (itemsData.value.length > NewMessage.MAX_SELECTED_TEMPLATES_NUM) return;
         this.setState({
             selectedTemplates: itemsData.value,
         });
+        let result = await getTemplate(itemsData.value["key"]);
+       this.card =JSON.parse(result.data.templateJSON);
     }
     private onChannelChange = async (event: any, itemsData: any) => {
         let responesofdl: any[] = [];

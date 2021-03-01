@@ -9,9 +9,10 @@ export const getInitAdaptiveCard = (t: TFunction) => {
                 {
                     "type": "TextBlock",
                     "weight": "Bolder",
-                    "text": titleTextAsString,
+                    "text": "",
                     "size": "ExtraLarge",
-                    "wrap": true
+                    "wrap": true,
+                    "id": "Title"
                 },
                 {
                     "type": "Image",
@@ -19,19 +20,22 @@ export const getInitAdaptiveCard = (t: TFunction) => {
                     "url": "",
                     "size": "Stretch",
                     "width": "400px",
-                    "altText": ""
+                    "altText": "",
+                    "id":"ImageUri"
                 },
                 {
                     "type": "TextBlock",
                     "text": "",
-                    "wrap": true
+                    "wrap": true,
+                    "id":"Description"
                 },
                 {
                     "type": "TextBlock",
                     "wrap": true,
                     "size": "Small",
                     "weight": "Lighter",
-                    "text": ""
+                    "text": "",
+                    "id":"Author"
                 }
             ],
             "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
@@ -41,178 +45,98 @@ export const getInitAdaptiveCard = (t: TFunction) => {
 }
 
 export const getCardTitle = (card: any) => {
-    return card.body[0].text;
+    var index = card.body.map(t => { return t.id }).indexOf('Title');
+    return card.body[index].text;
 }
+
+
 
 export const setCardTitle = (card: any, title: string) => {
-    card.body[0].text = title;
+    var  titleTextAsString = "title";
+    if (title != "") {
+        titleTextAsString = title;
+    }
+    var index = card.body.map(t => { return t.id }).indexOf('Title');
+    if (index != -1) {
+        card.body[index].text = titleTextAsString;
+    }
 }
+
+
 
 export const getCardImageLink = (card: any) => {
-    return card.body[1].url;
+    var index = card.body.map(t => { return t.id }).indexOf('ImageUri');
+    return card.body[index].url;
 }
+
+
 
 export const setCardImageLink = (card: any, imageLink?: string) => {
-    card.body[1].url = imageLink;
+    var index = card.body.map(t => { return t.id }).indexOf('ImageUri');
+    if (index != -1) {
+        card.body[index].url = imageLink;
+    }
 }
+
+
 
 export const getCardSummary = (card: any) => {
-    return card.body[2].text;
+    var index = card.body.map(t => { return t.id }).indexOf('Description');
+    return card.body[index].text;
 }
+
+
 
 export const setCardSummary = (card: any, summary?: string) => {
-    card.body[2].text = summary;
+    var index = card.body.map(t => { return t.id }).indexOf('Description');
+    if (index != -1) {
+        card.body[index].text = summary;
+    }
 }
+
+
 
 export const getCardAuthor = (card: any) => {
-    return card.body[3].text;
+    var index = card.body.map(t => { return t.id }).indexOf('Author');
+    return card.body[index].text;
 }
+
+
 
 export const setCardAuthor = (card: any, author?: string) => {
-    card.body[3].text = author;
+    var index = card.body.map(t => { return t.id }).indexOf('Author');
+    if (index != -1) {
+        card.body[index].text = author;
+    }
 }
+
+
 
 export const getCardBtnTitle = (card: any) => {
-    return card.actions[0].title;
+    var index = card.actions.map(t => { return t.id }).indexOf('ActionTitle');
+    return card.actions[index].title;
 }
 
+
+
 export const getCardBtnLink = (card: any) => {
-    return card.actions[0].url;
+    var index = card.actions.map(t => { return t.id }).indexOf('ActionUri');
+    return card.actions[index].url;
 }
+
+
 
 export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string) => {
     if (buttonTitle && buttonLink) {
         card.actions = [
             {
                 "type": "Action.OpenUrl",
-                "title": buttonTitle,
-                "url": buttonLink
+                "title": "buttonTitle",
+                "url": "buttonLink"
             }
         ];
     } else {
         delete card.actions;
     }
 }
-export const getInitAdaptiveCardWithoutHeader = (t: TFunction) => {
-    const titleTextAsString = t("TitleText");
-    return (
-        {
-            "type": "AdaptiveCard",
-            "body": [
-                {
-                    "type": "TextBlock",
-                    "size": "Medium",
-                    "weight": "Bolder",
-                    "text": "${title}",
-                    "wrap": true
-                },
-                {
-                    "type": "ColumnSet",
-                    "columns": [
-                        {
-                            "type": "Column",
-                            "items": [
-                                {
-                                    "type": "Image",
-                                    "style": "Person",
-                                    "url": "",
-                                    "size": "Small"
-                                }
-                            ],
-                            "width": "auto"
-                        },
-                        {
-                            "type": "Column",
-                            "items": [
-                                {
-                                    "type": "TextBlock",
-                                    "weight": "Bolder",
-                                    "text": "",
-                                    "wrap": true
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "spacing": "None",
-                                    "text": "",
-                                    "isSubtle": true,
-                                    "wrap": true
-                                }
-                            ],
-                            "width": "stretch"
-                        }
-                    ]
-                },
-                {
-                    "type": "TextBlock",
-                    "text": "",
-                    "wrap": true
-                },
-                {
-                    "type": "FactSet",
-                    "facts": [
-                        {
-                            
-                            "title": "",
-                            "value": ""
-                        }
-                    ]
-                }
-            ],
-        }
 
-    );
-}
-
-export const getCardTitleWithoutHeader = (card: any) => {
-    return card.body[0].text;
-}
-
-export const setCardTitleWithoutHeader = (card: any, title: string) => {
-    card.body[0].text = title;
-}
-
-export const getCardImageLinkWithoutHeader = (card: any) => {
-    return card.body[1].url;
-}
-
-export const setCardImageLinkWithoutHeader = (card: any, imageLink?: string) => {
-    card.body[1].url = imageLink;
-}
-
-export const getCardSummaryWithoutHeader = (card: any) => {
-    return card.body[2].text;
-}
-
-export const setCardSummaryWithoutHeader = (card: any, summary?: string) => {
-    card.body[2].text = summary;
-}
-
-export const getCardAuthorWithoutHeader = (card: any) => {
-    return card.body[3].text;
-}
-
-export const setCardAuthorWithoutHeader = (card: any, author?: string) => {
-    card.body[3].text = author;
-}
-
-export const getCardBtnTitleWithoutHeader = (card: any) => {
-    return card.actions[0].title;
-}
-
-export const getCardBtnLinkWithoutHeader = (card: any) => {
-    return card.actions[0].url;
-}
-
-export const setCardBtnWithoutHeader = (card: any, buttonTitle?: string, buttonLink?: string) => {
-    if (buttonTitle && buttonLink) {
-        card.actions = [
-            {
-                "type": "Action.OpenUrl",
-                "title": buttonTitle,
-                "url": buttonLink
-            }
-        ];
-    } else {
-        delete card.actions;
-    }
-}
