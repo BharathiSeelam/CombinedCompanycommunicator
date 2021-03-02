@@ -174,7 +174,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                                     <Radiobutton name="publish" value="publishNow" label={this.localize("PublishNow")} />
                                 <Radiobutton name="publish" value="publishOn" label={this.localize("PublishOn")} />
                                     <div className={this.state.selectedPublishBtn === "publishOn" ? "" : "hide"}>
-                                        {this.state.startDate === "" ? <DatePicker selected={new Date()} onChange={this.handleChange} showTimeSelect timeIntervals={60} /> : <DatePicker maxDetail="Hour" selected={new Date(this.state.startDate)} onChange={this.handleChange} showTimeSelect timeIntervals={60} />}
+                                        {this.state.startDate === "" ? <DatePicker selected={new Date()} onChange={this.handleChange} showTimeSelect timeIntervals={60} inline /> : <DatePicker maxDetail="Hour" selected={new Date(this.state.startDate)} onChange={this.handleChange} showTimeSelect timeIntervals={60} inline />}
                                         
                                         </div>
                                 
