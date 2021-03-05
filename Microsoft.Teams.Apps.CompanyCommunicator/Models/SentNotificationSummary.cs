@@ -38,6 +38,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public DateTime? SentDate { get; set; }
 
         /// <summary>
+        /// Gets or sets Edited DateTime value.
+        /// </summary>
+        public DateTime? Edited { get; set; }
+
+        /// <summary>
         /// Gets or sets the number of recipients who have received the notification successfully.
         /// </summary>
         public int Succeeded { get; set; }

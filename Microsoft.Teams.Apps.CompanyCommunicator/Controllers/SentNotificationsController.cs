@@ -258,6 +258,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     CreatedDateTime = notificationEntity.CreatedDate,
                     SentDate = notificationEntity.SentDate,
                     Succeeded = notificationEntity.Succeeded,
+                    Edited = notificationEntity.Edited,
                     Failed = notificationEntity.Failed,
                     Unknown = this.GetUnknownCount(notificationEntity),
                     TotalMessageCount = notificationEntity.TotalMessageCount,
