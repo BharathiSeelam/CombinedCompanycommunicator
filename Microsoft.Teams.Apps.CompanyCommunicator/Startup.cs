@@ -84,9 +84,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
                     botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
-                    //botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
+                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
                     botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
-                    // botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
+                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
                     botOptions.GrantType = configuration.GetValue<string>("GrantType");
                     botOptions.Scope = configuration.GetValue<string>("Scope");
                     botOptions.TenantId = configuration.GetValue<string>("TenantId");
