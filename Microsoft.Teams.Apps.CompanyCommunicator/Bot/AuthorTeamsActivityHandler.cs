@@ -246,7 +246,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="query">Contains messaging extension query keywords.</param>
         /// <param name="cancellationToken">Propagates notification that operations should be canceled.</param>
         /// <returns>Messaging extension response object to fill compose extension section.</returns>
-        protected override Task<MessagingExtensionResponse> OnTeamsMessagingExtensionSelectItemAsync(ITurnContext<IInvokeActivity> turnContext, JObject query, CancellationToken cancellationToken)
+        protected override async Task<MessagingExtensionResponse> OnTeamsMessagingExtensionSelectItemAsync(ITurnContext<IInvokeActivity> turnContext, JObject query, CancellationToken cancellationToken)
         {
             // The Preview card's Tap should have a Value property assigned, this will be returned to the bot in this event.
             var title = (string)query["Title"];
@@ -259,7 +259,33 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             // We take every row of the results and wrap them in cards wrapped in in MessagingExtensionAttachment objects.
             // The Preview is optional, if it includes a Tap, that will trigger the OnTeamsMessagingExtensionSelectItemAsync event back on this bot.
-            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
+
+            var templateDataEntityResult = await this.templateDataRepository.GetAsync("Default", templateId);
+            NotificationDataEntity notificationDataEntity = new NotificationDataEntity();
+            notificationDataEntity.Title = title;
+            notificationDataEntity.ImageLink = imageUrl;
+            notificationDataEntity.Summary = summary;
+            notificationDataEntity.Author = author;
+            notificationDataEntity.ButtonTitle = buttonTitle;
+            notificationDataEntity.ButtonLink = buttonUrl;
+
+            var reply = this.CreateReply(notificationDataEntity, templateDataEntityResult.TemplateJSON);
+            var attachments = reply.Attachments[0];
+
+            var _previewCard = new ThumbnailCard { Title = $"{title}, {author}" };
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                _previewCard.Images = new List<CardImage>() { new CardImage(imageUrl, "Icon") };
+            }
+
+            var attachment = new MessagingExtensionAttachment
+            {
+                ContentType = attachments.ContentType,
+                Content = JsonConvert.DeserializeObject((string)attachments.Content),
+                Preview = _previewCard.ToAttachment(),
+            };
+
+           /* var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
                 title,
                 imageUrl,
                 summary,
@@ -277,29 +303,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 ContentType = AdaptiveCard.ContentType,
                 Content = adaptiveCard,
                 Preview = _previewCard.ToAttachment(),
-            };
-            /*var card = new HeroCard
-            {
-                Title = $"{title}, {author}",
-                Subtitle = summary,
-                Buttons = new List<CardAction>
-                         {
-                             new CardAction { Type = ActionTypes.OpenUrl, Title = $"{buttonTitle}", Value = $"{buttonLink}" },
-                         },
-            };
-
-            if (!string.IsNullOrEmpty(imageLink))
-            {
-                card.Images = new List<CardImage>() { new CardImage(imageLink, "Icon") };
-            }
-
-            var attachment = new MessagingExtensionAttachment
-            {
-                ContentType = HeroCard.ContentType,
-                Content = card,
             };*/
-
-            return Task.FromResult(new MessagingExtensionResponse
+            return await Task.FromResult(new MessagingExtensionResponse
             {
                 ComposeExtension = new MessagingExtensionResult
                 {
@@ -308,6 +313,26 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     Attachments = new List<MessagingExtensionAttachment> { attachment },
                 },
             });
+        }
+
+        private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity, string templateJson)
+        {
+            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
+                notificationDataEntity.Title,
+                notificationDataEntity.ImageLink,
+                notificationDataEntity.Summary,
+                notificationDataEntity.Author,
+                notificationDataEntity.ButtonTitle,
+                notificationDataEntity.ButtonLink,
+                templateJson);
+            var attachment = new Attachment
+            {
+                ContentType = AdaptiveCard.ContentType,
+                Content = adaptiveCard,
+            };
+
+            var reply = MessageFactory.Attachment(attachment);
+            return reply;
         }
     }
 }
