@@ -14,6 +14,7 @@ import ErrorPage from "./components/ErrorPage/errorPage";
 import SignInPage from "./components/SignInPage/signInPage";
 import SignInSimpleStart from "./components/SignInPage/signInSimpleStart";
 import SignInSimpleEnd from "./components/SignInPage/signInSimpleEnd";
+import DiscoverTabMenu from "./components/Dashboard/dashboard";
 import { updateLocale } from './i18n';
 
 export interface IAppState {
@@ -115,6 +116,7 @@ class App extends React.Component<{}, IAppState> {
                 <Route exact path="/newmessage/:id" component={NewMessage} />
                 <Route exact path="/newchannel" component={NewChannel} />
                 <Route exact path="/newchannel/:id" component={NewChannel} />
+                <Route exact path="/dashboard" component={DiscoverTabMenu} />
                 <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
                 <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
                 <Route exact path="/errorpage" component={ErrorPage} />
