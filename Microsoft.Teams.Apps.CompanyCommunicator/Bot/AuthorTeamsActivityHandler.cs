@@ -10,16 +10,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
+    using AdaptiveCards;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Teams;
+    using Microsoft.Bot.Connector;
+    using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
     using Microsoft.Bot.Schema.Teams;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.User;
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
     /// <summary>
@@ -32,9 +38,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         private readonly TeamsFileUpload teamsFileUpload;
         private readonly IUserDataService userDataService;
         private readonly IAppSettingsService appSettingsService;
+        private readonly IStringLocalizer<Strings> localizer;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly IChannelDataRepository channelDataRepository;
-        private readonly IStringLocalizer<Strings> localizer;
+        private readonly AdaptiveCardCreator adaptiveCardCreator;
+        private readonly ITemplateDataRepository templateDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthorTeamsActivityHandler"/> class.
@@ -44,6 +52,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="notificationDataRepository">Notification data repository service that deals with the table storage in azure.</param>
         /// <param name="channelDataRepository">ChannelDataRepository.</param>
+        /// <param name="adaptiveCardCreator">adaptiveCardCreator .</param>
+        /// <param name="templateDataRepository">templateD ataRepository.</param>
         /// <param name="localizer">Localization service.</param>
         public AuthorTeamsActivityHandler(
             TeamsFileUpload teamsFileUpload,
@@ -51,12 +61,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             IAppSettingsService appSettingsService,
             INotificationDataRepository notificationDataRepository,
             IChannelDataRepository channelDataRepository,
+            AdaptiveCardCreator adaptiveCardCreator,
+            ITemplateDataRepository templateDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.userDataService = userDataService ?? throw new ArgumentNullException(nameof(userDataService));
             this.teamsFileUpload = teamsFileUpload ?? throw new ArgumentNullException(nameof(teamsFileUpload));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
+            this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
+            this.templateDataRepository = templateDataRepository ?? throw new ArgumentNullException(nameof(templateDataRepository));
             this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
@@ -236,15 +250,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         {
             // The Preview card's Tap should have a Value property assigned, this will be returned to the bot in this event.
             var title = (string)query["Title"];
-            var imageLink = (string)query["ImageLink"];
+            var imageUrl = (string)query["ImageLink"];
             var summary = (string)query["Summary"];
             var author = (string)query["Author"];
             var buttonTitle = (string)query["ButtonTitle"];
-            var buttonLink = (string)query["ButtonLink"];
+            var buttonUrl = (string)query["ButtonLink"];
+            var templateId = (string)query["TemplateID"];
 
             // We take every row of the results and wrap them in cards wrapped in in MessagingExtensionAttachment objects.
             // The Preview is optional, if it includes a Tap, that will trigger the OnTeamsMessagingExtensionSelectItemAsync event back on this bot.
-            var card = new HeroCard
+            var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
+                title,
+                imageUrl,
+                summary,
+                author,
+                buttonTitle,
+                buttonUrl
+                );
+            var _previewCard = new ThumbnailCard { Title = $"{title}, {author}" };
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                _previewCard.Images = new List<CardImage>() { new CardImage(imageUrl, "Icon") };
+            }
+            var attachment = new MessagingExtensionAttachment
+            {
+                ContentType = AdaptiveCard.ContentType,
+                Content = adaptiveCard,
+                Preview = _previewCard.ToAttachment(),
+            };
+            /*var card = new HeroCard
             {
                 Title = $"{title}, {author}",
                 Subtitle = summary,
@@ -263,7 +297,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             {
                 ContentType = HeroCard.ContentType,
                 Content = card,
-            };
+            };*/
 
             return Task.FromResult(new MessagingExtensionResponse
             {
@@ -274,7 +308,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     Attachments = new List<MessagingExtensionAttachment> { attachment },
                 },
             });
-        
         }
     }
 }

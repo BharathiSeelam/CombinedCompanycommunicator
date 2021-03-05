@@ -1,10 +1,10 @@
 .taskModule {
+
     .formContainer {
         overflow-y: auto;
         position: absolute;
         top: 0rem;
         bottom: 8.4rem;
-        width: 100%;
 
         h3 {
             font-size: 1.6rem;
@@ -40,10 +40,16 @@
                 }
             }
 
+            .ui-dropdown__container {
+                width: 100%;
+            }
+
             .ui-dropdown, .ui-text {
                 margin: 0rem 3.2rem;
 
-                span {
+                .ui-dropdown__items-list {
+                    width: 100%;
+                } span {
                     font-size: 1.2rem;
                     display: block;
                     margin: 0.8rem 0rem 0.4rem 0rem;
@@ -120,7 +126,7 @@
 
             .dropdown {
                 margin: 1rem 1rem 1rem 2rem;
-                width: 30rem;
+                // width: 30rem;
             }
 
             .noteText {
