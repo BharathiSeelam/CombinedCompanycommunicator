@@ -161,7 +161,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '27%' }} shrink={false}>
                         <Text
                             truncated
                             content={this.localize("Likes")}
