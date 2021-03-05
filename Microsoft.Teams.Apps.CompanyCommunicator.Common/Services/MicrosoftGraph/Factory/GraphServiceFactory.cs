@@ -40,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <inheritdoc/>
         public IGroupsService GetGroupsService()
         {
-            return new GroupsService(this.serviceClient);
+            return new GroupsService(this.betaServiceClient, this.serviceClient);
         }
 
         /// <inheritdoc/>

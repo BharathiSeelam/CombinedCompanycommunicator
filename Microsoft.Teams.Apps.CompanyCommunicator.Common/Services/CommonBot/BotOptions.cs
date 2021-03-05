@@ -33,13 +33,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// Gets or sets the GrantType.
         /// </summary>
         public string GrantType { get; set; }
+
         /// <summary>
         /// Gets or sets the Scope.
         /// </summary>
         public string Scope { get; set; }
+
         /// <summary>
         /// Gets or sets the Tenant ID.
         /// </summary>
         public string TenantId { get; set; }
+
+        /// <summary>
+        /// Gets or sets Storage Account.
+        /// </summary>
+        public string StorageAccount { get; set; }
+
+        /// <summary>
+        /// Gets or sets Blob Container Name.
+        /// </summary>
+        public string BlobContainerName { get; set; }
     }
 }

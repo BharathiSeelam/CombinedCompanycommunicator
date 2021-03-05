@@ -51,7 +51,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly IGroupsService groupsService;
         private readonly ITeamMembersService memberService;
-        private readonly ITeamsChannelInfo teamsChannelInfo;
         private readonly IMessageReactionService reactionService;
         private readonly IExportDataRepository exportDataRepository;
         private readonly IAppCatalogService appCatalogService;
@@ -96,7 +95,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
             IGroupsService groupsService,
             IMessageReactionService reactionService,
-            ITeamsChannelInfo teamsChannelInfo,
             ITeamMembersService memberService,
             IExportDataRepository exportDataRepository,
             IAppCatalogService appCatalogService,
@@ -121,7 +119,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
             this.reactionService = reactionService ?? throw new ArgumentNullException(nameof(reactionService));
-            this.teamsChannelInfo = teamsChannelInfo ?? throw new ArgumentNullException(nameof(teamsChannelInfo));
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
             this.appCatalogService = appCatalogService ?? throw new ArgumentNullException(nameof(appCatalogService));
@@ -406,7 +403,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     {
                         foreach (var teamsData in teamsDataEntity)
                         {
-                            string teamsID = await this.teamsChannelInfo.GetTeamsChannelInfoAsync(sentNotificationEntity.ConversationId, sentNotificationEntity.TenantId, sentNotificationEntity.ServiceUrl, teamsData.Name);
+                            string teamsID = await this.groupsService.SearchTeamsGroupAsync("displayname eq '" + teamsData.Name + "'");
+
                             if (!string.IsNullOrEmpty(teamsID))
                             {
                                 var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);

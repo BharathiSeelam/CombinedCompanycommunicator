@@ -8,7 +8,7 @@ import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import './newMessage.scss';
 import './teamTheme.scss';
-import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess} from '../../apis/messageListApi';
+import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess } from '../../apis/messageListApi';
 import { getChannel, getChannels, getAdminChannels } from '../../apis/channelListApi';
 import { getDistributionListsByName, getDistributionListsByID } from '../../apis/distributionListApi';
 import { getTemplates, getTemplate } from '../../apis/templateListApi';
@@ -19,6 +19,7 @@ import {
 import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import axios from '../../apis/axiosJWTDecorator';
 let loggedinUser;
 
 type dropdownItem = {
@@ -44,7 +45,12 @@ export interface IDraftMessage {
     rosters: any[],
     groups: any[],
     allUsers: boolean,
-    templateId?: string,   
+    templateId?: string,
+}
+
+export interface IUploadImage {
+    name?: string,
+    file?: any,
 }
 
 export interface formState {
@@ -64,12 +70,14 @@ export interface formState {
     groupsOptionSelected: boolean,
     teams?: any[],
     groups?: any[],
-    dls?:any[],
+    dls?: any[],
     exists?: boolean,
     templates?: any[],
     messageId: string,
     loader: boolean,
     groupAccess: boolean,
+    selectedFile: any,
+    selectedFileName: string,
     loading: boolean,
     noResultMessage: string,
     unstablePinned?: boolean,
@@ -78,11 +86,11 @@ export interface formState {
     selectedGroupsNum: number,
     selectedRadioBtn: string,
     selectedChannel: dropdownItem[],
-    selectedTemplates: dropdownItem[],   
+    selectedTemplates: dropdownItem[],
     selectedTeams: dropdownItem[],
     selectedRosters: dropdownItem[],
     selectedGroups: dropdownItem[],
-    selectedDLs:dropdownItem[],
+    selectedDLs: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
 }
@@ -119,6 +127,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             messageId: "",
             loader: true,
             groupAccess: false,
+            selectedFile: null,
+            selectedFileName: "",
             loading: false,
             noResultMessage: "",
             unstablePinned: true,
@@ -128,7 +138,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedRadioBtn: "teams",
             selectedChannel: [],
             selectedTeams: [],
-            selectedTemplates:[],
+            selectedTemplates: [],
             selectedRosters: [],
             selectedGroups: [],
             selectedDLs: [],
@@ -140,7 +150,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     public async componentDidMount() {
         microsoftTeams.initialize();
-        
+
         microsoftTeams.getContext(context => {
             loggedinUser = context.loginHint;
             //alert(loggedinUser);
@@ -148,39 +158,39 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
-       
+
         this.setGroupAccess();
-      await  this.getChannelList();
-           
-       await this.getTeamList().then(async() => {
+        await this.getChannelList();
+
+        await this.getTeamList().then(async () => {
             if ('id' in params) {
                 let id = params['id'];
-               await this.getItem(id).then(() => {
+                await this.getItem(id).then(() => {
                     const selectedTeams = this.makeDropdownItemList(this.state.selectedTeams, this.state.teams);
-                   const selectedTemplates = this.makeTemplateDropdownItemList(this.state.selectedTemplates, this.state.teams);
+                    const selectedTemplates = this.makeTemplateDropdownItemList(this.state.selectedTemplates, this.state.teams);
                     const selectedRosters = this.makeDropdownItemList(this.state.selectedRosters, this.state.teams);
-                   const selectedChannel = this.makeDropdownItemListChannel(this.state.selectedChannel);
-                   const selectedGroups = this.makeDropdownDLItems(this.state.selectedGroups);
-                   this.setState({
+                    const selectedChannel = this.makeDropdownItemListChannel(this.state.selectedChannel);
+                    const selectedGroups = this.makeDropdownDLItems(this.state.selectedGroups);
+                    this.setState({
                         exists: true,
                         messageId: id,
                         selectedTeams: selectedTeams,
                         selectedRosters: selectedRosters,
-                       selectedChannel: selectedChannel,
-                       selectedGroups: selectedGroups,
-                       selectedTemplates: selectedTemplates
+                        selectedChannel: selectedChannel,
+                        selectedGroups: selectedGroups,
+                        selectedTemplates: selectedTemplates
                     })
-               })
-                   //.then(() => {
-                  //  this.getGroupData(id).then(() => {
-                  //     const selectedGroups = this.makeDropdownDLItems(this.state.groups);
-                     //  this.setState({
-                      //     selectedGroups: selectedGroups
-                     //  })
-                  // });
-              // })
+                })
+                //.then(() => {
+                //  this.getGroupData(id).then(() => {
+                //     const selectedGroups = this.makeDropdownDLItems(this.state.groups);
+                //  this.setState({
+                //     selectedGroups: selectedGroups
+                //  })
+                // });
+                // })
 
-              
+
             } else {
                 this.setState({
                     exists: false,
@@ -236,7 +246,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         }
         return resultedTeams;
     }
-     private makeTemplateDropdownItems = (items: any[] | undefined) => {
+    private makeTemplateDropdownItems = (items: any[] | undefined) => {
         const resultedTeams: dropdownItem[] = [];
         if (items) {
             items.forEach((element) => {
@@ -268,36 +278,36 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         );
         return dropdownItemList;
     }
- 
-    private makeDropdownItemListChannel = (items: any[] | undefined ) => {
+
+    private makeDropdownItemListChannel = (items: any[] | undefined) => {
         const dropdownItemList: dropdownItem[] = [];
         if (items) {
-          
-                dropdownItemList.push({
-                    key: items["id"],
-                    header: items["channelName"],
-                    content: "",
-                    image: "",
-                    team: {
-                        id:""
-                    },
 
-                
+            dropdownItemList.push({
+                key: items["id"],
+                header: items["channelName"],
+                content: "",
+                image: "",
+                team: {
+                    id: ""
+                },
+
+
             });
         }
         return dropdownItemList;
     }
-   private makeTemplateDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
+    private makeTemplateDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
         const dropdownItemList: dropdownItem[] = [];
         if (items) {
-                dropdownItemList.push({
-                    key: items["templateID"],
-                    header: items["templateName"],
-                    content: "",
-                    image: "",
-                    team: {
-                        id: ""
-                    },
+            dropdownItemList.push({
+                key: items["templateID"],
+                header: items["templateName"],
+                content: "",
+                image: "",
+                team: {
+                    id: ""
+                },
 
             });
         }
@@ -326,8 +336,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         } catch (error) {
             return error;
         }
-        
-      }
+
+    }
 
     private getTeamList = async () => {
         try {
@@ -348,7 +358,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const dropdownItems: dropdownItem[] = [];
         return dropdownItems;
     }
-  
+
     private setGroupAccess = async () => {
         await verifyGroupAccess().then(() => {
             this.setState({
@@ -403,8 +413,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             var notificationtype = window.location.search.split('Notification=')[1]
             if (notificationtype === "sent") {
                 const response = await getDraftSentNotification(id);
-              const draftMessageDetail = response.data;
-              const responseChannel = await getChannel(draftMessageDetail.channel);
+                const draftMessageDetail = response.data;
+                const responseChannel = await getChannel(draftMessageDetail.channel);
                 const channelDetails = responseChannel.data;
                 const responseTemplate = await getTemplate(draftMessageDetail.templateID);
                 const templateDetails = responseTemplate.data;
@@ -466,7 +476,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
 
                 this.setState({
-                  selectedChannel:channelDetails,
+                    selectedChannel: channelDetails,
                     title: draftMessageDetail.title,
                     summary: draftMessageDetail.summary,
                     btnLink: draftMessageDetail.buttonLink,
@@ -505,7 +515,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         responesofdl.push(userDLs.data[0]);
                     });
                 }
-                let dlselectedGroups :any[]=[];
+                let dlselectedGroups: any[] = [];
                 if (draftMessageDetail.groups.length > 0) {
                     for (let i = 0; i < draftMessageDetail.groups.length; i++) {
 
@@ -589,9 +599,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         <div className="formContainer">
                             <div className="formContentContainer" >
                                 <Text
-                                    content={this.localize("SelectChannel")}/>
+                                    content={this.localize("SelectChannel")} />
                                 <Dropdown
-                                   
+
                                     placeholder={this.localize("SentToGeneralChannelTeam")}
                                     items={this.getChannels()}
                                     value={this.state.selectedChannel}
@@ -628,6 +638,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     errorLabel={this.state.errorImageUrlMessage}
                                     autoComplete="off"
                                 />
+
+                                <br />
+
+                                <input className="inputField" type="file" onChange={this.onFileChange} />
+
+                                <Button content={this.localize("Upload")} id="UploadBtn" onClick=                   {this.onFileUpload} disabled={this.isUploadBtnDisabled()} primary />
 
                                 <TextArea
                                     className="inputField textArea"
@@ -676,7 +692,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     ? <Button content={this.localize("Send")} disabled={this.isSaveBtnDisabled()} id="sendBtn" onClick={this.onSend} primary />
                                     : <Button content={this.localize("Next")} disabled={this.isNextBtnDisabled()} id="saveBtn" onClick={this.onNext} primary />
                                 }
-                                
+
                             </div>
                         </div>
                     </div>
@@ -721,30 +737,30 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         unstable_pinned={this.state.unstablePinned}
                                         noResultsMessage={this.localize("NoMatchMessage")}
                                     />
-                                  
+
                                     <Radiobutton name="grouped" value="groups" label={this.localize("SendToGroups")} />
-                                    
+
                                     <Dropdown
                                         className="hideToggle"
-                                        hidden={!this.state.groupsOptionSelected }
+                                        hidden={!this.state.groupsOptionSelected}
                                         placeholder={this.localize("SendToGroupsPlaceHolder")}
-                                      //  search={this.onGroupSearch}
+                                        //  search={this.onGroupSearch}
                                         search
                                         multiple
                                         loading={this.state.loading}
                                         loadingMessage={this.localize("LoadingText")}
                                         items={this.getGroupItems()}
                                         value={this.state.selectedGroups}
-                                      //  onSearchQueryChange={this.onGroupSearchQueryChange}
+                                        //  onSearchQueryChange={this.onGroupSearchQueryChange}
                                         onSelectedChange={this.onGroupsChange}
                                         noResultsMessage={this.state.noResultMessage}
                                         unstable_pinned={this.state.unstablePinned}
-                                    /> 
-                                   
+                                    />
+
                                 </RadiobuttonGroup>
-                              
+
                             </div>
-                          
+
                             <div className="adaptiveCardContainer">
                             </div>
                         </div>
@@ -765,7 +781,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             }
         }
     }
-   
+
     private onGroupSelected = (value: any) => {
         this.setState({
             selectedRadioBtn: value,
@@ -782,6 +798,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         });
     }
 
+    private isUploadBtnDisabled = () => {
+
+        const SelectionIsValid = (this.state.selectedFileName.trim() === "") ? true : false;
+        return SelectionIsValid;
+    }
+
     private isSaveBtnDisabled = () => {
         const teamsSelectionIsValid = (this.state.teamsOptionSelected && (this.state.selectedTeamsNum !== 0)) || (!this.state.teamsOptionSelected);
         const rostersSelectionIsValid = (this.state.rostersOptionSelected && (this.state.selectedRostersNum !== 0)) || (!this.state.rostersOptionSelected);
@@ -792,35 +814,35 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     private isNextBtnDisabled = () => {
         const channel = this.state.selectedChannel;
-       var channelvalue= Object.values(channel);
+        var channelvalue = Object.values(channel);
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
         const btnLink = this.state.btnLink;
         return (!(channelvalue.length && title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
     }
     private getChannels = () => {
-     
+
         const resultedChannels: dropdownItem[] = [];
         if (this.state.channel) {
             let remainingChannels = this.state.channel;
 
-          //  this.state.channel.filter(x => this.state.selectedChannel.findIndex(y => y.key === x.id) < 0);
-                
-               
-                remainingChannels.forEach((element) => {
-                    resultedChannels.push({
+            //  this.state.channel.filter(x => this.state.selectedChannel.findIndex(y => y.key === x.id) < 0);
+
+
+            remainingChannels.forEach((element) => {
+                resultedChannels.push({
                     key: element.id,
                     header: element.channelName,
                     content: "",
                     image: "",
                     team: {
-                        id:""
+                        id: ""
                     }
                 });
             });
         }
         return resultedChannels;
-    
+
     }
     private getMessageTemplateItems = () => {
         if (this.state.templates) {
@@ -886,21 +908,21 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         if (userResponse.data.length > 0) {
             let userDls = userResponse.data[0]["channelAdminDLs"];
             let reg = /(\(.*?\))/gi;
-           userDls= userDls.replace(reg, "");
-        let eachUser = userDls.split(",");
-        eachUser.map(async (Element) : Promise <any> => {
-            let userDLs = await getDistributionListsByName(Element);
-            responesofdl.push(userDLs.data[0]);
-        });
+            userDls = userDls.replace(reg, "");
+            let eachUser = userDls.split(",");
+            eachUser.map(async (Element): Promise<any> => {
+                let userDLs = await getDistributionListsByName(Element);
+                responesofdl.push(userDLs.data[0]);
+            });
         }
-                console.log(responesofdl);
+        console.log(responesofdl);
         this.setState({
             selectedChannel: itemsData.value,
             dls: responesofdl,
         });
-          
 
-       }
+
+    }
 
     private onRostersChange = (event: any, itemsData: any) => {
         if (itemsData.value.length > NewMessage.MAX_SELECTED_TEAMS_NUM) return;
@@ -1286,6 +1308,45 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const link = this.state.btnLink;
         adaptiveCard.onExecuteAction = function (action) { window.open(link, '_blank'); }
     }
+
+    onFileChange = event => {
+        const file = event.target.files[0];
+        this.setState({ selectedFileName: event.target.files[0].name })
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file)
+            reader.onload = (event) => {
+                this.setState({ selectedFile: reader.result });
+            };
+
+            reader.onerror = (err) => {
+                reject(err);
+            };
+
+        });
+
+    };
+
+    onFileUpload = () => {
+
+        let file = this.state.selectedFile;
+        const uploadImageProps: IUploadImage = {
+            name: this.state.selectedFileName,
+            file: file,
+        }
+
+        let baseAxiosUrl = getBaseUrl() + '/api';
+        let url = baseAxiosUrl + "/uploadImage";
+
+        const uri = axios.post(url, uploadImageProps)
+            .then(res => {
+
+                this.setState({ imageLink: res.data });
+
+                setCardImageLink(this.card, this.state.imageLink);
+                this.updateCard();
+            });
+    };
 }
 
 const newMessageWithTranslation = withTranslation()(NewMessage);

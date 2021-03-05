@@ -4,26 +4,31 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph
 {
+    extern alias BetaLib;
+
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Graph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Extensions;
+    using Beta = BetaLib::Microsoft.Graph;
 
     /// <summary>
     /// Groups Service.
     /// </summary>
     internal class GroupsService : IGroupsService
     {
+        private readonly Beta.IGraphServiceClient betaServiceClient;
         private readonly IGraphServiceClient graphServiceClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupsService"/> class.
         /// </summary>
         /// <param name="graphServiceClient">graph service client.</param>
-        internal GroupsService(IGraphServiceClient graphServiceClient)
+        internal GroupsService(Beta.IGraphServiceClient betaServiceClient, IGraphServiceClient graphServiceClient)
         {
+            this.betaServiceClient = betaServiceClient ?? throw new ArgumentNullException(nameof(betaServiceClient));
             this.graphServiceClient = graphServiceClient ?? throw new ArgumentNullException(nameof(graphServiceClient));
         }
 
@@ -82,6 +87,71 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
             groupList.AddRange(await this.AddDistributionGroupAsync(query, this.MaxResultCount - groupList.Count()));
             groupList.AddRange(await this.AddSecurityGroupAsync(query, this.MaxResultCount - groupList.Count()));
             return groupList;
+        }
+
+        /// <summary>
+        /// Get group of teams.
+        /// </summary>
+        /// <param name="filterQuery">query param.</param>
+        /// <returns>teams id.</returns>
+        public async Task<string> SearchTeamsGroupAsync(string filterQuery)
+        {
+            string groupID = string.Empty;
+
+            if (filterQuery.ToLower().StartsWith("displayname eq "))
+            {
+                groupID = await this.SearchTeamsGroupsAsync(filterQuery, this.MaxResultCount);
+            }
+
+            return groupID;
+        }
+
+        /// <summary>
+        /// Search Teams groups.
+        /// </summary>
+        /// <param name="query">query param.</param>
+
+        /// <returns>list of group.</returns>
+        private async Task<string> SearchTeamsGroupsAsync(string query, int resultCount, bool includeHiddenMembership = false)
+        {
+
+            string filterQuery = "resourceProvisioningOptions/Any(x:x eq 'Team') and " + query;
+            var teamsID = await this.SearchTeamsAsync(filterQuery, resultCount);
+            return teamsID;
+        }
+
+        /// <summary>
+        /// Search Teams group.
+        /// </summary>
+        /// <param name="filterQuery">Filter query for search teams group.</param>
+        /// <param name="resultCount">Maximum result count.</param>
+        /// <returns>List of Groups.</returns>
+        private async Task<string> SearchTeamsAsync(string filterQuery, int resultCount)
+        {
+            string teamID = string.Empty;
+            var groups = await this.betaServiceClient
+                                   .Groups
+                                   .Request()
+                                   .WithMaxRetry(this.MaxRetry)
+                                   .Filter(filterQuery)
+                                   .Select(group => new
+                                   {
+                                       group.Id,
+                                       group.Mail,
+                                       group.DisplayName,
+                                       group.Visibility,
+                                       group.GroupTypes,
+                                   }).
+                                   Top(resultCount)
+                                   .Header(Common.Constants.PermissionTypeKey, GraphPermissionType.Delegate.ToString())
+                                   .GetAsync();
+
+            foreach (var group in groups)
+            {
+                teamID = group.Id;
+            }
+
+            return teamID;
         }
 
         /// <summary>

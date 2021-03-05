@@ -33,5 +33,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <param name="query">query param.</param>
         /// <returns>list of group.</returns>
         Task<IList<Group>> SearchAsync(string query);
+
+        /// <summary>
+        /// Search teams group based on query.
+        /// </summary>
+        /// <param name="filterQuery">query param.</param>
+        /// <returns>teams id.</returns>
+        Task<string> SearchTeamsGroupAsync(string filterQuery);
     }
 }
