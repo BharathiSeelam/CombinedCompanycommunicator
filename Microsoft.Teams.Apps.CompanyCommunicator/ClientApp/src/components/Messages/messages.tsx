@@ -103,7 +103,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         const csvLink = this.createCSV(this.state.message);
         const label = this.processLabels();
         const outList = this.state.message.map(processItem);
-        const allMessages = [...csvLink, ...label, ...outList];
+        const allMessages = [...label, ...outList];
+        const csv = [...csvLink];
 
         if (this.state.loader) {
             return (
@@ -113,8 +114,12 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             return (<div className="results">{this.localize("EmptySentMessages")}</div>);
         }
         else {
+
             return (
-                <List selectable items={allMessages} className="list" />
+                <div>
+                    <List selectable items={csv} className="list" />
+                    <List selectable items={allMessages} className="list" />
+                </div>
             );
         }
     }
@@ -144,10 +149,10 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '30%' }}>
+                    <Flex.Item>
                         <Text></Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '30%' }} shrink={false}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} >
                         <Text
                             truncated
                             content={this.localize("Recipients")}
@@ -219,7 +224,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                     >
                     </Text>
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                <Flex.Item>
                     {this.renderSendingText(message)}
                 </Flex.Item>
                 <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }} shrink={false}>
