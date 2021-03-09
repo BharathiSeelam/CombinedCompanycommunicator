@@ -17,6 +17,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
@@ -83,11 +85,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             // Add teams services.
             builder.Services.AddTransient<IMessageService, MessageService>();
+            builder.Services.AddSingleton<IUpdateMessageService, MessageUpdateService>();
 
             // Add repositories.
             builder.Services.AddSingleton<ISendingNotificationDataRepository, SendingNotificationDataRepository>();
             builder.Services.AddSingleton<IGlobalSendingNotificationDataRepository, GlobalSendingNotificationDataRepository>();
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
+
+            builder.Services.AddSingleton<ISentUpdateDataRepository, SentUpdateDataRepository>();
+            builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
+            builder.Services.AddSingleton<ITemplateDataRepository, TemplateDataRepository>();
+            builder.Services.AddSingleton<AdaptiveCardCreator>();
 
             // Add service bus message queues.
             builder.Services.AddSingleton<ISendQueue, SendQueue>();
