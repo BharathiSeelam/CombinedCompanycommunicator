@@ -400,7 +400,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             await this.notificationDataRepository.DeleteAsync(notificationEntity);
-            await this.sentNotificationDataRepository.DeleteFromPostAsync(id);
+            UpdateSentNotificationEntity updateNotificationobj = new UpdateSentNotificationEntity();
+            updateNotificationobj.NotificationId = id;
+            updateNotificationobj.NotificationEntity = null;
+            var json = JsonConvert.SerializeObject(updateNotificationobj);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var url = this.sendFunctionAppBaseURL + "DeleteSentNotificationPost";
+            using var client = new HttpClient();
+            {
+                var response = await client.PostAsync(url, data);
+                string result = response.Content.ReadAsStringAsync().Result;
+            }
+
             return this.Ok();
         }
 
