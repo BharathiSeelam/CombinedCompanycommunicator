@@ -53,5 +53,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot
         /// Gets or sets Blob Container Name.
         /// </summary>
         public string BlobContainerName { get; set; }
+
+        /// <summary>
+        /// Gets or sets Send Function App Base URL.
+        /// </summary>
+        public string SendFunctionAppBaseURL { get; set; }
     }
 }

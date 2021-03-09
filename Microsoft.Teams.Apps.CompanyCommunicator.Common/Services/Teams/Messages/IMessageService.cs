@@ -31,6 +31,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             ILogger logger);
 
         /// <summary>
+        /// Send Message preview to the channel.
+        /// </summary>
+        /// <param name="previewDataEntity">previewDataEntity param.</param>
+        /// <param name="maxRetryCount">maxRetryCount param.</param>
+        /// <param name="log">log param.</param>
+        /// <returns>send message response.</returns>
+        public Task<SendMessageResponse> SendPreviewMessageAsync(PreviewDataEntity previewDataEntity, int maxRetryCount, ILogger log);
+
+        /// <summary>
         /// Delete message to a conversation.
         /// </summary>
         /// <param name="notificationId">Message.</param>

@@ -84,14 +84,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                 .Configure<IConfiguration>((botOptions, configuration) =>
                 {
                     botOptions.UserAppId = configuration.GetValue<string>("UserAppId");
-                    botOptions.UserAppPassword = configuration.GetValue<string>("UserAppPassword");
+                    botOptions.UserAppPassword = string.Empty;
                     botOptions.AuthorAppId = configuration.GetValue<string>("AuthorAppId");
-                    botOptions.AuthorAppPassword = configuration.GetValue<string>("AuthorAppPassword");
+                    botOptions.AuthorAppPassword = string.Empty;
                     botOptions.GrantType = configuration.GetValue<string>("GrantType");
                     botOptions.Scope = configuration.GetValue<string>("Scope");
                     botOptions.TenantId = configuration.GetValue<string>("TenantId");
                     botOptions.StorageAccount = configuration.GetValue<string>("ImageBlobStorageAccount");
                     botOptions.BlobContainerName = configuration.GetValue<string>("BlobContainerName");
+                    botOptions.SendFunctionAppBaseURL = configuration.GetValue<string>("SendFunctionAppBaseURL");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>

@@ -50,6 +50,73 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
         }
 
+        /// <summary>
+        /// Async function for send preview card.
+        /// </summary>
+        /// <param name="previewDataEntity">previewDataEntity param.</param>
+        /// <param name="maxRetryCount">maxRetryCount param.</param>
+        /// <param name="log">log param.</param>
+        /// <returns>sending message response.</returns>
+        public async Task<SendMessageResponse> SendPreviewMessageAsync(
+          PreviewDataEntity previewDataEntity, int maxRetryCount, ILogger log)
+        {
+            // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
+            MicrosoftAppCredentials.TrustServiceUrl(previewDataEntity.ServiceUrl);
+
+            var response = new SendMessageResponse
+            {
+                TotalNumberOfSendThrottles = 0,
+                AllSendStatusCodes = string.Empty,
+            };
+
+            await this.botAdapter.ContinueConversationAsync(
+                botAppId: this.microsoftAppId,
+                reference: previewDataEntity.ConversationReferance,
+                callback: async (turnContext, cancellationToken) =>
+                {
+                    previewDataEntity.MessageActivity.Conversation = turnContext.Activity.Conversation;
+                    var policy = this.GetRetryPolicy(maxRetryCount, log);
+                    try
+                    {
+                        // Send message.
+                        var messageResponse = await policy.ExecuteAsync(async () => await turnContext.SendActivityAsync(previewDataEntity.MessageActivity));
+
+                        // Success.
+                        response.ResultType = SendMessageResult.Succeeded;
+                        response.StatusCode = (int)HttpStatusCode.Created;
+                        response.AllSendStatusCodes += $"{(int)HttpStatusCode.Created},";
+                        response.ActivityId = messageResponse.Id;
+                    }
+                    catch (ErrorResponseException e)
+                    {
+                        var errorMessage = $"{e.GetType()}: {e.Message}";
+                        log.LogError(e, $"Failed to send message. Exception message: {errorMessage}");
+
+                        response.StatusCode = (int)e.Response.StatusCode;
+                        response.AllSendStatusCodes += $"{(int)e.Response.StatusCode},";
+                        response.ErrorMessage = e.Response.Content;
+                        switch (e.Response.StatusCode)
+                        {
+                            case HttpStatusCode.TooManyRequests:
+                                response.ResultType = SendMessageResult.Throttled;
+                                response.TotalNumberOfSendThrottles = maxRetryCount;
+                                break;
+
+                            case HttpStatusCode.NotFound:
+                                response.ResultType = SendMessageResult.RecipientNotFound;
+                                break;
+
+                            default:
+                                response.ResultType = SendMessageResult.Failed;
+                                break;
+                        }
+                    }
+                },
+                cancellationToken: CancellationToken.None);
+
+            return response;
+        }
+
         /// <inheritdoc/>
         public async Task<SendMessageResponse> SendMessageAsync(
             IMessageActivity message,

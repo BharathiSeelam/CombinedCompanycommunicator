@@ -7,6 +7,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using System;
     using System.Collections.Generic;
     using System.Net;
+    using System.Net.Http;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
@@ -20,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -35,6 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
         private readonly AdaptiveCardCreator adaptiveCardCreator;
         private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
         private readonly ITemplateDataRepository templateDataRepository;
+        private readonly string sendFunctionAppBaseURL;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationPreviewService"/> class.
@@ -50,6 +54,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             ITemplateDataRepository templateDataRepository)
         {
             var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
+            this.sendFunctionAppBaseURL = options.Value.SendFunctionAppBaseURL;
             this.botAppId = options.Value.AuthorAppId;
             if (string.IsNullOrEmpty(this.botAppId))
             {
@@ -98,11 +103,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             // Trigger bot to send the adaptive card.
             try
             {
-                await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
-                    this.botAppId,
-                    conversationReference,
-                    async (turnContext, cancellationToken) => await this.SendAdaptiveCardAsync(turnContext, draftNotificationEntity),
-                    CancellationToken.None);
+                //await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
+                //    this.botAppId,
+                //    conversationReference,
+                //    async (turnContext, cancellationToken) => await this.SendAdaptiveCardAsync(turnContext, draftNotificationEntity),
+                //    CancellationToken.None);
+
+                var previewDataEntity = new PreviewDataEntity
+                {
+                    ConversationReferance = conversationReference,
+                    MessageActivity = await this.GetPreviewMessageActivity(draftNotificationEntity),
+                    ServiceUrl = conversationReference.ServiceUrl,
+                    AppID = this.botAppId,
+                };
+
+                var json = JsonConvert.SerializeObject(previewDataEntity);
+                var data = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var url = this.sendFunctionAppBaseURL + "SendPreviewFunction";
+
+                using var client = new HttpClient();
+                {
+                    var response = await client.PostAsync(url, data);
+                    string result = response.Content.ReadAsStringAsync().Result;
+                }
+
                 return HttpStatusCode.OK;
             }
             catch (ErrorResponseException e)
@@ -116,6 +141,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Get message activity.
+        /// </summary>
+        /// <param name="draftNotificationEntity">draftNotificationEntity param.</param>
+        /// <returns>Message activity.</returns>
+        private async Task<Activity> GetPreviewMessageActivity(
+           NotificationDataEntity draftNotificationEntity)
+        {
+            var templateDataEntityResult = await this.templateDataRepository.GetAsync("Default", draftNotificationEntity.TemplateID);
+            var reply = this.CreateReply(draftNotificationEntity, templateDataEntityResult.TemplateJSON);
+            var attachments = reply.Attachments[0];
+            var sendCardActivity = new Activity(ActivityTypes.Message)
+            {                
+                Attachments = new List<Attachment>
+                            {
+                              new Attachment()
+                                        {
+                                            ContentType = attachments.ContentType,
+                                            Content = JsonConvert.DeserializeObject((string)attachments.Content),
+                                        },
+                            },
+            };
+            return sendCardActivity;
         }
 
         private ConversationReference PrepareConversationReferenceAsync(TeamDataEntity teamDataEntity, string channelId)
