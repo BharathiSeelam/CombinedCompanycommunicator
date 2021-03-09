@@ -7,7 +7,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net.Http;
     using System.Security.Claims;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -25,12 +27,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams.Messages;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Controller for the sent notification data.
@@ -58,6 +63,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly UserAppOptions userAppOptions;
         private readonly ILogger<SentNotificationsController> logger;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly string sendFunctionAppBaseURL;
         private string account;
 
         /// <summary>
@@ -100,13 +106,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IAppCatalogService appCatalogService,
             IAppSettingsService appSettingsService,
             IOptions<UserAppOptions> userAppOptions,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IOptions<BotOptions> botOptions)
         {
             if (dataQueueMessageOptions is null)
             {
                 throw new ArgumentNullException(nameof(dataQueueMessageOptions));
             }
 
+            var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
             this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
@@ -126,6 +134,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
             this.account = string.Empty;
+            this.sendFunctionAppBaseURL = options.Value.SendFunctionAppBaseURL;
+
         }
 
         /// <summary>
@@ -230,7 +240,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var id = updateSentNotificationDataEntity.Id;
             var sentNotificationId = await this.notificationDataRepository.UpdateSentNotificationAsync(updateSentNotificationDataEntity, id);
             await this.sentNotificationUpdateDataRepository.EnsureSentNotificationDataTableExistsAsync();
-            await this.sentNotificationUpdateDataRepository.UpdateFromPostAsync(sentNotificationId, updateSentNotificationDataEntity);
+
+            UpdateSentNotificationEntity updateNotificationobj = new UpdateSentNotificationEntity();
+            updateNotificationobj.NotificationId = sentNotificationId;
+            updateNotificationobj.NotificationEntity = updateSentNotificationDataEntity;
+            var json = JsonConvert.SerializeObject(updateNotificationobj);
+            var data = new StringContent(json, Encoding.UTF8, "application/json");
+            var url = this.sendFunctionAppBaseURL + "SentUpdatedNotificationFunction";
+            using var client = new HttpClient();
+            {
+                var response = await client.PostAsync(url, data);
+                string result = response.Content.ReadAsStringAsync().Result;
+            }
+
+            //await this.sentNotificationUpdateDataRepository.UpdateFromPostAsync(sentNotificationId, updateSentNotificationDataEntity);
             return this.Ok();
         }
 
