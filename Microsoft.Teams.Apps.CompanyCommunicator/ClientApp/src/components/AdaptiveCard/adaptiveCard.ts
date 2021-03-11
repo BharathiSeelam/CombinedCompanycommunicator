@@ -128,8 +128,8 @@ export const setCardBtn = (card: any, buttonTitle?: string, buttonLink?: string)
         card.actions = [
             {
                 "type": "Action.OpenUrl",
-                "title": "buttonTitle",
-                "url": "buttonLink"
+                "title": buttonTitle,
+                "url": buttonLink
             }
         ];
     } else {

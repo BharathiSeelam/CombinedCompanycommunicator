@@ -899,6 +899,19 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         });
         let result = await getTemplate(itemsData.value["key"]);
         this.card = JSON.parse(result.data.templateJSON);
+        this.setState({ card: this.card });
+        this.setDefaultCard(this.card);
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+        setCardTitle(this.card, this.state.title);
+        setCardImageLink(this.card, this.state.imageLink);
+        setCardSummary(this.card, this.state.summary);
+        setCardAuthor(this.card, this.state.author);
+        setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
+        
+           
+              
+            
+            this.updateCard();
     }
     private onChannelChange = async (event: any, itemsData: any) => {
         let responesofdl: any[] = [];
