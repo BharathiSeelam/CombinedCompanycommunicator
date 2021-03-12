@@ -104,9 +104,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     // Get a reference to the blob address, then upload the file to the blob.
                     CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(DateTime.Now.ToString("yyyyMMddHHmmss") + filename);
 
-                    string[] splittedFileName = filename.Split('.');
-                    string extension = splittedFileName[splittedFileName.Length - 1];
-                    var bytes = Convert.FromBase64String(stream.Replace("data:image/" + extension + ";base64,", string.Empty)); // without data:image/jpeg;base64 prefix, just base64 string.
+                    var bytes = Convert.FromBase64String(stream.Replace("data:image/jpeg;base64,", string.Empty).Replace("data:image/png;base64,", string.Empty).Replace("data:image/bmp;base64,", string.Empty));
 
                     using (var fileStream = new MemoryStream(bytes))
                     {

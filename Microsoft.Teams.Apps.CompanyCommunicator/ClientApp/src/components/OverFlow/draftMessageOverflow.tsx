@@ -83,7 +83,7 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                         },
                         {
                             key: 'preview',
-                            content: this.localize("PreviewInThisChannel"),
+                            content: this.localize("Preview in the General channel"),
                             onClick: (event: any) => {
                                 event.stopPropagation();
                                 this.setState({

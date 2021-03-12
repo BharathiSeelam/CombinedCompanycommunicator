@@ -603,6 +603,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Dropdown
 
                                     placeholder={this.localize("SentToGeneralChannelTeam")}
+                                    className="channelDropdown"
                                     items={this.getChannels()}
                                     value={this.state.selectedChannel}
                                     onSelectedChange={this.onChannelChange}
@@ -614,6 +615,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                 <Dropdown
 
                                     placeholder={this.localize("MessageTemplate")}
+                                    className="templateDropdown"
                                     items={this.getMessageTemplateItems()}
                                     value={this.state.selectedTemplates}
                                     onSelectedChange={this.onMessageTemplateChanged.bind(this)}

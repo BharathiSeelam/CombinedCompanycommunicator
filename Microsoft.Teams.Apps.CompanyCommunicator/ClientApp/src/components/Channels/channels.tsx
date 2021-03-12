@@ -94,10 +94,10 @@ class Channels extends React.Component<IChannelProps, IChannelState> {
                 key: keyCount,
                 content: (
                     <Flex className="listContainer" vAlign="center" fill gap="gap.small">
-                        <Flex.Item size="size.small" shrink={0} grow={1}>
+                        <Flex.Item size="size.small" variables={{ 'size.small': '24%' }}>
                             <Text>{channel.channelName}</Text>
                         </Flex.Item>
-                        <Flex.Item size="size.small" variables={{ 'size.small': '73%' }} shrink={0}>
+                        <Flex.Item size="size.small" variables={{ 'size.small': '73%' }}>
                             <Text>{channel.channelAdmins}</Text>
                         </Flex.Item>
                         <Flex.Item shrink={0} hAlign="end" vAlign="center">
@@ -137,7 +137,7 @@ class Channels extends React.Component<IChannelProps, IChannelState> {
             key: "labels",
             content: (
                 <Flex className="listContainer" vAlign="center" fill gap="gap.small">
-                    <Flex.Item size="size.small" variables={{ 'size.small': '24%' }} grow={1}>
+                    <Flex.Item size="size.small" variables={{ 'size.small': '24%' }}>
                         <Text
                             truncated
                             weight="bold"
@@ -145,11 +145,19 @@ class Channels extends React.Component<IChannelProps, IChannelState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.small" variables={{ 'size.small': '76%' }} shrink={false}>
+                    <Flex.Item size="size.small" variables={{ 'size.small': '73%' }}>
                         <Text
                             truncated
                             weight="bold"
                             content={this.localize("ChannelAdmins")}
+                        >
+                        </Text>
+                    </Flex.Item>
+                    <Flex.Item shrink={0} hAlign="end" vAlign="center">
+                        <Text
+                            truncated
+                            weight="bold"
+                            content={""}
                         >
                         </Text>
                     </Flex.Item>

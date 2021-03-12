@@ -151,13 +151,21 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '70%' }}>
                         <Text
                             truncated
                             weight="bold"
                             content={this.localize("PublishOn")}
                         >
                         </Text>
+                    </Flex.Item>
+                    <Flex.Item shrink={0} hAlign="end" vAlign="center" >
+                    <Text
+                        truncated
+                        weight="bold"
+                        content={""}
+                    >
+                    </Text>
                     </Flex.Item>
                 </Flex>
             ),
