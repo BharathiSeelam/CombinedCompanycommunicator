@@ -93,6 +93,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             builder.Services.AddSingleton<ISentNotificationDataRepository, SentNotificationDataRepository>();
 
             builder.Services.AddSingleton<ISentUpdateDataRepository, SentUpdateDataRepository>();
+            builder.Services.AddSingleton<ISentUpdateandDeleteNotificationDataRepository, SentUpdateandDeleteDataRepository>();
             builder.Services.AddSingleton<INotificationDataRepository, NotificationDataRepository>();
             builder.Services.AddSingleton<ITemplateDataRepository, TemplateDataRepository>();
             builder.Services.AddSingleton<AdaptiveCardCreator>();
