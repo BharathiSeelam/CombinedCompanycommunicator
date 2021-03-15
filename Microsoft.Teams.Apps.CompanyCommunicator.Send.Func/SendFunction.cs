@@ -42,6 +42,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         private readonly IMessageService messageService;
         private readonly ISendQueue sendQueue;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly ISentUpdateDataRepository sentNotificationUpdateDataRepository;
+        private readonly ISentUpdateandDeleteNotificationDataRepository sentUpdateandDeleteNotificationDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SendFunction"/> class.
@@ -52,13 +54,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
         /// <param name="notificationRepo">Notification repository.</param>
         /// <param name="sendQueue">The send queue.</param>
         /// <param name="localizer">Localization service.</param>
+        /// <param name="sentNotificationUpdateDataRepository">SentNotificationUpdateDataRepository service.</param>
+        /// <param name="sentUpdateandDeleteNotificationDataRepository">SentUpdateandDeleteNotificationDataRepository service.</param>
         public SendFunction(
             IOptions<SendFunctionOptions> options,
             INotificationService notificationService,
             IMessageService messageService,
             ISendingNotificationDataRepository notificationRepo,
             ISendQueue sendQueue,
-            IStringLocalizer<Strings> localizer)
+            IStringLocalizer<Strings> localizer,
+            ISentUpdateDataRepository sentNotificationUpdateDataRepository,
+            ISentUpdateandDeleteNotificationDataRepository sentUpdateandDeleteNotificationDataRepository)
         {
             if (options is null)
             {
@@ -73,6 +79,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
             this.notificationRepo = notificationRepo ?? throw new ArgumentNullException(nameof(notificationRepo));
             this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+            this.sentNotificationUpdateDataRepository = sentNotificationUpdateDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationUpdateDataRepository));
+            this.sentUpdateandDeleteNotificationDataRepository = sentUpdateandDeleteNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentUpdateandDeleteNotificationDataRepository));
         }
 
         /// <summary>
@@ -102,80 +110,108 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func
 
             var messageContent = JsonConvert.DeserializeObject<SendQueueMessageContent>(myQueueItem);
 
-            try
+            // Added to handle Preview, Update and Delete Notifications -- Start
+            var notificationUpdatePreviewEntity = messageContent.NotificationUpdatePreviewEntity ?? null;
+            var actionType = string.Empty;
+            if (notificationUpdatePreviewEntity != null)
             {
-                // Check if notification is pending.
-                var isPending = await this.notificationService.IsPendingNotification(messageContent);
-                if (!isPending)
-                {
-                    // Notification is either already sent or failed and shouldn't be retried.
-                    return;
-                }
+                actionType = notificationUpdatePreviewEntity.ActionType;
+            }
 
-                // Check if conversationId is set to send message.
-                if (string.IsNullOrWhiteSpace(messageContent.GetConversationId()))
+            if (!string.IsNullOrEmpty(actionType))
+            {
+                if (actionType == "PreviewNotification")
                 {
+                    var response = await this.messageService.SendPreviewUpdateMessageAsync(messageContent.NotificationUpdatePreviewEntity, 100, log);
+                }
+                else if (actionType == "EditNotification")
+                {
+                    await this.sentNotificationUpdateDataRepository.UpdateFromPostAsync(messageContent.NotificationId, notificationUpdatePreviewEntity.NotificationDataEntity);
+                }
+                else if (actionType == "DeleteNotification")
+                {
+                    await this.sentUpdateandDeleteNotificationDataRepository.DeleteFromPostAsync(messageContent.NotificationId);
+                }
+            }
+
+            // Added to handle Preview, Update and Delete Notifications -- End
+            else
+            {
+                try
+                {
+                    // Check if notification is pending.
+                    var isPending = await this.notificationService.IsPendingNotification(messageContent);
+                    if (!isPending)
+                    {
+                        // Notification is either already sent or failed and shouldn't be retried.
+                        return;
+                    }
+
+                    // Check if conversationId is set to send message.
+                    if (string.IsNullOrWhiteSpace(messageContent.GetConversationId()))
+                    {
+                        await this.notificationService.UpdateSentNotification(
+                            notificationId: messageContent.NotificationId,
+                            recipientId: messageContent.RecipientData.RecipientId,
+                            totalNumberOfSendThrottles: 0,
+                            statusCode: SentNotificationDataEntity.FinalFaultedStatusCode,
+                            allSendStatusCodes: $"{SentNotificationDataEntity.FinalFaultedStatusCode},",
+                            activityID: messageContent.ActivtiyId,
+                            errorMessage: this.localizer.GetString("AppNotInstalled"));
+                        return;
+                    }
+
+                    // Check if the system is throttled.
+                    var isThrottled = await this.notificationService.IsSendNotificationThrottled();
+                    if (isThrottled)
+                    {
+                        // Re-Queue with delay.
+                        await this.sendQueue.SendDelayedAsync(messageContent, this.sendRetryDelayNumberOfSeconds);
+                        return;
+                    }
+
+                    // Send message.
+                    var messageActivity = await this.GetMessageActivity(messageContent);
+                    var response = await this.messageService.SendMessageAsync(
+                        message: messageActivity,
+                        serviceUrl: messageContent.GetServiceUrl(),
+                        conversationId: messageContent.GetConversationId(),
+                        maxAttempts: this.maxNumberOfAttempts,
+                        logger: log);
+
+                    // Process response.
+                    await this.ProcessResponseAsync(messageContent, response, log);
+                }
+                catch (InvalidOperationException exception)
+                {
+                    // Bad message shouldn't be requeued.
+                    log.LogError(exception, $"InvalidOperationException thrown. Error message: {exception.Message}");
+                }
+                catch (Exception e)
+                {
+                    var errorMessage = $"{e.GetType()}: {e.Message}";
+                    log.LogError(e, $"Failed to send message. ErrorMessage: {errorMessage}");
+
+                    // Update status code depending on delivery count.
+                    var statusCode = SentNotificationDataEntity.FaultedAndRetryingStatusCode;
+                    if (deliveryCount >= SendFunction.MaxDeliveryCountForDeadLetter)
+                    {
+                        // Max deliveries attempted. No further retries.
+                        statusCode = SentNotificationDataEntity.FinalFaultedStatusCode;
+                    }
+
+                    // Update sent notification table.
                     await this.notificationService.UpdateSentNotification(
                         notificationId: messageContent.NotificationId,
                         recipientId: messageContent.RecipientData.RecipientId,
                         totalNumberOfSendThrottles: 0,
-                        statusCode: SentNotificationDataEntity.FinalFaultedStatusCode,
-                        allSendStatusCodes: $"{SentNotificationDataEntity.FinalFaultedStatusCode},",
+                        statusCode: statusCode,
+                        allSendStatusCodes: $"{statusCode},",
                         activityID: messageContent.ActivtiyId,
-                        errorMessage: this.localizer.GetString("AppNotInstalled"));
-                    return;
+                        errorMessage: errorMessage);
+
+                    throw;
                 }
-
-                // Check if the system is throttled.
-                var isThrottled = await this.notificationService.IsSendNotificationThrottled();
-                if (isThrottled)
-                {
-                    // Re-Queue with delay.
-                    await this.sendQueue.SendDelayedAsync(messageContent, this.sendRetryDelayNumberOfSeconds);
-                    return;
-                }
-
-                // Send message.
-                var messageActivity = await this.GetMessageActivity(messageContent);
-                var response = await this.messageService.SendMessageAsync(
-                    message: messageActivity,
-                    serviceUrl: messageContent.GetServiceUrl(),
-                    conversationId: messageContent.GetConversationId(),
-                    maxAttempts: this.maxNumberOfAttempts,
-                    logger: log);
-
-                // Process response.
-                await this.ProcessResponseAsync(messageContent, response, log);
-            }
-            catch (InvalidOperationException exception)
-            {
-                // Bad message shouldn't be requeued.
-                log.LogError(exception, $"InvalidOperationException thrown. Error message: {exception.Message}");
-            }
-            catch (Exception e)
-            {
-                var errorMessage = $"{e.GetType()}: {e.Message}";
-                log.LogError(e, $"Failed to send message. ErrorMessage: {errorMessage}");
-
-                // Update status code depending on delivery count.
-                var statusCode = SentNotificationDataEntity.FaultedAndRetryingStatusCode;
-                if (deliveryCount >= SendFunction.MaxDeliveryCountForDeadLetter)
-                {
-                    // Max deliveries attempted. No further retries.
-                    statusCode = SentNotificationDataEntity.FinalFaultedStatusCode;
-                }
-
-                // Update sent notification table.
-                await this.notificationService.UpdateSentNotification(
-                    notificationId: messageContent.NotificationId,
-                    recipientId: messageContent.RecipientData.RecipientId,
-                    totalNumberOfSendThrottles: 0,
-                    statusCode: statusCode,
-                    allSendStatusCodes: $"{statusCode},",
-                    activityID: messageContent.ActivtiyId,
-                    errorMessage: errorMessage);
-
-                throw;
             }
         }
 

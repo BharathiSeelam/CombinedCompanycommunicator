@@ -176,19 +176,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             await turnContext.SendActivityAsync(reply, cancellationToken);
         }
 
-        private async Task UpdateServiceUrl(string serviceUrl)
-        {
-            // Check if service url is already synced.
-            var cachedUrl = await this.appSettingsService.GetServiceUrlAsync();
-            if (!string.IsNullOrWhiteSpace(cachedUrl))
-            {
-                return;
-            }
-
-            // Update service url.
-            await this.appSettingsService.SetServiceUrlAsync(serviceUrl);
-        }
-
         /// <summary>
         /// Invoked when the user opens the messaging extension or searching any content in it.
         /// </summary>
@@ -224,7 +211,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
                     cattachments.Add(attachment);
                 }
-
             }
 
             // The list of MessagingExtensionAttachments must we wrapped in a MessagingExtensionResult wrapped in a MessagingExtensionResponse.
@@ -259,7 +245,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
             // We take every row of the results and wrap them in cards wrapped in in MessagingExtensionAttachment objects.
             // The Preview is optional, if it includes a Tap, that will trigger the OnTeamsMessagingExtensionSelectItemAsync event back on this bot.
-
             var templateDataEntityResult = await this.templateDataRepository.GetAsync("Default", templateId);
             NotificationDataEntity notificationDataEntity = new NotificationDataEntity();
             notificationDataEntity.Title = title;
@@ -272,17 +257,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
             var reply = this.CreateReply(notificationDataEntity, templateDataEntityResult.TemplateJSON);
             var attachments = reply.Attachments[0];
 
-            var _previewCard = new ThumbnailCard { Title = $"{title}, {author}" };
+            var previewCard = new ThumbnailCard { Title = $"{title}, {author}" };
             if (!string.IsNullOrEmpty(imageUrl))
             {
-                _previewCard.Images = new List<CardImage>() { new CardImage(imageUrl, "Icon") };
+                previewCard.Images = new List<CardImage>() { new CardImage(imageUrl, "Icon") };
             }
 
             var attachment = new MessagingExtensionAttachment
             {
                 ContentType = attachments.ContentType,
                 Content = JsonConvert.DeserializeObject((string)attachments.Content),
-                Preview = _previewCard.ToAttachment(),
+                Preview = previewCard.ToAttachment(),
             };
 
            /* var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
@@ -313,6 +298,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                     Attachments = new List<MessagingExtensionAttachment> { attachment },
                 },
             });
+        }
+
+        private async Task UpdateServiceUrl(string serviceUrl)
+        {
+            // Check if service url is already synced.
+            var cachedUrl = await this.appSettingsService.GetServiceUrlAsync();
+            if (!string.IsNullOrWhiteSpace(cachedUrl))
+            {
+                return;
+            }
+
+            // Update service url.
+            await this.appSettingsService.SetServiceUrlAsync(serviceUrl);
         }
 
         private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity, string templateJson)

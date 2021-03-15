@@ -4,6 +4,8 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue
 {
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+
     /// <summary>
     /// Azure service bus send queue message content class.
     /// </summary>
@@ -25,5 +27,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues
         /// recipient a notification.
         /// </summary>
         public RecipientData RecipientData { get; set; }
+
+        /// <summary>
+        /// Gets or sets the information about NotificationUpdatePreviewEntity.
+        /// This holds information for Preview, Edit and Delete of Notifications.
+        /// </summary>
+        public NotificationUpdatePreviewEntity NotificationUpdatePreviewEntity { get; set; }
     }
 }

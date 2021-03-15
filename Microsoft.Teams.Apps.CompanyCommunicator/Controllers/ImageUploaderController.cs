@@ -32,7 +32,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// </summary>
         /// <param name="botAdapter">Bot Adapter client.</param>
         /// <param name="botOptions">BOT options.</param>
-        public ImageUploaderController(BotFrameworkHttpAdapter botAdapter,
+        public ImageUploaderController(
+            BotFrameworkHttpAdapter botAdapter,
             IOptions<BotOptions> botOptions)
         {
             this.botAdapter = botAdapter ?? throw new ArgumentNullException(nameof(botAdapter));
@@ -52,13 +53,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             string uploadedUri = null;
             try
             {
-
                 (uploadSuccess, uploadedUri) = await this.UploadToBlob(imageValues.Name, imageValues.File);
                 return uploadedUri;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 throw;
             }
         }
@@ -87,13 +86,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
                     // Create a container based on configuration value and append a GUID value to it to make the name unique.
 
-                    //if (!isExist)
-                    //{
+                    // if (!isExist)
+                    // {
                     //    cloudBlobContainer = cloudBlobClient.GetContainerReference(this.blobContainerName + Guid.NewGuid().ToString());
                     //    await cloudBlobContainer.CreateAsync();
-                    //}
+                    // }
 
-                    // Set the permissions so the blobs are public. 
+                    // Set the permissions so the blobs are public.
                     BlobContainerPermissions permissions = new BlobContainerPermissions
                     {
                         PublicAccess = BlobContainerPublicAccessType.Blob,
@@ -113,25 +112,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
                     return (true, cloudBlockBlob.SnapshotQualifiedStorageUri.PrimaryUri.ToString());
                 }
-                catch (StorageException ex)
+                catch (StorageException)
                 {
                     return (false, null);
                 }
                 finally
                 {
                     // OPTIONAL: Clean up resources, e.g. blob container
-                    //if (cloudBlobContainer != null)
-                    //{
+                    // if (cloudBlobContainer != null)
+                    // {
                     //    await cloudBlobContainer.DeleteIfExistsAsync();
-                    //}
+                    // }
                 }
             }
             else
             {
                 return (false, null);
             }
-
         }
-
     }
 }

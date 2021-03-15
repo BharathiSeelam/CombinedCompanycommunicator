@@ -57,8 +57,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="maxRetryCount">maxRetryCount param.</param>
         /// <param name="log">log param.</param>
         /// <returns>sending message response.</returns>
-        public async Task<SendMessageResponse> SendPreviewMessageAsync(
-          PreviewDataEntity previewDataEntity, int maxRetryCount, ILogger log)
+        public async Task<SendMessageResponse> SendPreviewUpdateMessageAsync(
+          NotificationUpdatePreviewEntity previewDataEntity, int maxRetryCount, ILogger log)
         {
             // Set the service URL in the trusted list to ensure the SDK includes the token in the request.
             MicrosoftAppCredentials.TrustServiceUrl(previewDataEntity.ServiceUrl);

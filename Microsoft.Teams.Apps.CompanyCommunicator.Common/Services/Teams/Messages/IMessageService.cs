@@ -37,7 +37,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         /// <param name="maxRetryCount">maxRetryCount param.</param>
         /// <param name="log">log param.</param>
         /// <returns>send message response.</returns>
-        public Task<SendMessageResponse> SendPreviewMessageAsync(PreviewDataEntity previewDataEntity, int maxRetryCount, ILogger log);
+        public Task<SendMessageResponse> SendPreviewUpdateMessageAsync(NotificationUpdatePreviewEntity previewDataEntity, int maxRetryCount, ILogger log);
 
         /// <summary>
         /// Delete message to a conversation.

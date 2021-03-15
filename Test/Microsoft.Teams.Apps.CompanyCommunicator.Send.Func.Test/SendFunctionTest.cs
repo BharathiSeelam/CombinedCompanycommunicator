@@ -43,13 +43,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         public void SendFunctionConstructorTest()
         {
             // Arrange
-            Action action1 = () => new SendFunction(null /*options*/, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object);
-            Action action2 = () => new SendFunction(options, null /*notificationService*/, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object);
-            Action action3 = () => new SendFunction(options, notificationService.Object, null /*messageService*/, notificationRepo.Object, sendQueue.Object, localizer.Object);
-            Action action4 = () => new SendFunction(options, notificationService.Object, messageService.Object, null /*notificationRepo*/, sendQueue.Object, localizer.Object);
-            Action action5 = () => new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, null /*sendQueue*/, localizer.Object);
-            Action action6 = () => new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, null /*localizer*/);
-            Action action7 = () => new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object);
+            Action action1 = () => new SendFunction(null /*options*/, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object, null, null);
+            Action action2 = () => new SendFunction(options, null /*notificationService*/, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object, null, null);
+            Action action3 = () => new SendFunction(options, notificationService.Object, null /*messageService*/, notificationRepo.Object, sendQueue.Object, localizer.Object, null, null);
+            Action action4 = () => new SendFunction(options, notificationService.Object, messageService.Object, null /*notificationRepo*/, sendQueue.Object, localizer.Object, null, null);
+            Action action5 = () => new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, null /*sendQueue*/, localizer.Object, null, null);
+            Action action6 = () => new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, null /*localizer*/, null, null);
+            Action action7 = () => new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object, null, null);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("options is null.");
@@ -255,7 +255,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Send.Func.Test
         /// </summary>
         private SendFunction GetSendFunction()
         {
-            return new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object);
+            return new SendFunction(options, notificationService.Object, messageService.Object, notificationRepo.Object, sendQueue.Object, localizer.Object, null, null);
         }
     }
 }

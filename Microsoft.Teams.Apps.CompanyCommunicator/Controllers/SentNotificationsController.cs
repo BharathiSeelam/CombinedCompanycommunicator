@@ -30,9 +30,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.DataQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.PrepareToSendQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams.Messages;
     using Microsoft.Teams.Apps.CompanyCommunicator.Controllers.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Newtonsoft.Json;
@@ -52,6 +52,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private readonly IPrepareToSendQueue prepareToSendQueue;
+        private readonly ISendQueue sendQueue;
         private readonly IDataQueue dataQueue;
         private readonly double forceCompleteMessageDelayInSeconds;
         private readonly IGroupsService groupsService;
@@ -77,10 +78,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="teamDataRepository">Team data repository instance.</param>
         /// <param name="distributionListDataRepository">DistributionList data repository instance.</param>
         /// <param name="prepareToSendQueue">The service bus queue for preparing to send notifications.</param>
+        /// <param name="sendQueue">The service bus queue for the send queue.</param>
         /// <param name="dataQueue">The service bus queue for the data queue.</param>
         /// <param name="dataQueueMessageOptions">The options for the data queue messages.</param>
         /// <param name="groupsService">The groups service.</param>
-        /// <param name="teamsChannelInfo">The Teamchannel info service.</param>
         /// <param name="memberService">The meber info service.</param>
         /// <param name="reactionService">The reaction of message service.</param>
         /// <param name="exportDataRepository">The Export data repository instance.</param>
@@ -88,6 +89,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="appSettingsService">App settings service.</param>
         /// <param name="userAppOptions">User app options.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="botOptions">bot options.</param>
         public SentNotificationsController(
             IChannelDataRepository channelDataRepository,
             INotificationDataRepository notificationDataRepository,
@@ -97,6 +99,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             ITeamDataRepository teamDataRepository,
             IDistributionListDataRepository distributionListDataRepository,
             IPrepareToSendQueue prepareToSendQueue,
+            ISendQueue sendQueue,
             IDataQueue dataQueue,
             IOptions<DataQueueMessageOptions> dataQueueMessageOptions,
             IGroupsService groupsService,
@@ -123,6 +126,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
             this.prepareToSendQueue = prepareToSendQueue ?? throw new ArgumentNullException(nameof(prepareToSendQueue));
+            this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
             this.dataQueue = dataQueue ?? throw new ArgumentNullException(nameof(dataQueue));
             this.forceCompleteMessageDelayInSeconds = dataQueueMessageOptions.Value.ForceCompleteMessageDelayInSeconds;
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
@@ -135,7 +139,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
             this.account = string.Empty;
             this.sendFunctionAppBaseURL = options.Value.SendFunctionAppBaseURL;
-
         }
 
         /// <summary>
@@ -241,19 +244,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var sentNotificationId = await this.notificationDataRepository.UpdateSentNotificationAsync(updateSentNotificationDataEntity, id);
             await this.sentNotificationUpdateDataRepository.EnsureSentNotificationDataTableExistsAsync();
 
-            UpdateSentNotificationEntity updateNotificationobj = new UpdateSentNotificationEntity();
-            updateNotificationobj.NotificationId = sentNotificationId;
-            updateNotificationobj.NotificationEntity = updateSentNotificationDataEntity;
-            var json = JsonConvert.SerializeObject(updateNotificationobj);
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
-            var url = this.sendFunctionAppBaseURL + "SentUpdatedNotificationFunction";
-            using var client = new HttpClient();
+            var sendQueueMessageContent = new SendQueueMessageContent
             {
-                var response = await client.PostAsync(url, data);
-                string result = response.Content.ReadAsStringAsync().Result;
-            }
-
-            //await this.sentNotificationUpdateDataRepository.UpdateFromPostAsync(sentNotificationId, updateSentNotificationDataEntity);
+                NotificationId = sentNotificationId,
+                ActivtiyId = null,
+                RecipientData = null,
+                NotificationUpdatePreviewEntity = new NotificationUpdatePreviewEntity
+                {
+                    ActionType = "EditNotification",
+                    NotificationDataEntity = updateSentNotificationDataEntity,
+                    ConversationReferance = null,
+                    MessageActivity = null,
+                    ServiceUrl = null,
+                    AppID = null,
+                },
+            };
+            await this.sendQueue.SendAsync(sendQueueMessageContent);
             return this.Ok();
         }
 
@@ -400,26 +406,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             await this.notificationDataRepository.DeleteAsync(notificationEntity);
-            UpdateSentNotificationEntity updateNotificationobj = new UpdateSentNotificationEntity();
-            updateNotificationobj.NotificationId = id;
-            updateNotificationobj.NotificationEntity = null;
-            var json = JsonConvert.SerializeObject(updateNotificationobj);
-            var data = new StringContent(json, Encoding.UTF8, "application/json");
-            var url = this.sendFunctionAppBaseURL + "DeleteSentNotificationPost";
-            using var client = new HttpClient();
+            var deleteQueueMessageContent = new SendQueueMessageContent
             {
-                var response = await client.PostAsync(url, data);
-                string result = response.Content.ReadAsStringAsync().Result;
-            }
-
+                NotificationId = id,
+                ActivtiyId = null,
+                RecipientData = null,
+                NotificationUpdatePreviewEntity = new NotificationUpdatePreviewEntity
+                {
+                    ActionType = "DeleteNotification",
+                    NotificationDataEntity = null,
+                    ConversationReferance = null,
+                    MessageActivity = null,
+                    ServiceUrl = null,
+                    AppID = null,
+                },
+            };
+            await this.sendQueue.SendAsync(deleteQueueMessageContent);
             return this.Ok();
         }
 
         private async Task<string> GetActivityIDandLikes(NotificationDataEntity notificationEntity)
         {
-            var tenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
-            var serviceUrl = await this.appSettingsService.GetServiceUrlAsync();
-
+            // var tenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
+            // var serviceUrl = await this.appSettingsService.GetServiceUrlAsync();
             int likes = 0;
             try
             {
@@ -460,11 +469,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
             }
-
 
             return likes.ToString();
         }

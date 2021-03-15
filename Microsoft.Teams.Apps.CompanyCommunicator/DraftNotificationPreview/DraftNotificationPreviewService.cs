@@ -22,6 +22,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TemplateData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.CommonBot;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.SendQueue;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Newtonsoft.Json;
 
@@ -33,6 +34,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
         private static readonly string MsTeamsChannelId = "msteams";
         private static readonly string ChannelConversationType = "channel";
         private static readonly string ThrottledErrorResponse = "Throttled";
+        private readonly ISendQueue sendQueue;
 
         private readonly string botAppId;
         private readonly AdaptiveCardCreator adaptiveCardCreator;
@@ -47,11 +49,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
         /// <param name="adaptiveCardCreator">Adaptive card creator service.</param>
         /// <param name="companyCommunicatorBotAdapter">Bot framework http adapter instance.</param>
         /// <param name="templateDataRepository">The template data repository.</param>
+        /// <param name="sendQueue">The service bus queue for the data queue.</param>
         public DraftNotificationPreviewService(
             IOptions<BotOptions> botOptions,
             AdaptiveCardCreator adaptiveCardCreator,
             CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter,
-            ITemplateDataRepository templateDataRepository)
+            ITemplateDataRepository templateDataRepository,
+            ISendQueue sendQueue)
         {
             var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
             this.sendFunctionAppBaseURL = options.Value.SendFunctionAppBaseURL;
@@ -61,6 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
                 throw new ApplicationException("AuthorAppId setting is missing in the configuration.");
             }
 
+            this.sendQueue = sendQueue ?? throw new ArgumentNullException(nameof(sendQueue));
             this.adaptiveCardCreator = adaptiveCardCreator ?? throw new ArgumentNullException(nameof(adaptiveCardCreator));
             this.templateDataRepository = templateDataRepository ?? throw new ArgumentNullException(nameof(templateDataRepository));
             this.companyCommunicatorBotAdapter = companyCommunicatorBotAdapter ?? throw new ArgumentNullException(nameof(companyCommunicatorBotAdapter));
@@ -103,31 +108,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             // Trigger bot to send the adaptive card.
             try
             {
-                //await this.companyCommunicatorBotAdapter.ContinueConversationAsync(
-                //    this.botAppId,
-                //    conversationReference,
-                //    async (turnContext, cancellationToken) => await this.SendAdaptiveCardAsync(turnContext, draftNotificationEntity),
-                //    CancellationToken.None);
-
-                var previewDataEntity = new PreviewDataEntity
+                var previewQueueMessageContent = new SendQueueMessageContent
                 {
-                    ConversationReferance = conversationReference,
-                    MessageActivity = await this.GetPreviewMessageActivity(draftNotificationEntity),
-                    ServiceUrl = conversationReference.ServiceUrl,
-                    AppID = this.botAppId,
+                    NotificationId = draftNotificationEntity.Id,
+                    ActivtiyId = null,
+                    RecipientData = null,
+                    NotificationUpdatePreviewEntity = new NotificationUpdatePreviewEntity
+                    {
+                        ActionType = "PreviewNotification",
+                        NotificationDataEntity = null,
+                        ConversationReferance = conversationReference,
+                        MessageActivity = await this.GetPreviewMessageActivity(draftNotificationEntity),
+                        ServiceUrl = conversationReference.ServiceUrl,
+                        AppID = this.botAppId,
+                    },
                 };
-
-                var json = JsonConvert.SerializeObject(previewDataEntity);
-                var data = new StringContent(json, Encoding.UTF8, "application/json");
-
-                var url = this.sendFunctionAppBaseURL + "SendPreviewFunction";
-
-                using var client = new HttpClient();
-                {
-                    var response = await client.PostAsync(url, data);
-                    string result = response.Content.ReadAsStringAsync().Result;
-                }
-
+                await this.sendQueue.SendAsync(previewQueueMessageContent);
                 return HttpStatusCode.OK;
             }
             catch (ErrorResponseException e)
@@ -155,7 +151,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             var reply = this.CreateReply(draftNotificationEntity, templateDataEntityResult.TemplateJSON);
             var attachments = reply.Attachments[0];
             var sendCardActivity = new Activity(ActivityTypes.Message)
-            {                
+            {
                 Attachments = new List<Attachment>
                             {
                               new Attachment()
