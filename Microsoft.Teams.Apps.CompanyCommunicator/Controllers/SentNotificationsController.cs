@@ -64,7 +64,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly UserAppOptions userAppOptions;
         private readonly ILogger<SentNotificationsController> logger;
         private readonly IStringLocalizer<Strings> localizer;
-        private readonly string sendFunctionAppBaseURL;
         private string account;
 
         /// <summary>
@@ -138,7 +137,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
             this.account = string.Empty;
-            this.sendFunctionAppBaseURL = options.Value.SendFunctionAppBaseURL;
         }
 
         /// <summary>

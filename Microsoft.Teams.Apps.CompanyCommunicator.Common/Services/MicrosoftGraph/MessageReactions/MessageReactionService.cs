@@ -45,11 +45,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
                                                     .Request()
                                                     .WithMaxRetry(GraphConstants.MaxRetry)
                                                     .GetAsync();
-
             }
             catch (Exception)
             {
             }
+
             return response;
         }
     }

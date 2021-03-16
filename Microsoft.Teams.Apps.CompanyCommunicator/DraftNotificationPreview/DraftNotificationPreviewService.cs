@@ -40,7 +40,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
         private readonly AdaptiveCardCreator adaptiveCardCreator;
         private readonly CompanyCommunicatorBotAdapter companyCommunicatorBotAdapter;
         private readonly ITemplateDataRepository templateDataRepository;
-        private readonly string sendFunctionAppBaseURL;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationPreviewService"/> class.
@@ -58,7 +57,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
             ISendQueue sendQueue)
         {
             var options = botOptions ?? throw new ArgumentNullException(nameof(botOptions));
-            this.sendFunctionAppBaseURL = options.Value.SendFunctionAppBaseURL;
             this.botAppId = options.Value.AuthorAppId;
             if (string.IsNullOrEmpty(this.botAppId))
             {

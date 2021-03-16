@@ -1,3 +1,7 @@
+// <copyright file="QueueScheduledMessage.cs" company="Microsoft">
+// Copyright (c) Microsoft. All rights reserved.
+// </copyright>
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.SchduleMessage
 {
     using System;
@@ -74,7 +78,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.SchduleMessage
                     forceCompleteDataQueueMessageContent,
                     this.forceCompleteMessageDelayInSeconds);
             }
-
         }
 
         private string RoundAndFormatDateTime()
@@ -86,7 +89,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.SchduleMessage
             }
             catch (Exception ex)
             {
-
                 throw ex;
             }
         }

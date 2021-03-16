@@ -93,7 +93,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     botOptions.TenantId = configuration.GetValue<string>("TenantId");
                     botOptions.StorageAccount = configuration.GetValue<string>("ImageBlobStorageAccount");
                     botOptions.BlobContainerName = configuration.GetValue<string>("BlobContainerName");
-                    botOptions.SendFunctionAppBaseURL = configuration.GetValue<string>("SendFunctionAppBaseURL");
                 });
             services.AddOptions<BotFilterMiddlewareOptions>()
                 .Configure<IConfiguration>((botFilterMiddlewareOptions, configuration) =>

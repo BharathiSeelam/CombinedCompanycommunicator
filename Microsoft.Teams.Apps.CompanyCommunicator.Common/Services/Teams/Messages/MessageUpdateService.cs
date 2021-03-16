@@ -59,7 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
         public async Task UpdatePostSentNotification(
             NotificationDataEntity notificationDataEntity,
             string conversationId,
-            string recipientId,     
+            string recipientId,
             string serviceUrl,
             string tenantId,
             string activityId)
@@ -112,7 +112,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
             // return response;
         }
 
-        private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity , string templateJson)
+        private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity, string templateJson)
         {
             var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
                 notificationDataEntity.Title,

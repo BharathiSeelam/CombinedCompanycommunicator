@@ -25,6 +25,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <summary>
         /// Initializes a new instance of the <see cref="GroupsService"/> class.
         /// </summary>
+        /// <param name="betaServiceClient">betaServiceClient.</param>
         /// <param name="graphServiceClient">graph service client.</param>
         internal GroupsService(Beta.IGraphServiceClient betaServiceClient, IGraphServiceClient graphServiceClient)
         {
@@ -110,11 +111,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// Search Teams groups.
         /// </summary>
         /// <param name="query">query param.</param>
-
+        /// <param name="resultCount">resultCount.</param>
+        /// <param name="includeHiddenMembership">includeHiddenMembership.</param>
         /// <returns>list of group.</returns>
         private async Task<string> SearchTeamsGroupsAsync(string query, int resultCount, bool includeHiddenMembership = false)
         {
-
             string filterQuery = "resourceProvisioningOptions/Any(x:x eq 'Team') and " + query;
             var teamsID = await this.SearchTeamsAsync(filterQuery, resultCount);
             return teamsID;
