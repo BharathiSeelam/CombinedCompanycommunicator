@@ -42,19 +42,24 @@
 
             .ui-dropdown__container {
                 width: 100%;
+                span {
+                    color: #626365f7;
+                    font-weight: unset;
+                }
             }
 
             .ui-dropdown, .ui-text {
                 margin: 3rem 3.2rem;
                 font-size: 1.2rem;
-               .ui-dropdown__items-list {
+
+                .ui-dropdown__items-list {
                     width: 100%;
                 }
             }
 
             .templateDropdown {
                 margin: 1rem 3.2rem;
-                
+
                 li {
                     div {
                         width: inherit;
