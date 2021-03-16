@@ -307,12 +307,45 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
+            int likes = 0;
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 id);
+
             if (notificationEntity == null)
             {
                 return this.NotFound();
+            }
+
+            var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(id);
+            if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
+            {
+                var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
+                if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
+                {
+                    foreach (var teamsData in teamsDataEntity)
+                    {
+                        string teamsID = await this.groupsService.SearchTeamsGroupAsync("displayname eq '" + teamsData.Name + "'");
+
+                        if (!string.IsNullOrEmpty(teamsID))
+                        {
+                            var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
+                            int likeCount = 0;
+                            if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
+                            {
+                                foreach (var reaction in messageResponse.Reactions)
+                                {
+                                    if (reaction.ReactionType.ToString() == "like")
+                                    {
+                                        likeCount++;
+                                    }
+                                }
+
+                                likes = likeCount;
+                            }
+                        }
+                    }
+                }
             }
 
             // var groupNames = await this.groupsService.
@@ -347,6 +380,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 WarningMessage = notificationEntity.WarningMessage,
                 CanDownload = userNotificationDownload == null,
                 SendingCompleted = notificationEntity.IsCompleted(),
+                Likes = likes,
             };
 
             return this.Ok(result);
