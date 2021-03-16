@@ -45,16 +45,16 @@
             }
 
             .ui-dropdown, .ui-text {
-                margin: 0rem 3.2rem;
-
-                .ui-dropdown__items-list {
+                margin: 3rem 3.2rem;
+                font-size: 1.2rem;
+               .ui-dropdown__items-list {
                     width: 100%;
                 }
             }
 
             .templateDropdown {
-                margin: 0rem 3.2rem;
-
+                margin: 1rem 3.2rem;
+                
                 li {
                     div {
                         width: inherit;
@@ -69,7 +69,7 @@
             }
 
             .channelDropdown {
-                margin: 0rem 3.2rem;
+                margin: 1rem 3.2rem;
 
                 li {
                     div {
