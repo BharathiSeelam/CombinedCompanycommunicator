@@ -170,15 +170,13 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                                     <br />
                                     <label>{this.localize("Failure", { "FailureCount": this.state.message.failed })}</label>
                                     <br />
+                                    <label>{this.localize("Likes")}: {this.state.message.likes}</label>
+                                    <br />
                                     {this.state.message.unknown &&
                                         <>
                                         <label>{this.localize("Unknown", { "UnknownCount": this.state.message.unknown })}</label>
                                         </>
                                     }
-                                </div>
-                                <div className="contentField">
-                                    <h3>{this.localize("Likes")}</h3>
-                                    <span>{this.state.message.likes}</span>
                                 </div>
                                 <div className="contentField">
                                     {this.renderAudienceSelection()}

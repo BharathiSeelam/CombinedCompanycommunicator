@@ -84,6 +84,7 @@
   "Results": "Results",
   "Success": "Success : {{SuccessCount}}",
   "Failure": "Failure : {{FailureCount}}",
+  "Likes": "Likes",
   "Unknown": "Unknown : {{UnknownCount}}",
   "Throttled": "Throttled : ",
   "TooltipSuccess": "Success",
