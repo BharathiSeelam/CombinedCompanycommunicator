@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Schema;
@@ -50,19 +51,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         }
 
         /// <inheritdoc/>
-        public async Task<SentNotificationDataEntity> GetActivityIDAsync(string notificationID)
+        public async Task<List<SentNotificationDataEntity>> GetActivityIDAsync(string notificationID)
         {
+            List<SentNotificationDataEntity> lstSentDataRepository = new List<SentNotificationDataEntity>();
             SentNotificationDataEntity sentNotificationDatResult = null;
             var sentNotificationDataEntites = await this.GetAllAsync(notificationID);
             if (sentNotificationDataEntites != null)
             {
                 foreach (var sentNotificationDataEntity in sentNotificationDataEntites)
                 {
-                    sentNotificationDatResult = sentNotificationDataEntity;
+                    lstSentDataRepository.Add(sentNotificationDataEntity);
                 }
             }
 
-            return sentNotificationDatResult;
+            return lstSentDataRepository;
         }
     }
 }

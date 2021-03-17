@@ -4,6 +4,7 @@
 
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData
 {
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
 
@@ -29,6 +30,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         // <returns><see cref="Task"/> representing the result of the asynchronous operation.</returns>
         // public Task DeleteFromPostAsync(
         //    string notificationId);
-        public Task<SentNotificationDataEntity> GetActivityIDAsync(string notificationId);
+        public Task<List<SentNotificationDataEntity>> GetActivityIDAsync(string notificationId);
     }
 }

@@ -315,31 +315,34 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 return this.NotFound();
             }
 
-            var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(id);
-            if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
+            var sentNotificationEntities = await this.sentNotificationDataRepstry.GetActivityIDAsync(id);
+            foreach (var sentNotificationEntity in sentNotificationEntities)
             {
-                var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
-                if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
+                if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
                 {
-                    foreach (var teamsData in teamsDataEntity)
+                    var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
+                    if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
                     {
-                        string teamsID = await this.groupsService.SearchTeamsGroupAsync("displayname eq '" + teamsData.Name + "'");
-
-                        if (!string.IsNullOrEmpty(teamsID))
+                        foreach (var teamsData in teamsDataEntity)
                         {
-                            var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
-                            int likeCount = 0;
-                            if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
-                            {
-                                foreach (var reaction in messageResponse.Reactions)
-                                {
-                                    if (reaction.ReactionType.ToString() == "like")
-                                    {
-                                        likeCount++;
-                                    }
-                                }
+                            string teamsID = await this.groupsService.SearchTeamsGroupAsync("displayname eq '" + teamsData.Name + "'");
 
-                                likes = likeCount;
+                            if (!string.IsNullOrEmpty(teamsID))
+                            {
+                                var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
+                                int likeCount = 0;
+                                if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
+                                {
+                                    foreach (var reaction in messageResponse.Reactions)
+                                    {
+                                        if (reaction.ReactionType.ToString() == "like")
+                                        {
+                                            likeCount++;
+                                        }
+                                    }
+
+                                    likes = likeCount;
+                                }
                             }
                         }
                     }
@@ -462,6 +465,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             // var tenantId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeTenantId);
             // var serviceUrl = await this.appSettingsService.GetServiceUrlAsync();
             int likes = 0;
+            int likeCount = 0;
             try
             {
                 var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationEntity.Channel + "'", null);
@@ -470,31 +474,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     this.account = channelData.ChannelName;
                 }
 
-                var sentNotificationEntity = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);
-                if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
+                var sentNotificationEntities = await this.sentNotificationDataRepstry.GetActivityIDAsync(notificationEntity.RowKey);
+                foreach (var sentNotificationEntity in sentNotificationEntities)
                 {
-                    var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
-                    if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
+
+                    if (sentNotificationEntity != null && !string.IsNullOrEmpty(sentNotificationEntity.ConversationId))
                     {
-                        foreach (var teamsData in teamsDataEntity)
+                        var teamsDataEntity = await this.teamDataRepository.GetWithFilterAsync("RowKey eq '" + sentNotificationEntity.ConversationId + "'");
+                        if (teamsDataEntity != null && teamsDataEntity.ToArray().Length > 0)
                         {
-                            string teamsID = await this.groupsService.SearchTeamsGroupAsync("displayname eq '" + teamsData.Name + "'");
-
-                            if (!string.IsNullOrEmpty(teamsID))
+                            foreach (var teamsData in teamsDataEntity)
                             {
-                                var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
-                                int likeCount = 0;
-                                if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
-                                {
-                                    foreach (var reaction in messageResponse.Reactions)
-                                    {
-                                        if (reaction.ReactionType.ToString() == "like")
-                                        {
-                                            likeCount++;
-                                        }
-                                    }
+                                string teamsID = await this.groupsService.SearchTeamsGroupAsync("displayname eq '" + teamsData.Name + "'");
 
-                                    likes = likeCount;
+                                if (!string.IsNullOrEmpty(teamsID))
+                                {
+                                    var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
+
+                                    if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
+                                    {
+                                        foreach (var reaction in messageResponse.Reactions)
+                                        {
+                                            if (reaction.ReactionType.ToString() == "like")
+                                            {
+                                                likeCount++;
+                                            }
+                                        }
+
+                                        likes = likeCount;
+                                    }
                                 }
                             }
                         }
