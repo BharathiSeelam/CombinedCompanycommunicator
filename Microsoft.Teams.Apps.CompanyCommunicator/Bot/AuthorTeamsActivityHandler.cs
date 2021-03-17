@@ -267,7 +267,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         /// <returns>Messaging extension response object to fill compose extension section.</returns>
         protected override async Task<MessagingExtensionResponse> OnTeamsMessagingExtensionSelectItemAsync(ITurnContext<IInvokeActivity> turnContext, JObject query, CancellationToken cancellationToken)
         {
-            // The Preview card's Tap should have a Value property assigned, this will be returned to the bot in this event.
+            // The Preview card's Tap should have a Value property assigned, this will be returned to the bot in this event update.
             var title = (string)query["Title"];
             var imageUrl = (string)query["ImageLink"];
             var summary = (string)query["Summary"];
