@@ -9,14 +9,14 @@ Add the below code to the manifest.json
           "id": "Corp Comms",
           "title": "Search",
 		  "context": [ "compose", "commandBox" ],
-          "description": "Seacrh By Title",
+          "description": "Search By Title",
           "initialRun": true,
 		  "type": "query",  
           "parameters": [
             {
               "name": "searchText",
               "title": "Recent",
-              "description": "Seacrh By Title",
+              "description": "Search By Title",
 			  "inputType": "text"  
             }
           ]
