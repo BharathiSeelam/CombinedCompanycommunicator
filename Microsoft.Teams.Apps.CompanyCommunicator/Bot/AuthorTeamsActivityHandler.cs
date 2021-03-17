@@ -223,7 +223,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 var obj = await this.notificationDataRepository.GetWithFilterAsync("Title eq '" + text + "'", "SentNotifications");
                 var packages = obj;
                 var templateDataEntityResult = await this.templateDataRepository.GetAllTemplatesAsync();
-                // var cattachments = new List<MessagingExtensionAttachment>();
                 foreach (var package in packages)
                 {
                     var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
