@@ -306,6 +306,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> GetSentNotificationByIdAsync(string id)
         {
             int likes = 0;
+            int likeCount = 0;
             var notificationEntity = await this.notificationDataRepository.GetAsync(
                 NotificationDataTableNames.SentNotificationsPartition,
                 id);
@@ -330,7 +331,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                             if (!string.IsNullOrEmpty(teamsID))
                             {
                                 var messageResponse = await this.reactionService.GetMessagesAsync(teamsID, sentNotificationEntity.ConversationId, sentNotificationEntity.ActivtyId);
-                                int likeCount = 0;
+
                                 if (messageResponse != null && messageResponse.Reactions != null && messageResponse.Reactions.ToArray().Length > 0)
                                 {
                                     foreach (var reaction in messageResponse.Reactions)
