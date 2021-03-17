@@ -244,7 +244,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
                         cattachments.Add(attachment);
                     }
-
                 }
             }
 
