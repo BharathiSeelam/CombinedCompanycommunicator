@@ -55,6 +55,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<NotificationDataEntity>> GetFilterAsync(string filter, string partitionkey)
+        {
+            var result = await this.GetWithFilterAsync(filter, partitionkey);
+            return result;
+        }
+
+        /// <inheritdoc/>
         public async Task<string> MoveDraftToSentPartitionAsync(NotificationDataEntity draftNotificationEntity)
         {
             try

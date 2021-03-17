@@ -187,29 +187,65 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
         {
             turnContext = turnContext ?? throw new ArgumentNullException(nameof(turnContext));
             var text = query?.Parameters?[0]?.Value as string ?? string.Empty;
-            var obj = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
-            var packages = obj;
             var cattachments = new List<MessagingExtensionAttachment>();
-            foreach (var package in packages)
+            if (text == null || text == string.Empty || text == "true")
             {
-                var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
-                foreach (var cname in channelEntities)
+                var obj = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
+                var packages = obj;
+                var templateDataEntityResult = await this.templateDataRepository.GetAllTemplatesAsync();
+
+                foreach (var package in packages)
                 {
-                    var channelName = cname.ChannelName;
-                    var previewCard = new ThumbnailCard { Title = package.Title, Subtitle = package.Author, Text = channelName, Tap = new CardAction { Type = "invoke", Value = package } };
-                    if (!string.IsNullOrEmpty(package.ImageLink))
+                    var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
+                    foreach (var cname in channelEntities)
                     {
-                        previewCard.Images = new List<CardImage>() { new CardImage(package.ImageLink, "Icon") };
+                        var channelName = cname.ChannelName;
+                        var previewCard = new ThumbnailCard { Title = package.Title, Subtitle = package.Author, Text = channelName, Tap = new CardAction { Type = "invoke", Value = package } };
+                        if (!string.IsNullOrEmpty(package.ImageLink))
+                        {
+                            previewCard.Images = new List<CardImage>() { new CardImage(package.ImageLink, "Icon") };
+                        }
+
+                        var attachment = new MessagingExtensionAttachment
+                        {
+                            ContentType = HeroCard.ContentType,
+                            Content = new HeroCard { Title = package.Title },
+                            Preview = previewCard.ToAttachment(),
+                        };
+
+                        cattachments.Add(attachment);
                     }
 
-                    var attachment = new MessagingExtensionAttachment
+                }
+            }
+            else
+            {
+                var obj = await this.notificationDataRepository.GetWithFilterAsync("Title eq '" + text + "'", "SentNotifications");
+                var packages = obj;
+                var templateDataEntityResult = await this.templateDataRepository.GetAllTemplatesAsync();
+                // var cattachments = new List<MessagingExtensionAttachment>();
+                foreach (var package in packages)
+                {
+                    var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
+                    foreach (var cname in channelEntities)
                     {
-                        ContentType = HeroCard.ContentType,
-                        Content = new HeroCard { Title = package.Title },
-                        Preview = previewCard.ToAttachment(),
-                    };
+                        var channelName = cname.ChannelName;
+                        var previewCard = new ThumbnailCard { Title = package.Title, Subtitle = package.Author, Text = channelName, Tap = new CardAction { Type = "invoke", Value = package } };
+                        if (!string.IsNullOrEmpty(package.ImageLink))
+                        {
+                            previewCard.Images = new List<CardImage>() { new CardImage(package.ImageLink, "Icon") };
+                        }
 
-                    cattachments.Add(attachment);
+                        var attachment = new MessagingExtensionAttachment
+                        {
+                            ContentType = HeroCard.ContentType,
+                            Content = new HeroCard { Title = package.Title },
+                            Preview = previewCard.ToAttachment(),
+                        };
+
+                        cattachments.Add(attachment);
+                    }
+
                 }
             }
 
