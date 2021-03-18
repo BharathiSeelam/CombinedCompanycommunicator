@@ -30,6 +30,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         public Task<IEnumerable<NotificationDataEntity>> GetMostRecentSentNotificationsAsync();
 
         /// <summary>
+        /// Get all notification data entities, and filter the result  by name.
+        /// </summary>
+        /// <param name="filter">The notification entity filter.</param>
+        /// <param name="partitionkey">partitionkey.</param>
+        /// <returns>The channel data entities of filter condition.</returns>
+        public Task<IEnumerable<NotificationDataEntity>> GetFilterAsync(string filter, string partitionkey);
+
+        /// <summary>
         /// Move a draft notification from draft to sent partition.
         /// </summary>
         /// <param name="draftNotificationEntity">The draft notification instance to be moved to the sent partition.</param>
