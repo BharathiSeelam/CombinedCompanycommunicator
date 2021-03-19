@@ -91,18 +91,18 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
 
     public render(): JSX.Element {
         this.getAppSettingsList();
-        let show = false;
+        let show = true;
         if (loggedinUser != 'undefined' && loggedinUser != null) {
 
             if (adminArr.includes(loggedinUser) == true) {                
                 show = true;
             }
             else {
-                show = false;
+                show = true;
             }
         }
         else {
-            show = false;
+            show = true;
         }
         const panels = [
             {
