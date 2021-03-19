@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DLUserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
@@ -23,15 +24,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class DLUserController : ControllerBase
     {
         private readonly IDLUserDataRepository dlUserDataRepository;
+        private readonly IUsersService userService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DLUserController"/> class.
         /// </summary>
         /// <param name="dlUserDataRepository">dlUser data repository instance.</param>
+        /// <param name="userService">user data repository instance.</param>
         public DLUserController(
-            IDLUserDataRepository dlUserDataRepository)
+            IDLUserDataRepository dlUserDataRepository,
+            IUsersService userService)
         {
             this.dlUserDataRepository = dlUserDataRepository ?? throw new ArgumentNullException(nameof(dlUserDataRepository));
+            this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         /// <summary>
@@ -41,7 +46,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DLUser>>> GetAllDLUsersAsync()
         {
-            var dlUserEntities = await this.dlUserDataRepository.GetAllDLUsersAsync();
+            var dlUserEntities = await this.userService.GetAllUsersByAsync();
+            var result = new List<DLUser>();
+
+            foreach (var dlUserEntity in dlUserEntities)
+            {
+                var dlUsers = new DLUser
+                {
+                    UserEmail = dlUserEntity.UserPrincipalName,
+                    UserName = dlUserEntity.DisplayName,
+                };
+
+                result.Add(dlUsers);
+            }
+
+            return result;
+           /* var dlUserEntities = await this.dlUserDataRepository.GetAllDLUsersAsync();
 
             var result = new List<DLUser>();
             foreach (var dlUserEntity in dlUserEntities)
@@ -58,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 result.Add(dlUsers);
             }
 
-            return result;
+            return result;*/
         }
 
         /// <summary>

@@ -27,6 +27,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <returns>stream of users.</returns>
         IAsyncEnumerable<IEnumerable<User>> GetUsersAsync(string filter = null);
 
+
         /// <summary>
         /// get user by id.
         /// </summary>
@@ -42,6 +43,14 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <param name="deltaLink">Delta link.</param>
         /// <returns>List of users and delta link.</returns>
         Task<(IEnumerable<User>, string)> GetAllUsersAsync(string deltaLink = null);
+
+        /// <summary>
+        /// Gets all the users in the tenant. Doesn't include 'Guest' users.
+        ///
+        /// Note: If delta link is passed, the API returns delta changes only.
+        /// </summary>
+        /// <returns>List of users and delta link.</returns>
+        Task<List<User>> GetAllUsersByAsync();
 
         /// <summary>
         /// Checks if the user has teams license.

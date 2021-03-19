@@ -176,6 +176,36 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         }
 
         /// <inheritdoc/>
+        public async Task<List<User>> GetAllUsersByAsync()
+        {
+            var users = new List<User>();
+            IUserDeltaCollectionPage collectionPage;
+            collectionPage = await this.graphServiceClient
+                     .Users
+                     .Delta()
+                     .Request()
+                     .Select("id, displayName, userPrincipalName, userType")
+                     .Top(GraphConstants.MaxPageSize)
+                     .WithMaxRetry(GraphConstants.MaxRetry)
+                     .GetAsync();
+
+            users.AddRange(collectionPage);
+
+            while (collectionPage.NextPageRequest != null)
+            {
+                collectionPage = await collectionPage
+                    .NextPageRequest
+                    .WithMaxRetry(GraphConstants.MaxRetry)
+                    .GetAsync();
+
+                users.AddRange(collectionPage);
+            }
+
+            collectionPage.AdditionalData.TryGetValue("@odata.deltaLink", out object delta);
+            return users;
+        }
+
+        /// <inheritdoc/>
         public async Task<bool> HasTeamsLicenseAsync(string userId)
         {
             if (string.IsNullOrEmpty(userId))
