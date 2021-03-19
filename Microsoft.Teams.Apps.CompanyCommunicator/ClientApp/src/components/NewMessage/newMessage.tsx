@@ -424,7 +424,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 let userResponse = await getAdminChannels(loggedinUser, channelDetails["id"]);
                 if (userResponse.data.length > 0) {
                     let userDls = userResponse.data[0]["channelAdminDLs"];
-                    let reg = /(\(.*?\))/gi;
+                    let reg = /(\(.?\))/gi;
                     userDls = userDls.replace(reg, "");
                     let eachUser = userDls.split(",");
                     eachUser.map(async (Element): Promise<any> => {
