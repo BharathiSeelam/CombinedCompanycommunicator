@@ -11,6 +11,9 @@
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
 
+    /// <summary>
+    /// Controller for the Appsettings.
+    /// </summary>
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     [Route("api/appsettings")]
     public class AppsettingsController : Controller
@@ -20,7 +23,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="AppsettingsController"/> class.
         /// </summary>
-        /// <param name="configuration"></param>
+        /// <param name="configuration">configuration</param>
         public AppsettingsController(IConfiguration configuration)
         {
             this.configuration = configuration;
@@ -36,7 +39,8 @@
             {
                 AuthorizedCreatorUpns = this.ViewBag.connectionstring,
             };
-            result.Add(settings);            
+            result.Add(settings);
+
             return this.Ok(result);
         }
     }

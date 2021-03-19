@@ -12,12 +12,13 @@ import { Accordion, Button } from '@stardust-ui/react';
 import Tabs, { TabPane } from 'rc-tabs';
 import { getDraftMessagesList, getChannelsList } from '../../actions';
 import { getAppsettings } from '../../apis/appSettingsApi';
+import { getChannels } from '../../apis/channelListApi';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
 let loggedinUser;
 let sadmin;
 let adminArr: string[]= [];
-
+let show = false;
 interface ITaskInfo {
     title?: string;
     height?: number;
@@ -39,29 +40,64 @@ type Settings = {
 export interface ITabContainerState {
     messageURL: string;
     channelURL: string;
+    showTabs: boolean;
+    showChannelAdmins: boolean;
 }
 
 class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     readonly localize: TFunction;
-    constructor(props: ITaskInfoProps) {
+    constructor(props: ITaskInfoProps,state: ITabContainerState) {
         super(props);
         this.localize = this.props.t;
         this.state = {
             messageURL: getBaseUrl() + "/newmessage?locale={locale}",
-            channelURL: getBaseUrl() + "/newchannel?locale={locale}"
+            channelURL: getBaseUrl() + "/newchannel?locale={locale}",
+            showTabs: false,
+            showChannelAdmins:false
         }
         this.escFunction = this.escFunction.bind(this);
     }
 
-   public componentDidMount() {
+    public async componentDidMount() {
         microsoftTeams.initialize();     
-        this.getAppSettingsList();
+       
         document.addEventListener("keydown", this.escFunction, false);
         microsoftTeams.getContext(context => {
             loggedinUser = context.loginHint;
             var sloggedin = loggedinUser;
             loggedinUser = sloggedin.toLowerCase();
         });
+        await this.getAppSettingsList();
+     //  this.getAppSettingsList();
+       // const channelAdmins = await getChannels(); 
+       // const channelAdminsdata = channelAdmins.data;
+       // let channelEmails ="";
+        //channelAdminsdata.map(result => {
+        //    channelEmails += result["channelAdminEmail"].toLowerCase() + ",";
+
+        //});
+       // console.log(channelEmails);
+       // console.log(channelEmails.includes(loggedinUser));
+       // if (channelEmails.includes(loggedinUser) == true) {
+       //     this.setState({
+       //         showChannelAdmins:true
+        //    })
+       // }
+        if (loggedinUser != 'undefined' && loggedinUser != null) {
+
+           if (adminArr.includes(loggedinUser) == true) {
+               show = true;
+               this.setState({
+                   showTabs: true
+
+               });
+           }
+           
+       }
+       else {
+           show = false;
+       }
+       console.log(this.state.showTabs);
     }
 
     private getAppSettingsList = async () => {
@@ -90,20 +126,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     }
 
     public render(): JSX.Element {
-        this.getAppSettingsList();
-        let show = true;
-        if (loggedinUser != 'undefined' && loggedinUser != null) {
-
-            if (adminArr.includes(loggedinUser) == true) {                
-                show = true;
-            }
-            else {
-                show = true;
-            }
-        }
-        else {
-            show = true;
-        }
+        
         const panels = [
             {
                 title: this.localize('DraftMessagesSectionTitle'),
@@ -130,7 +153,8 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         ]
         return (
             <div className="tabContainer">
-                {show ?
+                
+                {this.state.showTabs ?
                     <Tabs defaultActiveKey="1" onChange={this.callback} >
                         <TabPane tab="Messages" key="1">
                             <div className="newPostBtn">
@@ -154,16 +178,16 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                                 <ChannelAdmins></ChannelAdmins>
                             </div>
                         </TabPane>
-                    </Tabs> : <Tabs defaultActiveKey="1" onChange={this.callback} >
-                        <TabPane tab="Messages" key="1">
-                            <div className="newPostBtn">
-                                <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
-                            </div>
-                            <div className="messageContainer">
-                                <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
-                            </div>
-                        </TabPane>
-                    </Tabs>}
+                    </Tabs> :  <Tabs defaultActiveKey="1" onChange={this.callback} >
+                            <TabPane tab="Messages" key="1">
+                                <div className="newPostBtn">
+                                    <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
+                                </div>
+                                <div className="messageContainer">
+                                    <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
+                                </div>
+                            </TabPane>
+                        </Tabs> }
             </div>
         );
     }
