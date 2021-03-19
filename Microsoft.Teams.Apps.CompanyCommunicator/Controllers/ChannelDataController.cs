@@ -102,21 +102,31 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("channelAdmin/{channelAdminEmail}/{id}")]
         public async Task<ActionResult<ChannelData>> GetChannelByAdminEmailAsync(string channelAdminEmail, string id)
         {
-            var channelEntities = await this.channelDataRepository.GetWithFilterAsync("ChannelAdminEmail eq '" + channelAdminEmail + "' and Id eq '" + id + "'", "Default");
+            var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + id + "'", "Default");
 
             var result = new List<ChannelData>();
             foreach (var channelEntity in channelEntities)
             {
-                var channels = new ChannelData
+                var loggedinUser = channelEntity.ChannelAdminEmail.Split(",");
+                if (loggedinUser.Length >= 0)
                 {
-                    Id = channelEntity.Id,
-                    ChannelName = channelEntity.ChannelName,
-                    ChannelDescription = channelEntity.ChannelDescription,
-                    ChannelAdmins = channelEntity.ChannelAdmins,
-                    ChannelAdminDLs = channelEntity.ChannelAdminDLs,
-                    ChannelAdminEmail = channelEntity.ChannelAdminEmail,
-                };
-                result.Add(channels);
+                foreach (var loggedin in loggedinUser)
+                    {
+                    if (loggedin == channelAdminEmail)
+                        {
+                            var channels = new ChannelData
+                            {
+                                Id = channelEntity.Id,
+                                ChannelName = channelEntity.ChannelName,
+                                ChannelDescription = channelEntity.ChannelDescription,
+                                ChannelAdmins = channelEntity.ChannelAdmins,
+                                ChannelAdminDLs = channelEntity.ChannelAdminDLs,
+                                ChannelAdminEmail = channelEntity.ChannelAdminEmail,
+                            };
+                            result.Add(channels);
+                        }
+                    }
+                }
             }
 
             return this.Ok(result);
