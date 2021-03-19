@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
@@ -37,6 +38,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
         private readonly IDistributionListDataRepository distributionListDataRepository;
+        private string loggedinuser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -222,28 +224,67 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<string> GetAppsettingsConnection()
+        {
+            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: false);
+
+            IConfiguration config = builder.Build();
+            var authorizedCreatorUpns = config.GetSection("AuthorizedCreatorUpns").Value;
+            return authorizedCreatorUpns.ToString();
+        }
+
+        /// <summary>
         /// Get draft notifications.
         /// </summary>
         /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
-
+            var appsettingsadmin = this.GetAppsettingsConnection().Result;
+            string[] adminsarr = appsettingsadmin.Split(",");
+            this.loggedinuser = this.HttpContext.User?.Identity?.Name;
+            var sloggedin = string.Empty + this.loggedinuser;
+            this.loggedinuser = sloggedin.ToLower();
             var result = new List<DraftNotificationSummary>();
-            foreach (var notificationEntity in notificationEntities)
+            if (adminsarr.Contains(this.loggedinuser))
             {
-                var summary = new DraftNotificationSummary
+                var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
+                foreach (var notificationEntity in notificationEntities)
                 {
-                    Id = notificationEntity.Id,
-                    Title = notificationEntity.Title,
-                    PublishOn = notificationEntity.PublishOn,
-                };
+                    var summary = new DraftNotificationSummary
+                    {
+                        Id = notificationEntity.Id,
+                        Title = notificationEntity.Title,
+                        PublishOn = notificationEntity.PublishOn,
+                    };
 
-                result.Add(summary);
+                    result.Add(summary);
+                }
+
+                return result;
             }
+            else
+            {
+                this.loggedinuser = sloggedin;
+                var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinuser + "'", "DraftNotifications");
 
-            return result;
+                foreach (var notificationEntity in notificationEntities)
+                {
+                    var summary = new DraftNotificationSummary
+                    {
+                        Id = notificationEntity.Id,
+                        Title = notificationEntity.Title,
+                        PublishOn = notificationEntity.PublishOn,
+                    };
+
+                    result.Add(summary);
+                }
+
+                return result;
+            }
         }
 
         /// <summary>

@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.Extensions.Options;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
 
     /// <summary>
     /// This class is an authorization handler, which handles the authorization requirement.
@@ -19,20 +20,41 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Authentication
     {
         private readonly bool disableCreatorUpnCheck;
         private readonly HashSet<string> authorizedCreatorUpnsSet;
+        private readonly IChannelDataRepository channelDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MustBeValidUpnHandler"/> class.
         /// </summary>
         /// <param name="authenticationOptions">The authentication options.</param>
-        public MustBeValidUpnHandler(IOptions<AuthenticationOptions> authenticationOptions)
+        /// <param name="channelDataRepository">channelDataRepository</param>
+        public MustBeValidUpnHandler(IOptions<AuthenticationOptions> authenticationOptions, IChannelDataRepository channelDataRepository)
         {
+            this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.disableCreatorUpnCheck = authenticationOptions.Value.DisableCreatorUpnCheck;
-            var authorizedCreatorUpns = authenticationOptions.Value.AuthorizedCreatorUpns;
+            var channeladmins = this.Getdata().Result;
+            var authorizedCreatorUpns = authenticationOptions.Value.AuthorizedCreatorUpns + ", " + channeladmins;
             this.authorizedCreatorUpnsSet = authorizedCreatorUpns
                 ?.Split(new char[] { ';', ',' }, StringSplitOptions.RemoveEmptyEntries)
                 ?.Select(p => p.Trim())
                 ?.ToHashSet()
                 ?? new HashSet<string>();
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<string> Getdata()
+        {
+            var email = string.Empty;
+            var data = await this.channelDataRepository.GetAllSortedAlphabeticallyByNameAsync();
+
+            foreach (var items in data.Select(x => x.ChannelAdminEmail).Distinct())
+            {
+                email += items + ", ";
+            }
+
+            return email;
         }
 
         /// <summary>

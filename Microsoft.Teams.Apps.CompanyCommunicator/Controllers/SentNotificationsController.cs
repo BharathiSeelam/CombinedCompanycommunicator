@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -65,6 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ILogger<SentNotificationsController> logger;
         private readonly IStringLocalizer<Strings> localizer;
         private string account;
+        private string loggedinuser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -262,36 +264,85 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
+        ///
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<string> GetAppsettingsConnection()
+        {
+            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: false);
+
+            IConfiguration config = builder.Build();
+            var authorizedCreatorUpns = config.GetSection("AuthorizedCreatorUpns").Value;
+            return authorizedCreatorUpns.ToString();
+        }
+
+        /// <summary>
         /// Get most recently sent notification summaries.
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
 
+            var appsettingsadmin = this.GetAppsettingsConnection().Result;
+            string[] adminsarr = appsettingsadmin.Split(",");
+            this.loggedinuser = this.HttpContext.User?.Identity?.Name;
+            var sloggedin = string.Empty + this.loggedinuser;
+            this.loggedinuser = sloggedin.ToLower();
             var result = new List<SentNotificationSummary>();
-            foreach (var notificationEntity in notificationEntities)
+            if (adminsarr.Contains(this.loggedinuser))
             {
-                string likes = await this.GetActivityIDandLikes(notificationEntity);
-                var summary = new SentNotificationSummary
+                var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
+                foreach (var notificationEntity in notificationEntities)
                 {
-                    Id = notificationEntity.Id,
-                    Title = notificationEntity.Title,
-                    Account = this.account,
-                    CreatedDateTime = notificationEntity.CreatedDate,
-                    SentDate = notificationEntity.SentDate,
-                    Succeeded = notificationEntity.Succeeded,
-                    Edited = notificationEntity.Edited,
-                    Failed = notificationEntity.Failed,
-                    Unknown = this.GetUnknownCount(notificationEntity),
-                    TotalMessageCount = notificationEntity.TotalMessageCount,
-                    SendingStartedDate = notificationEntity.SendingStartedDate,
-                    Status = notificationEntity.GetStatus(),
-                    Likes = likes,
-                };
+                    string likes = await this.GetActivityIDandLikes(notificationEntity);
+                    var summary = new SentNotificationSummary
+                    {
+                        Id = notificationEntity.Id,
+                        Title = notificationEntity.Title,
+                        Account = this.account,
+                        CreatedDateTime = notificationEntity.CreatedDate,
+                        SentDate = notificationEntity.SentDate,
+                        Succeeded = notificationEntity.Succeeded,
+                        Edited = notificationEntity.Edited,
+                        Failed = notificationEntity.Failed,
+                        Unknown = this.GetUnknownCount(notificationEntity),
+                        TotalMessageCount = notificationEntity.TotalMessageCount,
+                        SendingStartedDate = notificationEntity.SendingStartedDate,
+                        Status = notificationEntity.GetStatus(),
+                        Likes = likes,
+                    };
 
-                result.Add(summary);
+                    result.Add(summary);
+                }
+                return result;
+            }
+            else
+            {
+                this.loggedinuser = sloggedin;
+                var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinuser + "'", "SentNotifications");
+                foreach (var notificationEntity in notificationEntities)
+                {
+                    string likes = await this.GetActivityIDandLikes(notificationEntity);
+                    var summary = new SentNotificationSummary
+                    {
+                        Id = notificationEntity.Id,
+                        Title = notificationEntity.Title,
+                        Account = this.account,
+                        CreatedDateTime = notificationEntity.CreatedDate,
+                        SentDate = notificationEntity.SentDate,
+                        Succeeded = notificationEntity.Succeeded,
+                        Edited = notificationEntity.Edited,
+                        Failed = notificationEntity.Failed,
+                        Unknown = this.GetUnknownCount(notificationEntity),
+                        TotalMessageCount = notificationEntity.TotalMessageCount,
+                        SendingStartedDate = notificationEntity.SendingStartedDate,
+                        Status = notificationEntity.GetStatus(),
+                        Likes = likes,
+                    };
+
+                    result.Add(summary);
+                }
             }
 
             return result;

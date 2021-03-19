@@ -215,6 +215,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
             services.AddTransient<IUserDataService, UserDataService>();
             services.AddTransient<ITeamMembersService, TeamMembersService>();
             services.AddTransient<IMessageReactionService, MessageReactionService>();
+
+            // Add Appsettings Controller dependencies.
+            services.AddMvc();
+            services.AddSingleton<IConfiguration>(this.Configuration);
         }
 
         /// <summary>
