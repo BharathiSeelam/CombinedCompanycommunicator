@@ -59,7 +59,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
         document.addEventListener("keydown", this.escFunction, false);
         microsoftTeams.getContext(context => {
             loggedinUser = context.loginHint;
-            var sloggedin = '' + loggedinUser;
+            var sloggedin = loggedinUser;
             loggedinUser = sloggedin.toLowerCase();
         });
     }
