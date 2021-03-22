@@ -17,8 +17,8 @@ import { connect } from 'react-redux';
 import { TFunction } from "i18next";
 let loggedinUser;
 let sadmin;
-let adminArr: string[]= [];
-let show = false;
+let adminArr: string[] = [];
+
 interface ITaskInfo {
     title?: string;
     height?: number;
@@ -68,26 +68,11 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
             loggedinUser = sloggedin.toLowerCase();
         });
         await this.getAppSettingsList();
-     //  this.getAppSettingsList();
-       // const channelAdmins = await getChannels(); 
-       // const channelAdminsdata = channelAdmins.data;
-       // let channelEmails ="";
-        //channelAdminsdata.map(result => {
-        //    channelEmails += result["channelAdminEmail"].toLowerCase() + ",";
-
-        //});
-       // console.log(channelEmails);
-       // console.log(channelEmails.includes(loggedinUser));
-       // if (channelEmails.includes(loggedinUser) == true) {
-       //     this.setState({
-       //         showChannelAdmins:true
-        //    })
-       // }
+     
         if (loggedinUser != 'undefined' && loggedinUser != null) {
 
            if (adminArr.includes(loggedinUser) == true) {
-               show = true;
-               this.setState({
+                              this.setState({
                    showTabs: true
 
                });
@@ -95,7 +80,10 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
            
        }
        else {
-           show = false;
+            this.setState({
+                showTabs: false
+
+            });
        }
        console.log(this.state.showTabs);
     }

@@ -50,6 +50,57 @@
         "definition": {
           "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
           "actions": {
+            "Audience": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Audience",
+                    "type": "string",
+                    "value": "https://graph.microsoft.com/"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Secret": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "ClientId": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "ClientId",
+                    "type": "string",
+                    "value": "e365f9c6-77cc-4914-8a3b-d853ef72c579"
+                  }
+                ]
+              },
+              "runAfter": {
+                "TenantId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Flag": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Flag",
+                    "type": "boolean",
+                    "value": "@false"
+                  }
+                ]
+              },
+              "runAfter": {
+                "GroupType": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
             "For_each": {
               "actions": {
                 "Condition": {
@@ -209,6 +260,7 @@
                         "body": {
                           "DLID": "@{items('For_each')?['id']}",
                           "DLMail": "@{items('For_each')?['mail']}",
+                          "DLMemberCount": "@length(body('HTTP_2')['value'])",
                           "DLName": "@{items('For_each')?['displayName']}",
                           "GroupType": "@{variables('varGroupType')}",
                           "PartitionKey": "Default",
@@ -280,9 +332,8 @@
                     ]
                   },
                   "runAfter": {
-                    "Get_entity": [
-                      "Succeeded",
-                      "Failed"
+                    "HTTP_2": [
+                      "Succeeded"
                     ]
                   },
                   "type": "If"
@@ -368,7 +419,8 @@
                   },
                   "runAfter": {
                     "Condition_9": [
-                      "Succeeded"
+                      "Succeeded",
+                      "Failed"
                     ]
                   },
                   "type": "If"
@@ -512,8 +564,9 @@
                     }
                   },
                   "runAfter": {
-                    "HTTP_2": [
-                      "Succeeded"
+                    "Condition": [
+                      "Succeeded",
+                      "Failed"
                     ]
                   },
                   "type": "ApiConnection"
@@ -534,47 +587,102 @@
                 "HTTP_2": {
                   "inputs": {
                     "authentication": {
-                      "audience": "https://graph.microsoft.com/",
-                      "clientId": "7f071013-13c8-4858-b9cf-5b9fadfe5223",
-                      "secret": "9va-bO.69APmPnNx~TAB~ho2nXg216P5OH",
-                      "tenant": "73e2dc65-e18d-4421-8da7-e96d82b63aae",
+                      "audience": "@variables('Audience')",
+                      "clientId": "@variables('ClientId')",
+                      "secret": "@variables('Secret')",
+                      "tenant": "@variables('TenantId')",
                       "type": "ActiveDirectoryOAuth"
                     },
                     "method": "GET",
-                    "uri": "https://graph.microsoft.com/v1.0/groups/@{items('For_each')?['id']}/members"
+                    "uri": "@{variables('UserUri')}"
                   },
                   "runAfter": {
-                    "Condition": [
+                    "Set_UserUri": [
                       "Succeeded"
                     ]
                   },
                   "type": "Http"
+                },
+                "Set_UserUri": {
+                  "inputs": {
+                    "name": "UserUri",
+                    "value": "https://graph.microsoft.com/v1.0/groups/@{items('For_each')?['id']}/members"
+                  },
+                  "runAfter": {
+                    "Get_entity": [
+                      "Succeeded",
+                      "Failed"
+                    ]
+                  },
+                  "type": "SetVariable"
                 }
               },
-              "foreach": "@body('HTTP')['value']",
+              "foreach": "@variables('GroupArray')",
               "runAfter": {
-                "Initialize_variable_2": [
+                "PageNationCheck": [
                   "Succeeded"
                 ]
               },
               "type": "Foreach"
             },
-            "HTTP": {
+            "For_each_5": {
+              "actions": {
+                "Append_to_array_variable": {
+                  "inputs": {
+                    "name": "GroupArray",
+                    "value": "@items('For_each_5')"
+                  },
+                  "runAfter": {},
+                  "type": "AppendToArrayVariable"
+                }
+              },
+              "foreach": "@body('Get_Groups')['value']",
+              "runAfter": {
+                "Get_Groups": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "Get_Groups": {
               "inputs": {
                 "authentication": {
-                  "audience": "https://graph.microsoft.com/",
-                  "clientId": "7f071013-13c8-4858-b9cf-5b9fadfe5223",
-                  "secret": "9va-bO.69APmPnNx~TAB~ho2nXg216P5OH",
-                  "tenant": "73e2dc65-e18d-4421-8da7-e96d82b63aae",
+                  "audience": "@variables('Audience')",
+                  "clientId": "@variables('ClientId')",
+                  "secret": "@variables('Secret')",
+                  "tenant": "@variables('TenantId')",
                   "type": "ActiveDirectoryOAuth"
                 },
                 "method": "GET",
-                "uri": "https://graph.microsoft.com/v1.0/groups"
+                "uri": "@variables('GroupUri')"
               },
-              "runAfter": {},
+              "runAfter": {
+                "GroupArray": [
+                  "Succeeded"
+                ],
+                "UserUri": [
+                  "Succeeded"
+                ]
+              },
               "type": "Http"
             },
-            "Initialize_variable": {
+            "GroupArray": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "GroupArray",
+                    "type": "array"
+                  }
+                ]
+              },
+              "runAfter": {
+                "boolloopDone": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "GroupType": {
               "inputs": {
                 "variables": [
                   {
@@ -584,24 +692,192 @@
                 ]
               },
               "runAfter": {
-                "HTTP": [
+                "nextlink": [
                   "Succeeded"
                 ]
               },
               "type": "InitializeVariable"
             },
-            "Initialize_variable_2": {
+            "GroupUri": {
               "inputs": {
                 "variables": [
                   {
-                    "name": "Flag",
+                    "name": "GroupUri",
+                    "type": "string",
+                    "value": "https://graph.microsoft.com/v1.0/groups"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Audience": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "PageNationCheck": {
+              "actions": {
+                "Set_nextLink": {
+                  "inputs": {
+                    "name": "nextlink",
+                    "value": "@{decodeUriComponent(body('Get_Groups')?['@odata.nextLink'])}"
+                  },
+                  "runAfter": {},
+                  "type": "SetVariable"
+                },
+                "Until": {
+                  "actions": {
+                    "For_each_6": {
+                      "actions": {
+                        "Append_to_array_variable_2": {
+                          "inputs": {
+                            "name": "GroupArray",
+                            "value": "@items('For_each_6')"
+                          },
+                          "runAfter": {},
+                          "type": "AppendToArrayVariable"
+                        }
+                      },
+                      "foreach": "@body('GetGroupsNextPage')['value']",
+                      "runAfter": {
+                        "GetGroupsNextPage": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Foreach"
+                    },
+                    "GetGroupsNextPage": {
+                      "inputs": {
+                        "authentication": {
+                          "audience": "@variables('Audience')",
+                          "clientId": "@variables('ClientId')",
+                          "secret": "@variables('Secret')",
+                          "tenant": "@variables('TenantId')",
+                          "type": "ActiveDirectoryOAuth"
+                        },
+                        "method": "GET",
+                        "uri": "@variables('nextlink')"
+                      },
+                      "runAfter": {},
+                      "type": "Http"
+                    }
+                  },
+                  "expression": "@equals(variables('bool_loopDone'), true)",
+                  "limit": {
+                    "count": 5,
+                    "timeout": "PT1H"
+                  },
+                  "runAfter": {
+                    "Set_nextLink": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Until"
+                }
+              },
+              "else": {
+                "actions": {
+                  "Set_loopdone": {
+                    "inputs": {
+                      "name": "bool_loopDone",
+                      "value": "@true"
+                    },
+                    "runAfter": {},
+                    "type": "SetVariable"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "contains": [
+                      "@string(body('Get_Groups'))",
+                      "odata.nextLink"
+                    ]
+                  }
+                ]
+              },
+              "runAfter": {
+                "For_each_5": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If"
+            },
+            "Secret": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "Secret",
+                    "type": "string",
+                    "value": "~I~_YBnL3swKeJZpHBfa9o~qn4H45h7.56"
+                  }
+                ]
+              },
+              "runAfter": {
+                "ClientId": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "TenantId": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "TenantId",
+                    "type": "string",
+                    "value": "73e2dc65-e18d-4421-8da7-e96d82b63aae"
+                  }
+                ]
+              },
+              "runAfter": {},
+              "type": "InitializeVariable"
+            },
+            "UserUri": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "UserUri",
+                    "type": "string"
+                  }
+                ]
+              },
+              "runAfter": {
+                "GroupUri": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "boolloopDone": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "bool_loopDone",
                     "type": "boolean",
                     "value": "@false"
                   }
                 ]
               },
               "runAfter": {
-                "Initialize_variable": [
+                "Flag": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "nextlink": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "nextlink",
+                    "type": "string"
+                  }
+                ]
+              },
+              "runAfter": {
+                "TenantId": [
                   "Succeeded"
                 ]
               },
@@ -630,9 +906,9 @@
           "$connections": {
             "value": {
               "azuretables": {
-                "connectionId": "/subscriptions/98590240-1726-40d9-a6ea-8fdc1fc448b3/resourceGroups/MS-ECIF-Programs/providers/Microsoft.Web/connections/azuretables",
-                "connectionName": "azuretables",
-                "id": "/subscriptions/98590240-1726-40d9-a6ea-8fdc1fc448b3/providers/Microsoft.Web/locations/centralus/managedApis/azuretables"
+                "connectionId": "/subscriptions/fb855967-c6c7-44a9-bb38-5d49b9277e3c/resourceGroups/MS-ECIF-USWEST/providers/Microsoft.Web/connections/azuretables",
+                "connectionName": "azuretableconnection",
+                "id": "/subscriptions/fb855967-c6c7-44a9-bb38-5d49b9277e3c/providers/Microsoft.Web/locations/westus/managedApis/azuretables"
               }
             }
           }
