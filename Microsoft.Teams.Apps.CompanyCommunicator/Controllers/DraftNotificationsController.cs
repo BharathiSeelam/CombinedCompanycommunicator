@@ -268,7 +268,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
             else
             {
-                this.loggedinuser = sloggedin;
+                //this.loggedinuser = sloggedin;
+
                 var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinuser + "'", "DraftNotifications");
 
                 foreach (var notificationEntity in notificationEntities)
