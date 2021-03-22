@@ -6,7 +6,7 @@
       "value": "Test_Deployment_App"
     },
     "logicAppLocation": {
-      "value": "centralus"
+      "value": "westus"
     }
   }
 }
