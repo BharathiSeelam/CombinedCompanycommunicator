@@ -16,15 +16,17 @@ export class ImageUtil {
             context.fillRect(0, 0, canvas.width, canvas.height);
             context.font = "16px Arial";
             context.fillStyle = "#fff";
-            const split = name.split(' ');
-            const len = split.length;
-            const first = split[0][0];
-            if (len > 1) {
-                const last = split[len - 1][0];
-                const initials = first + last;
-                context.fillText(initials.toUpperCase(), 3, 23);
-            } else {
-                context.fillText(first.toUpperCase(), 10, 23);
+            if (name !== null) {
+                const split = name.split(' ');
+                const len = split.length;
+                const first = split[0][0];
+                if (len > 1) {
+                    const last = split[len - 1][0];
+                    const initials = first + last;
+                    context.fillText(initials.toUpperCase(), 3, 23);
+                } else {
+                    context.fillText(first.toUpperCase(), 10, 23);
+                }
             }
             const data = canvas.toDataURL();
             document.body.removeChild(canvas);
