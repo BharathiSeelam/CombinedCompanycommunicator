@@ -129,16 +129,18 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             const key = 'userName';
             //const uniqueItems = [...new Map(items.map(item => [item[key], item])).values()];
             items.forEach((element) => {
-                resultedTeams.push({
-                    key: element.userEmail,
-                    header: element.userName,
-                    content: element.userEmail,
-                    image: ImageUtil.makeInitialImage(element.userName),
-                    team: {
-                        id: element.userEmail
-                    },
+                if (element.userEmail !== null || element.userName !== null) {
+                    resultedTeams.push({
+                        key: element.userEmail,
+                        header: element.userName,
+                        content: element.userEmail,
+                        image: ImageUtil.makeInitialImage(element.userName),
+                        team: {
+                            id: element.userEmail
+                        },
 
-                });
+                    });
+                }
             });
         }
         return resultedTeams;
