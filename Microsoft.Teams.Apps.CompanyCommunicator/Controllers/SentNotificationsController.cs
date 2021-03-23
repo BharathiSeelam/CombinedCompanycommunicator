@@ -67,6 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IStringLocalizer<Strings> localizer;
         private string account;
         private string loggedinuser;
+        private readonly IConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SentNotificationsController"/> class.
@@ -90,6 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="appSettingsService">App settings service.</param>
         /// <param name="userAppOptions">User app options.</param>
         /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="configuration">The Configuration.</param>
         /// <param name="botOptions">bot options.</param>
         public SentNotificationsController(
             IChannelDataRepository channelDataRepository,
@@ -111,6 +113,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IAppSettingsService appSettingsService,
             IOptions<UserAppOptions> userAppOptions,
             ILoggerFactory loggerFactory,
+            IConfiguration configuration,
             IOptions<BotOptions> botOptions)
         {
             if (dataQueueMessageOptions is null)
@@ -139,6 +142,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.userAppOptions = userAppOptions?.Value ?? throw new ArgumentNullException(nameof(userAppOptions));
             this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
             this.account = string.Empty;
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -264,19 +268,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        ///
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<string> GetAppsettingsConnection()
-        {
-            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: false);
-
-            IConfiguration config = builder.Build();
-            var authorizedCreatorUpns = config.GetSection("AuthorizedCreatorUpns").Value;
-            return authorizedCreatorUpns.ToString();
-        }
-
-        /// <summary>
         /// Get most recently sent notification summaries.
         /// </summary>
         /// <returns>A list of <see cref="SentNotificationSummary"/> instances.</returns>
@@ -284,7 +275,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
 
-            var appsettingsadmin = this.GetAppsettingsConnection().Result;
+            var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
             string[] adminsarr = appsettingsadmin.Split(",");
             this.loggedinuser = this.HttpContext.User?.Identity?.Name;
             var sloggedin = string.Empty + this.loggedinuser;
@@ -315,6 +306,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 
                     result.Add(summary);
                 }
+
                 return result;
             }
             else

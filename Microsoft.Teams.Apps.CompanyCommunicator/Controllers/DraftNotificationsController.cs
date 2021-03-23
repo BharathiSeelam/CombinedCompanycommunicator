@@ -39,6 +39,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IStringLocalizer<Strings> localizer;
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private string loggedinuser;
+        private readonly IConfiguration configuration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -49,6 +50,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="draftNotificationPreviewService">Draft notification preview service.</param>
         /// <param name="appSettingsService">App Settings service.</param>
         /// <param name="localizer">Localization service.</param>
+        /// <param name="configuration">The Configuration.</param>
         /// <param name="groupsService">group service.</param>
         public DraftNotificationsController(
             INotificationDataRepository notificationDataRepository,
@@ -57,6 +59,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             DraftNotificationPreviewService draftNotificationPreviewService,
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
+            IConfiguration configuration,
             IGroupsService groupsService)
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
@@ -66,6 +69,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
+            this.configuration = configuration;
         }
 
         /// <summary>
@@ -224,26 +228,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         }
 
         /// <summary>
-        ///
-        /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<string> GetAppsettingsConnection()
-        {
-            var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: false);
-
-            IConfiguration config = builder.Build();
-            var authorizedCreatorUpns = config.GetSection("AuthorizedCreatorUpns").Value;
-            return authorizedCreatorUpns.ToString();
-        }
-
-        /// <summary>
         /// Get draft notifications.
         /// </summary>
         /// <returns>A list of <see cref="DraftNotificationSummary"/> instances.</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var appsettingsadmin = this.GetAppsettingsConnection().Result;
+            var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
             string[] adminsarr = appsettingsadmin.Split(",");
             this.loggedinuser = this.HttpContext.User?.Identity?.Name;
             var sloggedin = string.Empty + this.loggedinuser;
@@ -268,7 +259,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
             else
             {
-                //this.loggedinuser = sloggedin;
+                this.loggedinuser = sloggedin;
 
                 var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinuser + "'", "DraftNotifications");
 
