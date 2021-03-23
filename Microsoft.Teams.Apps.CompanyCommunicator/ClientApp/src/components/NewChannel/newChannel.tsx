@@ -127,8 +127,8 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         const resultedTeams: dropdownItem[] = [];         
         if (items) {
             const key = 'userName';
-            const uniqueItems = [...new Map(items.map(item => [item[key], item])).values()];
-            uniqueItems.forEach((element) => {
+            //const uniqueItems = [...new Map(items.map(item => [item[key], item])).values()];
+            items.forEach((element) => {
                 resultedTeams.push({
                     key: element.userEmail,
                     header: element.userName,
