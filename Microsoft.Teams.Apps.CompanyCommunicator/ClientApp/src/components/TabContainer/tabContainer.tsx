@@ -90,12 +90,13 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
 
     private getAppSettingsList = async () => {
         try {
-            const response = await getAppsettings();
+           const response = await getAppsettings();
             const AppSettingsList: Settings[] = response.data;
             var author = Object.values(response.data[0]);
-            var str = author[0];            
-            sadmin = str;
-            adminArr = sadmin.split(",");
+            var str = author[0];
+            sadmin = String(str).toLowerCase().split(",");          
+            var appadmins = sadmin;
+            adminArr = appadmins;
             console.log(adminArr);
            
         } catch (error) {
