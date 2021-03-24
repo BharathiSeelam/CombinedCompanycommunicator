@@ -236,11 +236,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
             string[] adminsarr = appsettingsadmin.Split(",");
+            var appadmins = string.Join(",", adminsarr).ToLower();
             this.loggedinuser = this.HttpContext.User?.Identity?.Name;
             var sloggedin = string.Empty + this.loggedinuser;
             this.loggedinuser = sloggedin.ToLower();
             var result = new List<DraftNotificationSummary>();
-            if (adminsarr.Contains(this.loggedinuser))
+            if (appadmins.Contains(this.loggedinuser))
             {
                 var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
                 foreach (var notificationEntity in notificationEntities)
