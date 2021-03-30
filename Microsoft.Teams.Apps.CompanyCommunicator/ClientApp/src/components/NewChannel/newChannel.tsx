@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { withTranslation, WithTranslation } from "react-i18next";
-import { Input, TextArea} from 'msteams-ui-components-react';
+import { Input, TextArea } from 'msteams-ui-components-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
-import { Button, Loader, Dropdown, Label} from '@stardust-ui/react';
+import { Button, Loader, Dropdown, Label } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import './newChannel.scss';
 import './teamTheme.scss';
@@ -33,12 +33,12 @@ export interface IChannel {
     channelDescription: string,
     channelAdmins: string,
     channelAdminDLs: string,
-    channelAdminEmail:string
+    channelAdminEmail: string
 }
 
 export interface formState {
     channelName: string,
-    channelDescription: string, 
+    channelDescription: string,
     teams?: any[],
     card?: any,
     page: string,
@@ -51,10 +51,10 @@ export interface formState {
     dlAdminLabel: string,
     admins?: any[],
     dls?: any[],
-    selectedAdmins: dropdownItem[],    
+    selectedAdmins: string,
     selectedDLs: dropdownItem[],
-    selectedAdminEmail:any[],
-    dlAdminEmail:string,
+    selectedAdminEmail: any[],
+    dlAdminEmail: string,
 }
 
 export interface INewChannelProps extends RouteComponentProps, WithTranslation {
@@ -74,8 +74,8 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         this.state = {
             channelName: "",
             channelDescription: "",
-            selectedAdmins: [], 
-            selectedDLs: [],             
+            selectedAdmins: "",
+            selectedDLs: [],
             card: this.card,
             page: "ChannelCreation",
             channelId: "",
@@ -84,15 +84,15 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             noResultMessage: "",
             unstablePinned: true,
             dlAdminLabel: "",
-            dlAdminEmail:"",
+            dlAdminEmail: "",
             selectedAdminEmail: []
         }
-        this.getAdminData();
+        //this.getAdminData();
         this.getDLData();
     }
 
     public async componentDidMount() {
-        microsoftTeams.initialize();        
+        microsoftTeams.initialize();
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
@@ -100,31 +100,31 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         this.getTeamList().then(() => {
             if ('id' in params) {
                 let id = params['id'];
-                this.getItem(id).then(() => { 
+                this.getItem(id).then(() => {
                     const selectedDLs = this.makeDLDropdownItemList(this.state.selectedDLs, this.state.teams);
-                    const selectedAdmins = this.makeDropdownItemList(this.state.selectedAdmins, this.state.selectedAdminEmail, this.state.teams);                    
+                    //const selectedAdmins = this.makeDropdownItemList(this.state.selectedAdmins, this.state.selectedAdminEmail, this.state.teams);                    
                     this.setState({
                         exists: true,
                         channelId: id,
                         selectedDLs: selectedDLs,
-                        selectedAdmins: selectedAdmins,
-                        selectedAdminEmail:this.state.selectedAdminEmail,
+                        selectedAdmins: this.state.selectedAdmins,
+                        selectedAdminEmail: this.state.selectedAdminEmail,
                     })
-                });               
+                });
             } else {
                 this.setState({
                     exists: false,
                     loader: false
                 }, () => {
                     let adaptiveCard = new AdaptiveCards.AdaptiveCard();
-                    adaptiveCard.parse(this.state.card);                    
+                    adaptiveCard.parse(this.state.card);
                 })
             }
         });
     }
 
     private makeDropdownItems = (items: any[] | undefined) => {
-        const resultedTeams: dropdownItem[] = [];         
+        const resultedTeams: dropdownItem[] = [];
         if (items) {
             const key = 'userName';
             //const uniqueItems = [...new Map(items.map(item => [item[key], item])).values()];
@@ -145,12 +145,12 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
         return resultedTeams;
     }
-    private makeDropdownItemList = (items: any[],emailItems:any[], fromItems: any[] | undefined) => {
+    private makeDropdownItemList = (items: any[], emailItems: any[], fromItems: any[] | undefined) => {
         items = items.toString().split(',');
         emailItems = emailItems.toString().split(',');
         const dropdownItemList: dropdownItem[] = [];
         if (items) {
-            items.forEach((element,index) => {
+            items.forEach((element, index) => {
                 dropdownItemList.push({
                     key: element,
                     header: element,
@@ -165,14 +165,14 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
         return dropdownItemList;
     }
-    
+
     private makeDLDropdownItems = (items: any[] | undefined) => {
-        const resultedTeams: dropdownItem[] = []; 
-        if (items) {            
+        const resultedTeams: dropdownItem[] = [];
+        if (items) {
             items.forEach((element) => {
                 resultedTeams.push({
                     key: element.dlid,
-                    header: element.dlName+"("+element.dlMemberCount+")",
+                    header: element.dlName + "(" + element.dlMemberCount + ")",
                     content: element.dlMail,
                     image: ImageUtil.makeInitialImage(element.dlName),
                     team: {
@@ -202,7 +202,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
         return dropdownItemList;
     }
-   private getTeamList = async () => {
+    private getTeamList = async () => {
         try {
             const response = await getTeams();
             this.setState({
@@ -211,7 +211,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         } catch (error) {
             return error;
         }
-   }
+    }
     private getAdminData = async () => {
         try {
             const response = await getDLUsers();
@@ -224,7 +224,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
     }
 
-   
+
 
     private getDLData = async () => {
         try {
@@ -240,11 +240,11 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
     private getItem = async (id: string) => {
         try {
             const response = await getChannel(id);
-            const ChannelDetail = response.data;                   
+            const ChannelDetail = response.data;
             this.setState({
                 channelName: ChannelDetail.channelName,
-                channelDescription: ChannelDetail.channelDescription,                
-                selectedAdmins: ChannelDetail.channelAdmins, 
+                channelDescription: ChannelDetail.channelDescription,
+                selectedAdmins: ChannelDetail.channelAdmins,
                 selectedDLs: ChannelDetail.channelAdminDLs,
                 selectedAdminEmail: ChannelDetail.channelAdminEmail,
                 loader: false
@@ -290,19 +290,13 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                                     onChange={this.onDescriptionChanged}
                                 />
                                 <br />
-                                <Label className="inputField label">{this.localize("AdminsForThisChannel")}</Label>
-                                <Dropdown
-                                    className="channelDropdown"
-                                    placeholder={this.localize("ChannelAdmin")}
-                                    search
-                                    multiple
-                                    loading={this.state.loading}
-                                    loadingMessage={this.localize("LoadingText")}
-                                    items={this.getAdminItems()}
+                                <Input
+                                    className="inputField"
                                     value={this.state.selectedAdmins}
-                                    onSelectedChange={this.onChannelAdminChanged.bind(this)}
-                                    unstable_pinned={this.state.unstablePinned}
-                                    noResultsMessage={this.localize("NoMatchMessage")}
+                                    label={this.localize("AdminsForThisChannel")}
+                                    placeholder={this.localize("ChannelAdmin")}
+                                    onChange={this.onChannelAdminChanged}
+                                    autoComplete="off"
                                 />
                             </div>
                         </div>
@@ -318,9 +312,9 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                 return (
                     <div className="taskModule">
                         <div className="formContainer">
-                            <div className="formChannelContainer" >  
-                                <br/>
-                                <Label className="inputField label">{this.localize("AddDLsFor")}{ this.state.dlAdminLabel}</Label>
+                            <div className="formChannelContainer" >
+                                <br />
+                                <Label className="inputField label">{this.localize("AddDLsFor")}{this.state.dlAdminLabel}</Label>
                                 <Dropdown
                                     className="channelDropdown"
                                     placeholder={this.localize("ChannelDLs")}
@@ -355,20 +349,20 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
     }
 
     private isNextBtnDisabled = () => {
-        return !(this.state.channelName !== "" && this.state.selectedAdmins.length !== 0 );
+        return !(this.state.channelName !== "" && this.state.selectedAdmins.length !== 0);
     }
 
     private onSave = () => {
-        let channelAdmins: any[] = this.state.selectedAdmins.map(a => a.header);
-        let channelAdminsEmail: any[] = this.state.selectedAdmins.map(a => a.content);
+        let channelAdmins: string = this.state.selectedAdmins;
+        let channelAdminsEmail: string = this.state.selectedAdmins
         let channelAdminDLs: any[] = this.state.selectedDLs.map(a => a.header);
         const channel: IChannel = {
             id: this.state.channelId,
             channelName: this.state.channelName,
             channelDescription: this.state.channelDescription,
-            channelAdmins: channelAdmins.join(','), 
-            channelAdminDLs: channelAdminDLs.join(','),         
-            channelAdminEmail: channelAdminsEmail.join(',')
+            channelAdmins: channelAdmins,
+            channelAdminDLs: channelAdminDLs.join(','),
+            channelAdminEmail: channelAdminsEmail
         };
 
         if (this.state.exists) {
@@ -424,23 +418,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         this.setState({
             page: "DLSelection"
         });
-        let dlAdminLabel: any[] = [];
-        let dlAdminEmail: any[] = [];
-        let dlAdminLabelString: string = "";
-        let dlAdminEmailLabelString: string = ""
-        if (this.state.selectedAdmins.length !== 0) {
-            this.state.selectedAdmins.forEach((element) => {
-                dlAdminLabel.push(element.header); 
-                dlAdminEmail.push(element.content);
-            });
-            dlAdminLabelString = dlAdminLabel.join(',');
-            dlAdminEmailLabelString = dlAdminEmail.join(',');
-            this.setState({
-                dlAdminLabel: dlAdminLabelString,
-                dlAdminEmail:dlAdminEmailLabelString
-            });              
-        }        
-        
+
     }
 
     private onBack = (event: any) => {
@@ -448,8 +426,8 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             page: "ChannelCreation"
         });
     }
-  
-    private onChannelNameChanged = (event: any) => {       
+
+    private onChannelNameChanged = (event: any) => {
         this.setState({
             channelName: event.target.value,
             card: this.card
@@ -464,32 +442,16 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         });
     }
 
-    private onChannelAdminChanged = async (event: any, itemsData: any) => {   
+    private onChannelAdminChanged = async (event: any) => {
         this.setState({
-            selectedAdmins: itemsData.value,
+            selectedAdmins: event.target.value,
         });
-        let dlAdminLabel: any[] = [];
-        let dlAdminEmail: any[] = [];
-        let dlAdminLabelString: string = "";
-        let dlAdminEmailLabelString: string = ""
-        if (this.state.selectedAdmins.length !== 0) {
-            this.state.selectedAdmins.forEach((element) => {
-                dlAdminLabel.push(element.key);
-                dlAdminEmail.push(element.content);
-            });
-            dlAdminLabelString = dlAdminLabel.join(',');
-            dlAdminEmailLabelString = dlAdminEmail.join(',');
-            this.setState({
-                dlAdminLabel: dlAdminLabelString,
-                dlAdminEmail: dlAdminEmailLabelString
-            }); ;
-        }       
-    } 
+    }
     private onAdminDLChanged = (event: any, itemsData: any) => {
         this.setState({
             selectedDLs: itemsData.value
         })
-    }   
+    }
 }
 
 const newChannelWithTranslation = withTranslation()(NewChannel);

@@ -21,5 +21,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
         /// <param name="messageID">messageID.</param>
         /// <returns>Send message reaction.</returns>
         public Task<ChatMessage> GetMessagesAsync(string teamsID, string channelID, string messageID);
+
+        /// <summary>
+        /// getLoggedinUser Details.
+        /// </summary>
+        /// <returns>UserDetails.</returns>
+        public Task<User> GetLoggedinUserDetails();
     }
 }

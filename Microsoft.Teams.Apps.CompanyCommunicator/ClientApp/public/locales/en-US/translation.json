@@ -4,6 +4,8 @@
   "EmptyDraftMessages": "You have no draft messages.",
   "EmptySentMessages": "You have no sent messages.",
   "EmptyChannels": "You have no Accounts.",
+  "EmptySearchResults": "No Search Results Found",
+  "SearchByTitle": "Search By Title",
   "TitleText": "Title",
   "ChannelName": "Account Name",
   "PlaceHolderTitle": "Title (required)",

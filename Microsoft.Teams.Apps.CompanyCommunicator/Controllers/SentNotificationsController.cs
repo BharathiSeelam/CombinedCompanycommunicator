@@ -274,9 +274,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-
             var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
-             string[] adminsarr = appsettingsadmin.Split(",");
+            string[] adminsarr = appsettingsadmin.Split(",");
             var appadmins = string.Join(",", adminsarr).ToLower();
             this.loggedinuser = this.HttpContext.User?.Identity?.Name;
             var sloggedin = string.Empty + this.loggedinuser;
@@ -303,6 +302,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                         SendingStartedDate = notificationEntity.SendingStartedDate,
                         Status = notificationEntity.GetStatus(),
                         Likes = likes,
+                        ImageLink = notificationEntity.ImageLink,
+                        Summary = notificationEntity.Summary,
                     };
 
                     result.Add(summary);
@@ -332,6 +333,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                         SendingStartedDate = notificationEntity.SendingStartedDate,
                         Status = notificationEntity.GetStatus(),
                         Likes = likes,
+                        ImageLink = notificationEntity.ImageLink,
+                        Summary = notificationEntity.Summary,
                     };
 
                     result.Add(summary);
@@ -478,14 +481,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> DeleteSentNotificationAsync(string id)
         {
             var notificationEntity = await this.notificationDataRepository.GetAsync(
-               NotificationDataTableNames.SentNotificationsPartition,
-               id);
+            NotificationDataTableNames.SentNotificationsPartition,
+            id);
             if (notificationEntity == null)
             {
                 return this.NotFound();
             }
 
             await this.notificationDataRepository.DeleteAsync(notificationEntity);
+            var sendingNotificationEntity = await this.notificationDataRepository.GetAsync(
+            NotificationDataTableNames.SendingNotificationsPartition,
+            id);
+            if (notificationEntity == null)
+            {
+                return this.NotFound();
+            }
+
+            await this.notificationDataRepository.DeleteAsync(sendingNotificationEntity);
+            var sentNotificationrepositoryEntities = await this.sentNotificationDataRepository.GetWithFilterAsync("PartitionKey eq'" + id + "'", id);
+
+            foreach (var sentNotificationRepositoryEntity in sentNotificationrepositoryEntities)
+            {
+                var sentNotificationEntity = await this.sentNotificationDataRepository.GetAsync(
+                id,
+                sentNotificationRepositoryEntity.RowKey);
+                if (notificationEntity == null)
+                {
+                    return this.NotFound();
+                }
+
+                await this.sentNotificationDataRepository.DeleteAsync(sentNotificationEntity);
+            }
+
             var deleteQueueMessageContent = new SendQueueMessageContent
             {
                 NotificationId = id,
@@ -503,6 +530,56 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             };
             await this.sendQueue.SendAsync(deleteQueueMessageContent);
             return this.Ok();
+        }
+
+        /// <summary>
+        /// Get most recently sent notification summaries for users.
+        /// </summary>
+        /// <param name="userID">Id of the requested sent notification to edit.</param>
+        /// <returns>A list of user <see cref="SentNotificationSummary"/> instances.</returns>
+        [HttpGet("dashBoards/{userID}")]
+        public async Task<ActionResult<SentNotificationSummary>> GetSentNotificationsDashboardAsync(string userID)
+        {
+            var result = new List<SentNotificationSummary>();
+            var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
+            foreach (var notificationEntity in notificationEntities)
+            {
+                // var userDetails = await this.reactionService.GetLoggedinUserDetails();
+                // Console.WriteLine(userDetails.Id);
+                var getUserSpecificSentItems = await this.sentNotificationDataRepstry.GetWithFilterAsync("RecipientId eq '" + userID + "' and RecipientType eq 'User' ", notificationEntity.Id);
+                var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationEntity.Channel + "'", null);
+                foreach (ChannelDataEntity channelData in channelDataEntity)
+                {
+                    this.account = channelData.ChannelName;
+                }
+
+                foreach (var sentnotificationEntity in getUserSpecificSentItems)
+                {
+                    if (sentnotificationEntity.PartitionKey == notificationEntity.Id)
+                    {
+                        var summary = new SentNotificationSummary
+                        {
+                            Id = notificationEntity.Id,
+                            Title = notificationEntity.Title,
+                            Account = this.account,
+                            CreatedDateTime = notificationEntity.CreatedDate,
+                            SentDate = notificationEntity.SentDate,
+                            Succeeded = notificationEntity.Succeeded,
+                            Edited = notificationEntity.Edited,
+                            Failed = notificationEntity.Failed,
+                            Unknown = this.GetUnknownCount(notificationEntity),
+                            TotalMessageCount = notificationEntity.TotalMessageCount,
+                            SendingStartedDate = notificationEntity.SendingStartedDate,
+                            Status = notificationEntity.GetStatus(),
+                            ImageLink = notificationEntity.ImageLink,
+                            Summary = notificationEntity.Summary,
+                        };
+
+                        result.Add(summary);
+                    }
+                }
+            }
+            return this.Ok(result);
         }
 
         private async Task<string> GetActivityIDandLikes(NotificationDataEntity notificationEntity)

@@ -52,5 +52,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGrap
 
             return response;
         }
+
+        /// <summary>
+        /// Get the Loggedinuser Details.
+        /// </summary>
+        /// <returns>chat message.</returns>
+        public async Task<User> GetLoggedinUserDetails()
+        {
+            var response = new User();
+            try
+            {
+                response = await this.graphServiceClient
+                                                 .Me
+                                                 .Request()
+                                                 .GetAsync();
+            }
+            catch (Exception)
+            {
+            }
+            return response;
+        }
     }
 }

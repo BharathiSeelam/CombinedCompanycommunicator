@@ -51,10 +51,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         }
 
         /// <inheritdoc/>
+        public async Task<IEnumerable<SentNotificationDataEntity>> GetFilterAsync(string filter, string partitionkey)
+        {
+            var result = await this.GetWithFilterAsync(filter, partitionkey);
+            return result;
+        }
+
+        /// <inheritdoc/>
         public async Task<List<SentNotificationDataEntity>> GetActivityIDAsync(string notificationID)
         {
             List<SentNotificationDataEntity> lstSentDataRepository = new List<SentNotificationDataEntity>();
-            SentNotificationDataEntity sentNotificationDatResult = null;
             var sentNotificationDataEntites = await this.GetAllAsync(notificationID);
             if (sentNotificationDataEntites != null)
             {

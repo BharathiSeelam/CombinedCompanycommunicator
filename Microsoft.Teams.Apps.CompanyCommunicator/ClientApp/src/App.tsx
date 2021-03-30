@@ -5,6 +5,7 @@ import TabContainer from './components/TabContainer/tabContainer';
 import NewMessage from './components/NewMessage/newMessage';
 import NewChannel from './components/NewChannel/newChannel';
 import StatusTaskModule from './components/StatusTaskModule/statusTaskModule';
+import Dashboard from './components/Dashboard/dashboard';
 import './App.scss';
 import { Provider, themes } from '@stardust-ui/react';
 import SendConfirmationTaskModule from './components/SendConfirmationTaskModule/sendConfirmationTaskModule';
@@ -115,6 +116,7 @@ class App extends React.Component<{}, IAppState> {
                 <Route exact path="/newmessage/:id" component={NewMessage} />
                 <Route exact path="/newchannel" component={NewChannel} />
                 <Route exact path="/newchannel/:id" component={NewChannel} />
+                <Route exact path="/dashboard" component={Dashboard} />
                 <Route exact path="/viewstatus/:id" component={StatusTaskModule} />
                 <Route exact path="/sendconfirmation/:id" component={SendConfirmationTaskModule} />
                 <Route exact path="/errorpage" component={ErrorPage} />

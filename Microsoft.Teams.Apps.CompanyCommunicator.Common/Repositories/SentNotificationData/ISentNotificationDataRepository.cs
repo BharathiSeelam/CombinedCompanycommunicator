@@ -31,5 +31,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotif
         // public Task DeleteFromPostAsync(
         //    string notificationId);
         public Task<List<SentNotificationDataEntity>> GetActivityIDAsync(string notificationId);
+
+        /// <summary>
+        /// Get all sentnotification data entities, and filter the result  by name.
+        /// </summary>
+        /// <param name="filter">The sentnotification entity filter.</param>
+        /// <param name="partitionkey">partitionkey.</param>
+        /// <returns>The sentNotification data entities of filter condition.</returns>
+        public Task<IEnumerable<SentNotificationDataEntity>> GetFilterAsync(string filter, string partitionkey);
     }
 }

@@ -23,6 +23,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public string Title { get; set; }
 
         /// <summary>
+        /// Gets or sets the image link of the notification's content.
+        /// </summary>
+        public string ImageLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the summary text of the notification's content.
+        /// </summary>
+        public string Summary { get; set; }
+
+        /// <summary>
         /// Gets or sets Account.
         /// </summary>
         public string Account { get; set; }

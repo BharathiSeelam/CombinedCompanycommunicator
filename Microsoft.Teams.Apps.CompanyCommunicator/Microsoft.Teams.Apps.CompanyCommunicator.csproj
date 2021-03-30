@@ -90,6 +90,7 @@
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <LangVersion>8.0</LangVersion>
+    <UserSecretsId>37ff71ba-7831-4ba5-88b0-7b57c90776fe</UserSecretsId>
   </PropertyGroup>
 
 </Project>

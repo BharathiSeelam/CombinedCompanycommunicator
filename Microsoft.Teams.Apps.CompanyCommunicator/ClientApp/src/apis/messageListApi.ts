@@ -1,4 +1,4 @@
-import axios from './axiosJWTDecorator';
+﻿import axios from './axiosJWTDecorator';
 import { getBaseUrl } from '../configVariables';
 
 let baseAxiosUrl = getBaseUrl() + '/api';
@@ -63,19 +63,25 @@ export const deleteSendNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/sentnotifications/" + id;
     return await axios.delete(url);
 }
+
 export const duplicateDraftNotification = async (id: number): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/duplicates/" + id;
     return await axios.post(url);
 }
+
 export const updateDraftNotificationPublish = async (id: number, publish: String): Promise<any> => {
     let url = baseAxiosUrl + "/draftnotifications/publishOn/" + id + "/" + publish;
     return await axios.post(url);
 }
 
-
 export const sendDraftNotification = async (payload: {}): Promise<any> => {
     let url = baseAxiosUrl + "/sentnotifications";
     return await axios.post(url, payload);
+}
+
+export const getSentNotificationsDashboard = async (userID :string): Promise<any> => {
+    let url = baseAxiosUrl + "/sentnotifications/dashBoards/"+ userID;
+    return await axios.get(url);
 }
 
 export const updateDraftNotification = async (payload: {}): Promise<any> => {
