@@ -816,11 +816,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     private isNextBtnDisabled = () => {
         const channel = this.state.selectedChannel;
+        const template = this.state.selectedTemplates;
         var channelvalue = Object.values(channel);
+        var templatevalue = Object.values(template);
         const title = this.state.title;
         const btnTitle = this.state.btnTitle;
         const btnLink = this.state.btnLink;
-        return (!(channelvalue.length && title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
+        return (!(channelvalue.length && templatevalue.length && title && ((btnTitle && btnLink) || (!btnTitle && !btnLink))) && (this.state.errorImageUrlMessage === "") && (this.state.errorButtonUrlMessage === ""));
     }
     private getChannels = () => {
 
