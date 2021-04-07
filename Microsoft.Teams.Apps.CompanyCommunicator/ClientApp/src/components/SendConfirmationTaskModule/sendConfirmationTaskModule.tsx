@@ -14,6 +14,7 @@ import {
     getInitAdaptiveCard, setCardTitle, setCardImageLink, setCardSummary,
     setCardAuthor, setCardBtn
 } from '../AdaptiveCard/adaptiveCard';
+import {getTemplate } from '../../apis/templateListApi';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 import dateFormat from 'dateformat';
@@ -137,6 +138,16 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
     private getItem = async (id: number) => {
         try {
             const response = await getDraftNotification(id);
+            const responseTemplate = await getTemplate(response.data.templateID);
+            const templateDetails = responseTemplate.data;
+            this.card = JSON.parse(templateDetails["templateJSON"]);
+            const draftMessageDetail = response.data;
+            setCardTitle(this.card, draftMessageDetail.title);
+            setCardImageLink(this.card, draftMessageDetail.imageLink);
+            setCardSummary(this.card, draftMessageDetail.summary);
+            setCardAuthor(this.card, draftMessageDetail.author);
+            setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
+           
             this.setState({
                 message: response.data
             });

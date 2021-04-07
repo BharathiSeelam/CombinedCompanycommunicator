@@ -40,7 +40,7 @@
   "ChannelAdmin": "Account Admin",
   "ChannelDLs": "Account DLs",
   "ChannelAdminDLs": "Account Admin Dls",
-  "MessageTemplate": "Select Message Template",
+  "MessageTemplate": "Select Message Template (required)",
   "Author1": "- Author",
   "ButtonTitle": "Button title",
   "ButtonURL": "Button URL",

@@ -468,7 +468,14 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     selectedGroups: dlselectedGroups,
                     dls: responesofdl
                 });
-
+                this.card = JSON.parse(templateDetails["templateJSON"]);
+                this.setState({ card: this.card });
+                this.setDefaultCard(this.card);
+                setCardTitle(this.card, draftMessageDetail.title);
+                setCardImageLink(this.card, draftMessageDetail.imageLink);
+                setCardSummary(this.card, draftMessageDetail.summary);
+                setCardAuthor(this.card, draftMessageDetail.author);
+                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
                 setCardTitle(this.card, draftMessageDetail.title);
                 setCardImageLink(this.card, draftMessageDetail.imageLink);
                 setCardSummary(this.card, draftMessageDetail.summary);
@@ -549,7 +556,14 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     selectedGroups: dlselectedGroups,
                     dls: responesofdl
                 });
-
+                this.card = JSON.parse(templateDetails["templateJSON"]);
+                this.setState({ card: this.card });
+                this.setDefaultCard(this.card);
+                setCardTitle(this.card, draftMessageDetail.title);
+                setCardImageLink(this.card, draftMessageDetail.imageLink);
+                setCardSummary(this.card, draftMessageDetail.summary);
+                setCardAuthor(this.card, draftMessageDetail.author);
+                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
                 setCardTitle(this.card, draftMessageDetail.title);
                 setCardImageLink(this.card, draftMessageDetail.imageLink);
                 setCardSummary(this.card, draftMessageDetail.summary);
