@@ -498,21 +498,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             await this.notificationDataRepository.DeleteAsync(sendingNotificationEntity);
-            var sentNotificationrepositoryEntities = await this.sentNotificationDataRepository.GetWithFilterAsync("PartitionKey eq'" + id + "'", id);
-
-            foreach (var sentNotificationRepositoryEntity in sentNotificationrepositoryEntities)
-            {
-                var sentNotificationEntity = await this.sentNotificationDataRepository.GetAsync(
-                id,
-                sentNotificationRepositoryEntity.RowKey);
-                if (notificationEntity == null)
-                {
-                    return this.NotFound();
-                }
-
-                await this.sentNotificationDataRepository.DeleteAsync(sentNotificationEntity);
-            }
-
             var deleteQueueMessageContent = new SendQueueMessageContent
             {
                 NotificationId = id,
@@ -529,6 +514,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 },
             };
             await this.sendQueue.SendAsync(deleteQueueMessageContent);
+            var sentNotificationrepositoryEntities = await this.sentNotificationDataRepository.GetWithFilterAsync("PartitionKey eq'" + id + "'", id);
+
+            foreach (var sentNotificationRepositoryEntity in sentNotificationrepositoryEntities)
+            {
+                var sentNotificationEntity = await this.sentNotificationDataRepository.GetAsync(
+                id,
+                sentNotificationRepositoryEntity.RowKey);
+                if (notificationEntity == null)
+                {
+                    return this.NotFound();
+                }
+
+                await this.sentNotificationDataRepository.DeleteAsync(sentNotificationEntity);
+            }
             return this.Ok();
         }
 
