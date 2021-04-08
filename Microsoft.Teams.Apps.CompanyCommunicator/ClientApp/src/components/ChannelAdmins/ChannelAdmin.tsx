@@ -87,10 +87,10 @@ class ChannelAdmins extends React.Component<IChannelAdminProps, IChannelAdminSta
                             <Text>{channel.channelName}</Text>
                         </Flex.Item>
                         <Flex.Item size="size.small" variables={{ 'size.small': '20%' }} shrink={0} grow={1}>
-                            <Text>{channel.channelAdmins}</Text>
+                            <span className="channelAdmin"><Text>{channel.channelAdmins}</Text></span>
                         </Flex.Item>
                         <Flex.Item size="size.small" variables={{ 'size.small': '20%' }} shrink={0} grow={1}>
-                            <Text>{channel.channelAdminDLs.replace(reg, "")}</Text>
+                            <span className="channelAdminDL"><Text>{channel.channelAdminDLs.replace(reg, "")}</Text></span>
                         </Flex.Item>
                    
                     </Flex>

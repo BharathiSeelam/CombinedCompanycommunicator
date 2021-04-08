@@ -98,7 +98,7 @@ class Channels extends React.Component<IChannelProps, IChannelState> {
                             <Text>{channel.channelName}</Text>
                         </Flex.Item>
                         <Flex.Item size="size.small" variables={{ 'size.small': '73%' }}>
-                            <Text>{channel.channelAdmins}</Text>
+                            <span className="channelAdmin"><Text>{channel.channelAdmins}</Text></span>
                         </Flex.Item>
                         <Flex.Item shrink={0} hAlign="end" vAlign="center">
                             <Overflow channel={channel} title="" />
