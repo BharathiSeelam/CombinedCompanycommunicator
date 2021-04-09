@@ -46,22 +46,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DLUser>>> GetAllDLUsersAsync()
         {
-            var dlUserEntities = await this.userService.GetAllUsersByAsync();
+            /*  var dlUserEntities = await this.userService.GetAllUsersByAsync();
             var result = new List<DLUser>();
 
-            foreach (var dlUserEntity in dlUserEntities)
-            {
-                var dlUsers = new DLUser
-                {
-                    UserEmail = dlUserEntity.UserPrincipalName,
-                    UserName = dlUserEntity.DisplayName,
-                };
+             foreach (var dlUserEntity in dlUserEntities)
+             {
+                 var dlUsers = new DLUser
+                 {
+                     UserEmail = dlUserEntity.UserPrincipalName,
+                     UserName = dlUserEntity.DisplayName,
+                 };
 
-                result.Add(dlUsers);
-            }
+                 result.Add(dlUsers);
+             }
 
-            return result;
-           /* var dlUserEntities = await this.dlUserDataRepository.GetAllDLUsersAsync();
+             return result; */
+            var dlUserEntities = await this.dlUserDataRepository.GetAllDLUsersAsync();
 
             var result = new List<DLUser>();
             foreach (var dlUserEntity in dlUserEntities)
@@ -78,7 +78,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 result.Add(dlUsers);
             }
 
-            return result;*/
+            return result;
         }
 
         /// <summary>
