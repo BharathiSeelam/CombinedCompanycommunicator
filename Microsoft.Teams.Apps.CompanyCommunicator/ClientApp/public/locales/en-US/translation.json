@@ -29,6 +29,7 @@
   "ViewStatus": "View status",
   "SendConfirmation": "Send confirmation",
   "ScheduleMessage": "Schedule This Message",
+  "TimezoneInformation": "Application Server runs in GMT Time Zone",
   "PreparingToSend": "Preparing to send...",
   "Queued": "Queued...",
   "SyncingRecipients": "Syncing recipients...",

@@ -88,9 +88,17 @@ class Overflow extends React.Component<ChannelOverflowProps, ChannelOverflowStat
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                this.deleteChannel(this.props.channel.id).then(() => {
-                                    this.props.getChannelsList();
-                                });
+                                const confirmBox = window.confirm(
+                                    "Are you sure do you want to delete this Account?"
+                                );
+                                if (confirmBox === true) {
+                                    this.deleteChannel(this.props.channel.id).then(() => {
+                                        this.props.getChannelsList();
+                                    });
+
+                                } else {
+                                    return false;
+                                }
                             }
                         }
                     ],

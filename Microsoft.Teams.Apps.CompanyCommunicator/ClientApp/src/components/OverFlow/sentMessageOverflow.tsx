@@ -104,9 +104,16 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
                                 this.setState({
                                     menuOpen: false,
                                 });
-                                this.deleteSentMessage(this.props.message.id).then(() => {
-                                    this.props.getSentMessagesList();
-                                });
+                                const confirmBox = window.confirm(
+                                    "Are you sure do you want to delete this sent message?"
+                                );
+                                if (confirmBox === true) {
+                                    this.deleteSentMessage(this.props.message.id).then(() => {
+                                        this.props.getSentMessagesList();
+                                    });
+                                } else {
+                                    return false;
+                                }
                             }
                         },
                     ],
