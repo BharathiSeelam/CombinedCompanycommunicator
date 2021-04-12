@@ -224,6 +224,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 var templateDataEntityResult = await this.templateDataRepository.GetAllTemplatesAsync();
                 foreach (var package in packages)
                 {
+                if (package.Title.Contains(text) == true)
+                    {
                     var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
                     foreach (var cname in channelEntities)
                     {
@@ -243,6 +245,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
                         cattachments.Add(attachment);
                     }
+                }
                 }
             }
 
