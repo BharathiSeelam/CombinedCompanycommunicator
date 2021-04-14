@@ -20,6 +20,11 @@ import { getBaseUrl } from '../../configVariables';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 import axios from '../../apis/axiosJWTDecorator';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+// Import Turndown module
+const TurndownService = require('turndown').default;
+const MarkdownIt = require('markdown-it');
 let loggedinUser;
 
 type dropdownItem = {
@@ -145,7 +150,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
         }
-        this.getTemplateData();
+        this.onSummaryChanged = this.onSummaryChanged.bind(this);
     }
 
     public async componentDidMount() {
@@ -181,16 +186,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         selectedTemplates: selectedTemplates
                     })
                 })
-                //.then(() => {
-                //  this.getGroupData(id).then(() => {
-                //     const selectedGroups = this.makeDropdownDLItems(this.state.groups);
-                //  this.setState({
-                //     selectedGroups: selectedGroups
-                //  })
-                // });
-                // })
-
-
             } else {
                 this.setState({
                     exists: false,
@@ -419,8 +414,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 const responseTemplate = await getTemplate(draftMessageDetail.templateID);
                 const templateDetails = responseTemplate.data;
                 let responesofdl: any[] = [];
-                var promises = [];
-
                 let userResponse = await getAdminChannels(loggedinUser, channelDetails["id"]);
                 if (userResponse.data.length > 0) {
                     let userDls = userResponse.data[0]["channelAdminDLs"];
@@ -471,17 +464,16 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 this.card = JSON.parse(templateDetails["templateJSON"]);
                 this.setState({ card: this.card });
                 this.setDefaultCard(this.card);
+                // Create an instance of the turndown service
+                let turndownService = new TurndownService();
+                // Use the turndown method from the created instance
+                // to convert the first argument (HTML string) to Markdown
+                let markdown = turndownService.turndown(draftMessageDetail.summary);
                 setCardTitle(this.card, draftMessageDetail.title);
                 setCardImageLink(this.card, draftMessageDetail.imageLink);
-                setCardSummary(this.card, draftMessageDetail.summary);
+                setCardSummary(this.card, markdown);
                 setCardAuthor(this.card, draftMessageDetail.author);
-                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-                setCardTitle(this.card, draftMessageDetail.title);
-                setCardImageLink(this.card, draftMessageDetail.imageLink);
-                setCardSummary(this.card, draftMessageDetail.summary);
-                setCardAuthor(this.card, draftMessageDetail.author);
-                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-
+                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);                
                 this.setState({
                     selectedChannel: channelDetails,
                     title: draftMessageDetail.title,
@@ -559,17 +551,16 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 this.card = JSON.parse(templateDetails["templateJSON"]);
                 this.setState({ card: this.card });
                 this.setDefaultCard(this.card);
+                // Create an instance of the turndown service
+                let turndownService = new TurndownService();
+                // Use the turndown method from the created instance
+                // to convert the first argument (HTML string) to Markdown
+                let markdown = turndownService.turndown(draftMessageDetail.summary);
                 setCardTitle(this.card, draftMessageDetail.title);
                 setCardImageLink(this.card, draftMessageDetail.imageLink);
-                setCardSummary(this.card, draftMessageDetail.summary);
+                setCardSummary(this.card, markdown);
                 setCardAuthor(this.card, draftMessageDetail.author);
-                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-                setCardTitle(this.card, draftMessageDetail.title);
-                setCardImageLink(this.card, draftMessageDetail.imageLink);
-                setCardSummary(this.card, draftMessageDetail.summary);
-                setCardAuthor(this.card, draftMessageDetail.author);
-                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
-
+                setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);                
                 this.setState({
                     selectedChannel: channelDetails,
                     title: draftMessageDetail.title,
@@ -592,7 +583,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     public componentWillUnmount() {
         document.removeEventListener("keydown", this.escFunction, false);
-    }
+    }   
 
     public render(): JSX.Element {
         if (this.state.loader) {
@@ -644,6 +635,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                     autoComplete="off"
                                     required
                                 />
+                                <Text
+                                    content={this.localize("Summary")} />
+                                <ReactQuill theme="snow" value={this.state.summary}
+                                    onChange={this.onSummaryChanged} />
 
                                 <Input
                                     className="inputField"
@@ -659,16 +654,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
                                 <input className="inputField" type="file" onChange={this.onFileChange} />
 
-                                <Button content={this.localize("Upload")} id="UploadBtn" onClick=                   {this.onFileUpload} disabled={this.isUploadBtnDisabled()} primary />
-
-                                <TextArea
-                                    className="inputField textArea"
-                                    autoFocus
-                                    placeholder={this.localize("Summary")}
-                                    label={this.localize("Summary")}
-                                    value={this.state.summary}
-                                    onChange={this.onSummaryChanged}
-                                />
+                                <Button content={this.localize("Upload")} id="UploadBtn" onClick={this.onFileUpload} disabled={this.isUploadBtnDisabled()} primary />
 
                                 <Input
                                     className="inputField"
@@ -863,6 +849,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     }
     private getMessageTemplateItems = () => {
+        this.getTemplateData();
         if (this.state.templates) {
             return this.makeTemplateDropdownItems(this.state.templates);
         }
@@ -922,14 +909,19 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(this.state.summary);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, this.state.author);
         setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
-        
-           
-              
-            
-            this.updateCard();
+
+
+
+
+        this.updateCard();
     }
     private onChannelChange = async (event: any, itemsData: any) => {
         let responesofdl: any[] = [];
@@ -1177,7 +1169,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let showDefaultCard = (!event.target.value && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
         setCardTitle(this.card, event.target.value);
         setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(this.state.summary);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, this.state.author);
         setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
@@ -1206,7 +1203,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let showDefaultCard = (!this.state.title && !event.target.value && !this.state.summary && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, event.target.value);
-        setCardSummary(this.card, this.state.summary);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(this.state.summary);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, this.state.author);
         setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
@@ -1220,15 +1222,20 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         });
     }
 
-    private onSummaryChanged = (event: any) => {
-        let showDefaultCard = (!this.state.title && !this.state.imageLink && !event.target.value && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+    private onSummaryChanged = (value) => {
+        let showDefaultCard = (!this.state.title && !this.state.imageLink && !value && !this.state.author && !this.state.btnTitle && !this.state.btnLink);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(value);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, event.target.value);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, this.state.author);
         setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
-            summary: event.target.value,
+            summary: value,
             card: this.card
         }, () => {
             if (showDefaultCard) {
@@ -1242,7 +1249,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         let showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !event.target.value && !this.state.btnTitle && !this.state.btnLink);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(this.state.summary);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, event.target.value);
         setCardBtn(this.card, this.state.btnTitle, this.state.btnLink);
         this.setState({
@@ -1260,7 +1272,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
         const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !event.target.value && !this.state.btnLink);
         setCardTitle(this.card, this.state.title);
         setCardImageLink(this.card, this.state.imageLink);
-        setCardSummary(this.card, this.state.summary);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(this.state.summary);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, this.state.author);
         if (event.target.value && this.state.btnLink) {
             setCardBtn(this.card, event.target.value, this.state.btnLink);
@@ -1299,7 +1316,12 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
         const showDefaultCard = (!this.state.title && !this.state.imageLink && !this.state.summary && !this.state.author && !this.state.btnTitle && !event.target.value);
         setCardTitle(this.card, this.state.title);
-        setCardSummary(this.card, this.state.summary);
+        // Create an instance of the turndown service
+        let turndownService = new TurndownService();
+        // Use the turndown method from the created instance
+        // to convert the first argument (HTML string) to Markdown
+        let markdown = turndownService.turndown(this.state.summary);
+        setCardSummary(this.card, markdown);
         setCardAuthor(this.card, this.state.author);
         setCardImageLink(this.card, this.state.imageLink);
         if (this.state.btnTitle && event.target.value) {
@@ -1328,6 +1350,10 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     private updateCard = () => {
         const adaptiveCard = new AdaptiveCards.AdaptiveCard();
+        AdaptiveCards.AdaptiveCard.onProcessMarkdown = (text, result) => {
+            result.outputHtml = MarkdownIt().render(text);
+            result.didProcess = true;
+        };
         adaptiveCard.parse(this.state.card);
         const renderedCard = adaptiveCard.render();
         const container = document.getElementsByClassName('adaptiveCardContainer')[0].firstChild;

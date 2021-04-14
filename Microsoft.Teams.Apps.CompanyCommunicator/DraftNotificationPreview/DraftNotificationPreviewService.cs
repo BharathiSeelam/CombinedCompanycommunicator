@@ -12,6 +12,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
     using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
+    using Html2Markdown;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Connector.Authentication;
     using Microsoft.Bot.Schema;
@@ -211,10 +212,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.DraftNotificationPreview
 
         private IMessageActivity CreateReply(NotificationDataEntity draftNotificationEntity, string templateJson)
         {
+            var summaryHtmlString = draftNotificationEntity.Summary;
+            var converter = new Converter();
+            var summaryMarkdownString = converter.Convert(summaryHtmlString);
             var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
                 draftNotificationEntity.Title,
                 draftNotificationEntity.ImageLink,
-                draftNotificationEntity.Summary,
+                summaryMarkdownString,
                 draftNotificationEntity.Author,
                 draftNotificationEntity.ButtonTitle,
                 draftNotificationEntity.ButtonLink,

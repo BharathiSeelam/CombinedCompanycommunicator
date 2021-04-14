@@ -11,6 +11,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
     using System.Threading;
     using System.Threading.Tasks;
     using AdaptiveCards;
+    using Html2Markdown;
     using Microsoft.Bot.Builder;
     using Microsoft.Bot.Builder.Teams;
     using Microsoft.Bot.Connector;
@@ -354,10 +355,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
 
         private IMessageActivity CreateReply(NotificationDataEntity notificationDataEntity, string templateJson)
         {
+            var summaryHtmlString = notificationDataEntity.Summary;
+            var converter = new Converter();
+            var summaryMarkdownString = converter.Convert(summaryHtmlString);
             var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCardWithoutHeader(
                 notificationDataEntity.Title,
                 notificationDataEntity.ImageLink,
-                notificationDataEntity.Summary,
+                summaryMarkdownString,
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink,

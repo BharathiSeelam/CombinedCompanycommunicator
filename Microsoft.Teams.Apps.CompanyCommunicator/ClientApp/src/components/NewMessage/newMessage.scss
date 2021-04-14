@@ -19,7 +19,12 @@
 
         .formContentContainer {
 
-            .inputField {
+                .quill {
+                    width: 410px;
+                    margin-left: 30px;
+                    background-color: #d3d3d333;
+                    }
+                .inputField {
                 margin: 0rem 3.2rem;
 
                 span {
