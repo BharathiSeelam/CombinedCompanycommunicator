@@ -225,7 +225,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 var templateDataEntityResult = await this.templateDataRepository.GetAllTemplatesAsync();
                 foreach (var package in packages)
                 {
-                if (package.Title.Contains(text) == true)
+                var userText = text.ToLower();
+                    var title = package.Title.ToLower();
+                    if (title.Contains(userText) == true)
+                    
                     {
                     var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
                     foreach (var cname in channelEntities)
