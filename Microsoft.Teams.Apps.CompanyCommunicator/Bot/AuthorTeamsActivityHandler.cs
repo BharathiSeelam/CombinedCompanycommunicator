@@ -226,9 +226,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 foreach (var package in packages)
                 {
                 var userText = text.ToLower();
-                    var title = package.Title.ToLower();
-                    if (title.Contains(userText) == true)
-                    
+                var title = package.Title.ToLower();
+                if (title.Contains(userText) == true)
                     {
                     var channelEntities = await this.channelDataRepository.GetWithFilterAsync("Id eq '" + package.Channel + "'", null);
                     foreach (var cname in channelEntities)
