@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
     using System.Linq;
     using AdaptiveCards;
     using AdaptiveCards.Templating;
+    using Html2Markdown;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Newtonsoft.Json;
@@ -82,7 +83,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
 
             if (!string.IsNullOrWhiteSpace(summary))
             {
-                mSummary = summary;
+                var summaryHtmlString = summary;
+                var converter = new Converter();
+                var summaryMarkdownString = converter.Convert(summaryHtmlString);
+                mSummary = summaryMarkdownString;
             }
            else
             {

@@ -18,6 +18,9 @@ import {getTemplate } from '../../apis/templateListApi';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 import dateFormat from 'dateformat';
+// Import Turndown module
+const TurndownService = require('turndown').default;
+const MarkdownIt = require('markdown-it');
 
 export interface IListItem {
     header: string,
@@ -121,6 +124,10 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
                             }
 
                             let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                            AdaptiveCards.AdaptiveCard.onProcessMarkdown = (text, result) => {
+                                result.outputHtml = MarkdownIt().render(text);
+                                result.didProcess = true;
+                            };
                             adaptiveCard.parse(this.card);
                             let renderedCard = adaptiveCard.render();
                             document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
@@ -144,7 +151,13 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
             const draftMessageDetail = response.data;
             setCardTitle(this.card, draftMessageDetail.title);
             setCardImageLink(this.card, draftMessageDetail.imageLink);
-            setCardSummary(this.card, draftMessageDetail.summary);
+            // Create an instance of the turndown service
+            let turndownService = new TurndownService();
+            // Use the turndown method from the created instance
+            // to convert the first argument (HTML string) to Markdown
+            let markdown = turndownService.turndown(draftMessageDetail.summary);
+            setCardSummary(this.card, markdown);
+            response.data.summary = markdown;
             setCardAuthor(this.card, draftMessageDetail.author);
             setCardBtn(this.card, draftMessageDetail.buttonTitle, draftMessageDetail.buttonLink);
            
