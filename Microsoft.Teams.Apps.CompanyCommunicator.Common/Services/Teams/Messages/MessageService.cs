@@ -323,8 +323,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams
                 notificationDataEntity.Author,
                 notificationDataEntity.ButtonTitle,
                 notificationDataEntity.ButtonLink,
-                notificationDataEntity.Acknowledge,
-                notificationDataEntity.Feedback,
                 templateJson);
             /*var adaptiveCard = this.adaptiveCardCreator.CreateAdaptiveCard(
                    "Testing3",
