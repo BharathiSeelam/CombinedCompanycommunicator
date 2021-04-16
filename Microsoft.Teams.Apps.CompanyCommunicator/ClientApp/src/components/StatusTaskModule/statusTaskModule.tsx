@@ -15,6 +15,10 @@ import {
 import { ImageUtil } from '../../utility/imageutility';
 import { formatDate, formatDuration, formatNumber } from '../../i18n';
 import { TFunction } from "i18next";
+// Import Turndown module
+const TurndownService = require('turndown').default;
+const MarkdownIt = require('markdown-it');
+
 
 export interface IListItem {
     header: string,
@@ -100,13 +104,24 @@ class StatusTaskModule extends React.Component<StatusTaskModuleProps, IStatusSta
                 }, () => {
                     setCardTitle(this.card, this.state.message.title);
                     setCardImageLink(this.card, this.state.message.imageLink);
-                    setCardSummary(this.card, this.state.message.summary);
+                    //setCardSummary(this.card, this.state.message.summary);
+                        // Create an instance of the turndown service
+                        let turndownService = new TurndownService();
+                        // Use the turndown method from the created instance
+                        // to convert the first argument (HTML string) to Markdown
+                        let markdown = turndownService.turndown(this.state.message.summary);
+                        setCardSummary(this.card, markdown);
                     setCardAuthor(this.card, this.state.message.author);
                     if (this.state.message.buttonTitle !== "" && this.state.message.buttonLink !== "") {
                         setCardBtn(this.card, this.state.message.buttonTitle, this.state.message.buttonLink);
                     }
 
-                    let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                        let adaptiveCard = new AdaptiveCards.AdaptiveCard();
+                        AdaptiveCards.AdaptiveCard.onProcessMarkdown = (text, result) => {
+                            result.outputHtml = MarkdownIt().render(text);
+                            result.didProcess = true;
+                        };
+
                     adaptiveCard.parse(this.card);
                     let renderedCard = adaptiveCard.render();
                     document.getElementsByClassName('adaptiveCardContainer')[0].appendChild(renderedCard);
