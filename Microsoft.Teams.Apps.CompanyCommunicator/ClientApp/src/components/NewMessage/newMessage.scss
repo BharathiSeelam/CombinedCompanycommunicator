@@ -19,12 +19,24 @@
 
         .formContentContainer {
 
-                .quill {
-                    width: 410px;
-                    margin-left: 30px;
-                    background-color: #d3d3d333;
-                    }
-                .inputField {
+            .quill {
+                width: 460px;
+                margin-left: 30px;
+                background-color: #d3d3d333;
+            }
+
+            .ql-snow .ql-picker.ql-header {
+                display: none !important;
+            }
+
+            button.ql-underline {
+                display: none !important;
+            }
+
+            button.ql-clean {
+                display: none !important;
+            }
+            .inputField {
                 margin: 0rem 3.2rem;
 
                 span {
@@ -47,6 +59,7 @@
 
             .ui-dropdown__container {
                 width: 100%;
+
                 span {
                     color: #626365f7;
                     font-weight: unset;

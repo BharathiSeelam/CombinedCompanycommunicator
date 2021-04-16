@@ -58,7 +58,7 @@ class MessageCard extends React.Component<IMessageProps, IMessageState> {
                                         < Label className="tags-label-wrapper" circular content={this.props.messagesList.account} />
                                     </Flex>
                                     <Flex className="card-content-flex" gap="gap.small">
-                                        <Text size="small" className="card-content-text" content={this.props.messagesList.summary} data-testid="group-desc" />
+                                       <div dangerouslySetInnerHTML={{__html: this.props.messagesList.summary}}/>
                                     </Flex>
                                 </div>
                             </Flex>

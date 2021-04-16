@@ -6,6 +6,7 @@ import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
 import * as AdaptiveCards from "adaptivecards";
 import { Button, Loader, Dropdown, Text } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
+import 'react-quill/dist/quill.snow.css';
 import './newMessage.scss';
 import './teamTheme.scss';
 import { getDraftNotification, getTeams, createDraftNotification, updateDraftNotification, getDraftSentNotification, updateSentNotification, searchGroups, getGroups, getsentGroups, verifyGroupAccess } from '../../apis/messageListApi';
@@ -21,7 +22,6 @@ import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 import axios from '../../apis/axiosJWTDecorator';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 // Import Turndown module
 const TurndownService = require('turndown').default;
 const MarkdownIt = require('markdown-it');
