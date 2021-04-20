@@ -91,22 +91,30 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<DLUser>> GetDLUserByIdAsync(string id)
         {
-            var dlUserEntity = await this.dlUserDataRepository.GetAsync(
-                DLUserDataTableNames.DLUserPartition,
-                id);
-            if (dlUserEntity == null)
+            // var dlUserEntity = await this.dlUserDataRepository.GetAsync(
+            // DLUserDataTableNames.DLUserPartition,
+            //    id);
+            var useremail = id.ToLower();
+            var dlUserEntites = await this.dlUserDataRepository.GetWithFilterAsync("UserEmail eq '" + useremail + "'", DLUserDataTableNames.DLUserPartition);
+            if (dlUserEntites == null)
             {
                 return this.NotFound();
             }
 
-            var result = new DLUser
+            var result = new List<DLUser>();
+            foreach (var dlUserEntity in dlUserEntites)
             {
-                UserID = dlUserEntity.UserID,
-                DLName = dlUserEntity.DLName,
-                TeamsID = dlUserEntity.TeamsID,
-                UserEmail = dlUserEntity.UserEmail,
-                UserName = dlUserEntity.UserName,
-            };
+                var dlUsers = new DLUser
+                {
+                    UserID = dlUserEntity.UserID,
+                    DLName = dlUserEntity.DLName,
+                    TeamsID = dlUserEntity.TeamsID,
+                    UserEmail = dlUserEntity.UserEmail,
+                    UserName = dlUserEntity.UserName,
+                };
+
+                result.Add(dlUsers);
+            }
 
             return this.Ok(result);
         }
