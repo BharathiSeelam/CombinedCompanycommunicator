@@ -81,7 +81,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             dlAdminEmail: "",
             selectedAdminEmail: ""
         }
-        this.onChannelAdminChanged = this.onChannelAdminChanged.bind(this);
+       // this.onChannelAdminChanged = this.onChannelAdminChanged.bind(this);
        // this.getAdminData();
         this.getDLData();
     }
@@ -279,7 +279,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                                     className="inputField"
                                     label={this.localize("AdminsForThisChannel")}
                                     placeholder={this.localize("ChannelAdmin")}
-                                    value={this.state.selectedAdminEmail}
+                                    defaultValue={this.state.selectedAdminEmail}
                                     onChange={this.onChannelAdminChanged}
                                     
                                    // onBlur={this.onChannelAdminChanged.bind(this)}
@@ -289,7 +289,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                                     className="inputField"
                                     label={"AdminsChannel"}
                                     placeholder={"AdminUserEmail"}
-                                    value={this.state.selectedAdmins}
+                                    defaultValue={this.state.selectedAdmins}
                                    readOnly
                                     autoComplete="off"
                                 />
@@ -427,7 +427,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         });
     }
     private onChannelAdminChanged = async (event: any) => {
-        var dlUserEmails = event;
+        var dlUserEmails = event.target.value;
         if (dlUserEmails.endsWith(".com")) {
             this.setState({
                 selectedAdminEmail: dlUserEmails.toString(),
