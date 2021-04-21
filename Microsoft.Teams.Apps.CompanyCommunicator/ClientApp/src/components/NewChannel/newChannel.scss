@@ -21,6 +21,15 @@
             .label {
                 background-color: transparent;
                 font-size: 1.2rem;
+                color: #000000c2;
+            }
+
+            .adminLabel {
+                display: block !important;
+                height: 3.2rem;
+                padding: 6px 0px 0px 13px;
+                color: black;
+                margin-top: 10px !important;
             }
 
             p {
@@ -39,8 +48,9 @@
                         width: inherit;
                     }
                 }
-                ul{
-                    width:inherit;
+
+                ul {
+                    width: inherit;
                 }
             }
 

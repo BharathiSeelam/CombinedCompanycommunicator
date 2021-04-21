@@ -40,5 +40,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DLUserDat
         /// Gets or sets the UserName value.
         /// </summary>
         public string UserName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the UPN value.
+        /// </summary>
+        public string UPN { get; set; }
     }
 }

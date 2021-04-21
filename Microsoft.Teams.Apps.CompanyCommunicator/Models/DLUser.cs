@@ -35,5 +35,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         /// Gets or sets the UserName value.
         /// </summary>
         public string UserName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the UPN value.
+        /// </summary>
+        public string UPN { get; set; }
     }
 }

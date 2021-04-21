@@ -112,7 +112,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                 foreach (var loggedin in loggedinUser)
                     {
-                    if (loggedin == channelAdminEmail)
+                    if (loggedin.ToLower() == channelAdminEmail.ToLower())
                         {
                             var channels = new ChannelData
                             {

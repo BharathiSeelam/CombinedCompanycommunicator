@@ -53,6 +53,7 @@ export interface formState {
     selectedDLs: dropdownItem[],
     selectedAdminEmail: string,
     dlAdminEmail: string,
+    userNameReadonly:boolean,
 }
 export interface INewChannelProps extends RouteComponentProps, WithTranslation {
     getChannelsList?: any;
@@ -79,7 +80,8 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             unstablePinned: true,
             dlAdminLabel: "",
             dlAdminEmail: "",
-            selectedAdminEmail: ""
+            selectedAdminEmail: "",
+            userNameReadonly:true,
         }
        // this.onChannelAdminChanged = this.onChannelAdminChanged.bind(this);
        // this.getAdminData();
@@ -285,15 +287,10 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                                    // onBlur={this.onChannelAdminChanged.bind(this)}
                                    autoComplete="off"
                                 />
-                                <Input
-                                    className="inputField"
-                                    label={"AdminsChannel"}
-                                    placeholder={"AdminUserEmail"}
-                                    defaultValue={this.state.selectedAdmins}
-                                   readOnly
-                                    autoComplete="off"
-                                />
-
+                                <br/>
+                                <Label className="inputField label">{this.localize("AdminUserNameLabel")}</Label>
+                                <br />
+                                <Label className="inputField adminLabel">{this.state.selectedAdmins}</Label>
                             </div>
                         </div>
                         <div className="footerContainer">
@@ -428,6 +425,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
     }
     private onChannelAdminChanged = async (event: any) => {
         var dlUserEmails = event.target.value;
+        this.setState({ userNameReadonly :false });
         if (dlUserEmails.endsWith(".com")) {
             this.setState({
                 selectedAdminEmail: dlUserEmails.toString(),
@@ -448,17 +446,20 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                 this.setState({
                     selectedAdmins: dlUserNames.toString(),
                 });
-            })
-        }        
+            }).then(result => { this.setState({ userNameReadonly: true }); });
+        }
+        else {
+            if (dlUserEmails == "") {
+                this.setState({
+                    selectedAdmins: "",
+                    selectedAdminEmail:""
+                });
+            }
+        }
                    
                 
     }
    
-        
-        
-
-
-
     private onAdminDLChanged = (event: any, itemsData: any) => {
         this.setState({
             selectedDLs: itemsData.value

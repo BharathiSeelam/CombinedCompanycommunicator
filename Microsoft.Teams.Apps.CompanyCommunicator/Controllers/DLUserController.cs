@@ -73,6 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TeamsID = dlUserEntity.TeamsID,
                     UserEmail = dlUserEntity.UserEmail,
                     UserName = dlUserEntity.UserName,
+                    UPN = dlUserEntity.UPN,
                 };
 
                 result.Add(dlUsers);
@@ -95,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             // DLUserDataTableNames.DLUserPartition,
             //    id);
             var useremail = id.ToLower();
-            var dlUserEntites = await this.dlUserDataRepository.GetWithFilterAsync("UserEmail eq '" + useremail + "'", DLUserDataTableNames.DLUserPartition);
+            var dlUserEntites = await this.dlUserDataRepository.GetWithFilterAsync("UPN eq '" + useremail + "'", DLUserDataTableNames.DLUserPartition);
             if (dlUserEntites == null)
             {
                 return this.NotFound();
@@ -111,9 +112,11 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     TeamsID = dlUserEntity.TeamsID,
                     UserEmail = dlUserEntity.UserEmail,
                     UserName = dlUserEntity.UserName,
+                    UPN = dlUserEntity.UPN,
                 };
 
                 result.Add(dlUsers);
+                break;
             }
 
             return this.Ok(result);
