@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     using System.Net;
     using Microsoft.Extensions.Localization;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -27,6 +28,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         private readonly ISentNotificationDataRepository sentNotificationDataRepository;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IUsersService usersService;
+        private readonly IChannelDataRepository channelDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
 
         /// <summary>
@@ -40,11 +42,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             ISentNotificationDataRepository sentNotificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IUsersService usersService,
+            IChannelDataRepository channelDataRepository,
             IStringLocalizer<Strings> localizer)
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.usersService = usersService ?? throw new ArgumentNullException(nameof(usersService));
+            this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
         }
 
@@ -137,17 +141,19 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             var upn = string.Empty;
             var teamId = string.Empty;
             var teamName = string.Empty;
+            var channelName = string.Empty;
+
+            var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationDataEntity.Channel + "'", null);
+            foreach (ChannelDataEntity channelData in channelDataEntity)
+            {
+                channelName = channelData.ChannelName;
+            }
 
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationDataEntity.Id);
             await foreach (var sentNotificationDataEntities in sentNotificationDataEntitiesStream)
             {
                 var notificationDetailsList = new List<NotificationDetailsExport>();
-                var channelName = string.Empty;
-                //var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationEntity.Channel + "'", null);
-                //foreach (ChannelDataEntity channelData in channelDataEntity)
-                //{
-                //    channelName = channelData.ChannelName;
-                //}
+
                 foreach (var sentNotificationDataEntity in sentNotificationDataEntities)
                 {
 

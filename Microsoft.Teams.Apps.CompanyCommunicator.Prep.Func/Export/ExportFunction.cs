@@ -81,7 +81,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             var exportDataEntity = await this.exportDataRepository.GetAsync(messageContent.UserId, notificationId);
             if (exportDataEntity.ExportType == "ExportAllNotifications")
             {
-                exportDataEntity.FileName = this.GetFileName("FileName_ExportDetails");
+                //exportDataEntity.FileName = this.GetFileName("FileName_ExportDetails");
+                var fileName = this.localizer.GetString("FileName_ExportDetails") + "_" + exportDataEntity.RowKey+ ".zip";
+                exportDataEntity.FileName = fileName;
             }
             else
             {
@@ -90,17 +92,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 
             var requirement = new ExportDataRequirement(sentNotificationDataEntity, exportDataEntity, messageContent.UserId);
 
-            if (requirement.IsValid() && exportDataEntity.ExportType != "ExportAllNotifications")
+            if (exportDataEntity.ExportType == "ExportAllNotifications")
             {
-             string instanceId = await starter.StartNewAsync(
-                                        nameof(ExportOrchestration.ExportOrchestrationAsync),
-                                        requirement);
+             string instanceId = await starter.StartNewAsync( nameof(ExportOrchestration.ExportOrchestrationAsync), requirement);
             }
-            else
+            else if (requirement.IsValid())
             {
-                string instanceId = await starter.StartNewAsync(
-                                        nameof(ExportOrchestration.ExportOrchestrationAsync),
-                                        requirement);
+             string instanceId = await starter.StartNewAsync(nameof(ExportOrchestration.ExportOrchestrationAsync), requirement);
             }
         }
 
