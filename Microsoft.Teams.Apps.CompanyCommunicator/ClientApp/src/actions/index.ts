@@ -33,13 +33,16 @@ export const selectMessage = (message: any) => {
 
 export const getMessagesList = () => async (dispatch: any) => {
     const response = await getSentNotifications();
+    var regex = /(<([^>]+)>)/ig;
     const notificationList: Notification[] = response.data;
     notificationList.forEach(notification => {
         notification.sendingStartedDate = formatDate(notification.sendingStartedDate);
         notification.sentDate = formatDate(notification.sentDate);
         notification.edited = formatDate(notification.edited);
+        notification.summary = notification.summary.replace(regex, "");
     });
     dispatch({ type: 'FETCH_MESSAGES', payload: notificationList });
+
 };
 
 export const getUserDashboardMessagesList = () => async (dispatch: any) => {
