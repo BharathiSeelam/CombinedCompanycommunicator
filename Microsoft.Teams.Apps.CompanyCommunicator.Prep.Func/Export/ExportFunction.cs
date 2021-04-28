@@ -79,20 +79,35 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 partitionKey: NotificationDataTableNames.SentNotificationsPartition,
                 rowKey: notificationId);
             var exportDataEntity = await this.exportDataRepository.GetAsync(messageContent.UserId, notificationId);
-            exportDataEntity.FileName = this.GetFileName();
+            if (exportDataEntity.ExportType == "ExportAllNotifications")
+            {
+                exportDataEntity.FileName = this.GetFileName("FileName_ExportDetails");
+            }
+            else
+            {
+                exportDataEntity.FileName = this.GetFileName("FileName_ExportData");
+            }
+
             var requirement = new ExportDataRequirement(sentNotificationDataEntity, exportDataEntity, messageContent.UserId);
-            if (requirement.IsValid())
+
+            if (requirement.IsValid() && exportDataEntity.ExportType != "ExportAllNotifications")
+            {
+             string instanceId = await starter.StartNewAsync(
+                                        nameof(ExportOrchestration.ExportOrchestrationAsync),
+                                        requirement);
+            }
+            else
             {
                 string instanceId = await starter.StartNewAsync(
-                    nameof(ExportOrchestration.ExportOrchestrationAsync),
-                    requirement);
+                                        nameof(ExportOrchestration.ExportOrchestrationAsync),
+                                        requirement);
             }
         }
 
-        private string GetFileName()
+        private string GetFileName(string resourceKey)
         {
             var guid = Guid.NewGuid().ToString();
-            var fileName = this.localizer.GetString("FileName_ExportData");
+            var fileName = this.localizer.GetString(resourceKey); // "FileName_ExportData"
             return $"{fileName}_{guid}.zip";
         }
     }

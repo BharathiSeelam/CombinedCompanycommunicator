@@ -18,5 +18,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model
         /// Gets or sets the user id value.
         /// </summary>
         public string UserId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Export Type value.
+        /// </summary>
+        public string ExportType { get; set; }
     }
 }

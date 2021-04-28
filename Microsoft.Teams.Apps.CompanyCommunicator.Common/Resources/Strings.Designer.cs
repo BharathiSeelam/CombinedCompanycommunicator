@@ -79,11 +79,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Account.
+        /// </summary>
+        public static string ColumnName_Account {
+            get {
+                return ResourceManager.GetString("ColumnName_Account", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Created Time.
+        /// </summary>
+        public static string ColumnName_CreatedDateTime {
+            get {
+                return ResourceManager.GetString("ColumnName_CreatedDateTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delivery Status.
         /// </summary>
         public static string ColumnName_DeliveryStatus {
             get {
                 return ResourceManager.GetString("ColumnName_DeliveryStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edited Date.
+        /// </summary>
+        public static string ColumnName_Edited {
+            get {
+                return ResourceManager.GetString("ColumnName_Edited", resourceCulture);
             }
         }
         
@@ -106,11 +133,47 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Notification Id.
+        /// </summary>
+        public static string ColumnName_Id {
+            get {
+                return ResourceManager.GetString("ColumnName_Id", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Message Title.
         /// </summary>
         public static string ColumnName_MessageTitle {
             get {
                 return ResourceManager.GetString("ColumnName_MessageTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recipient Type.
+        /// </summary>
+        public static string ColumnName_RecipientType {
+            get {
+                return ResourceManager.GetString("ColumnName_RecipientType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sending Start Date.
+        /// </summary>
+        public static string ColumnName_SendingStartedDate {
+            get {
+                return ResourceManager.GetString("ColumnName_SendingStartedDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sent Date.
+        /// </summary>
+        public static string ColumnName_SentDate {
+            get {
+                return ResourceManager.GetString("ColumnName_SentDate", resourceCulture);
             }
         }
         
@@ -129,6 +192,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         public static string ColumnName_StatusReason {
             get {
                 return ResourceManager.GetString("ColumnName_StatusReason", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Summary.
+        /// </summary>
+        public static string ColumnName_Summary {
+            get {
+                return ResourceManager.GetString("ColumnName_Summary", resourceCulture);
             }
         }
         
@@ -169,7 +241,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Name.
+        ///   Looks up a localized string similar to User Name.
         /// </summary>
         public static string ColumnName_UserName {
             get {
@@ -331,11 +403,29 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ExportDetails.
+        /// </summary>
+        public static string FileName_ExportDetails {
+            get {
+                return ResourceManager.GetString("FileName_ExportDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Message_Delivery.
         /// </summary>
         public static string FileName_Message_Delivery {
             get {
                 return ResourceManager.GetString("FileName_Message_Delivery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message_DeliveryDetails.
+        /// </summary>
+        public static string FileName_Message_DeliveryDetails {
+            get {
+                return ResourceManager.GetString("FileName_Message_DeliveryDetails", resourceCulture);
             }
         }
         

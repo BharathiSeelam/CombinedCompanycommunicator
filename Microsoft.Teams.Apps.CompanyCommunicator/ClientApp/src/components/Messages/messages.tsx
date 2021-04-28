@@ -3,10 +3,11 @@ import { connect } from 'react-redux';
 import { withTranslation, WithTranslation } from "react-i18next";
 import { TooltipHost } from 'office-ui-fabric-react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { Icon, Loader, List, Flex, Text } from '@stardust-ui/react';
+import { Icon, Loader, List, Flex, Text, Image, Button, IconProps  } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
 import { CommandBarButton } from 'office-ui-fabric-react/lib/Button';
 import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
+import { exportNotification } from '../../apis/messageListApi';
 import { getBaseUrl } from '../../configVariables';
 import Overflow from '../OverFlow/sentMessageOverflow';
 import './messages.scss';
@@ -44,6 +45,8 @@ export interface IMessageProps extends WithTranslation {
 export interface IMessageState {
     message: IMessage[];
     loader: boolean;
+    page: string;
+    teamId?: string;
 }
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
@@ -58,12 +61,19 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         this.state = {
             message: this.props.messagesList,
             loader: true,
+            page: "",
+            teamId: "",
         };
         this.escFunction = this.escFunction.bind(this);
     }
 
     public componentDidMount() {
         microsoftTeams.initialize();
+        microsoftTeams.getContext((context) => {
+            this.setState({
+                teamId: context.teamId,
+            });
+        });
         this.props.getMessagesList();
         document.addEventListener("keydown", this.escFunction, false);
         this.interval = setInterval(() => {
@@ -114,23 +124,53 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
         } else if (this.state.message.length === 0) {
             return (<div className="results">{this.localize("EmptySentMessages")}</div>);
         }
-        else {
-
+        else
+        {
+            const downloadIcon: IconProps = { name: 'download', size: "medium" };
             return (
                 <div>
-                    <List selectable items={csv} className="list" />
+                    <tr>
+                        <td><List selectable items={csv} className="list" /></td>
+                        <td>
+                            <div className="buttonContainer">
+                                
+                                <TooltipHost content={"Export All Notification Details"} calloutProps={{ gapSpace: 0 }}>
+                                    <Button icon={downloadIcon} content={"Export Details"} id="exportBtn" onClick={this.onExportDetails} primary />
+                                </TooltipHost>
+                            </div>
+                         </td>
+                    </tr>
                     <List selectable items={allMessages} className="list" />
                 </div>
             );
         }
     }
+
+    private onExportDetails = async () => {
+        //let spanner = document.getElementsByClassName("sendingLoader");
+        //spanner[0].classList.remove("hiddenLoader");
+        let payload = {
+            id: "dummy",
+            teamId: this.state.teamId
+        };
+        await exportNotification(payload).then(() => {
+            this.setState({ page: "SuccessPage" });
+        }).catch(() => {
+            this.setState({ page: "ErrorPage" });
+        });
+    }
+
+    private onClose = () => {
+        microsoftTeams.tasks.submitTask();
+    }
+
     private createCSV = (message: any) => {
 
         const link = [{
             key: "csvlink",
             content: (
                 <CSVLink data={message} filename={"TeamActivity.csv"}>
-                    <CommandBarButton iconProps={{ iconName: 'ExcelLogoInverse' }} text='Export' />
+                    <CommandBarButton iconProps={{ iconName: 'ExcelLogoInverse' }} text='Export Summary' />
                 </CSVLink>
             ),
             styles: { margin: '0.2rem 0.2rem 0 0' },
@@ -294,6 +334,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             microsoftTeams.tasks.submitTask();
         }
     }
+
+    
 
     public onOpenTaskModule = (event: any, url: string, title: string) => {
         if (this.isOpenTaskModuleAllowed) {

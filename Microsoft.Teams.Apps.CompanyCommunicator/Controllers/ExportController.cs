@@ -88,6 +88,12 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 return this.Conflict();
             }
+            var exportType = "ExportSingleNotifications";
+            if (exportRequest.Id == "dummy")
+            {
+                exportRequest.Id = Guid.NewGuid().ToString();
+                exportType = "ExportAllNotifications";
+            }
 
             await this.exportDataRepository.CreateOrUpdateAsync(new ExportDataEntity()
             {
@@ -95,6 +101,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 RowKey = exportRequest.Id,
                 SentDate = DateTime.UtcNow,
                 Status = ExportStatus.New.ToString(),
+                ExportType = exportType,
             });
 
             var exportQueueMessageContent = new ExportQueueMessageContent

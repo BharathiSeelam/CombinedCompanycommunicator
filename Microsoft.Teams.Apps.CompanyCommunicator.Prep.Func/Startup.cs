@@ -114,6 +114,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             builder.Services.AddTransient<UpdateExportDataActivity>();
             builder.Services.AddTransient<GetMetadataActivity>();
             builder.Services.AddTransient<UploadActivity>();
+            builder.Services.AddTransient<UploadActivityAll>();
             builder.Services.AddTransient<SendFileCardActivity>();
             builder.Services.AddTransient<HandleExportFailureActivity>();
 

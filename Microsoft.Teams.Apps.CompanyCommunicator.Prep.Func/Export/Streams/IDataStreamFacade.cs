@@ -5,6 +5,7 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 {
     using System.Collections.Generic;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
 
     /// <summary>
@@ -25,5 +26,13 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
         /// <param name="notificationId">the notification id.</param>
         /// <returns>the streams of team data.</returns>
         IAsyncEnumerable<IEnumerable<TeamData>> GetTeamDataStreamAsync(string notificationId);
+
+        /// <summary>
+        /// get the NotificationDetailsExport streams.
+        /// </summary>
+        /// <param name="notificationEntity">notificationEntity.</param>
+        /// <returns>the streams of NotificationDetailsExport</returns>
+        IAsyncEnumerable<IEnumerable<NotificationDetailsExport>> GetNotificationDetailsStreamAsync(NotificationDataEntity notificationEntity);
+
     }
 }

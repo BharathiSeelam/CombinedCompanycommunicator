@@ -154,7 +154,7 @@
     <value>User ID</value>
   </data>
   <data name="ColumnName_UserName" xml:space="preserve">
-    <value>Name</value>
+    <value>User Name</value>
   </data>
   <data name="DuplicateText" xml:space="preserve">
     <value>{0} (copy)</value>
@@ -246,5 +246,35 @@
   </data>
   <data name="Throttled" xml:space="preserve">
     <value>Throttled</value>
+  </data>
+  <data name="ColumnName_Account" xml:space="preserve">
+    <value>Account</value>
+  </data>
+  <data name="ColumnName_CreatedDateTime" xml:space="preserve">
+    <value>Created Time</value>
+  </data>
+  <data name="ColumnName_Edited" xml:space="preserve">
+    <value>Edited Date</value>
+  </data>
+  <data name="ColumnName_Id" xml:space="preserve">
+    <value>Notification Id</value>
+  </data>
+  <data name="ColumnName_RecipientType" xml:space="preserve">
+    <value>Recipient Type</value>
+  </data>
+  <data name="ColumnName_SendingStartedDate" xml:space="preserve">
+    <value>Sending Start Date</value>
+  </data>
+  <data name="ColumnName_SentDate" xml:space="preserve">
+    <value>Sent Date</value>
+  </data>
+  <data name="ColumnName_Summary" xml:space="preserve">
+    <value>Summary</value>
+  </data>
+  <data name="FileName_ExportDetails" xml:space="preserve">
+    <value>ExportDetails</value>
+  </data>
+  <data name="FileName_Message_DeliveryDetails" xml:space="preserve">
+    <value>Message_DeliveryDetails</value>
   </data>
 </root>

@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
     using System.Net;
     using Microsoft.Extensions.Localization;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -116,6 +117,84 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 }
 
                 yield return teamDataList;
+            }
+        }
+
+        /// <summary>
+        /// get the team data streams.
+        /// </summary>
+        /// <param name="notificationDataEntity">notificationDataEntity.</param>
+        /// <returns>the streams of team data.</returns>
+        public async IAsyncEnumerable<IEnumerable<NotificationDetailsExport>> GetNotificationDetailsStreamAsync (NotificationDataEntity notificationDataEntity)
+        {
+            if (notificationDataEntity.Id == null)
+            {
+                throw new ArgumentNullException(nameof(notificationDataEntity.Id));
+            }
+
+            var userId = string.Empty;
+            var userName = string.Empty;
+            var upn = string.Empty;
+            var teamId = string.Empty;
+            var teamName = string.Empty;
+
+            var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationDataEntity.Id);
+            await foreach (var sentNotificationDataEntities in sentNotificationDataEntitiesStream)
+            {
+                var notificationDetailsList = new List<NotificationDetailsExport>();
+                var channelName = string.Empty;
+                //var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationEntity.Channel + "'", null);
+                //foreach (ChannelDataEntity channelData in channelDataEntity)
+                //{
+                //    channelName = channelData.ChannelName;
+                //}
+                foreach (var sentNotificationDataEntity in sentNotificationDataEntities)
+                {
+
+                    if (sentNotificationDataEntity.RecipientType == "Team")
+                    {
+                        var team = await this.teamDataRepository.GetAsync(TeamDataTableNames.TeamDataPartition, sentNotificationDataEntity.RowKey);
+                        teamId = sentNotificationDataEntity.RecipientId;
+                        teamName = team.Name;
+                        userId = string.Empty;
+                        userName = string.Empty;
+                        upn = string.Empty;
+                    }
+
+                    if (sentNotificationDataEntity.RecipientType == "User")
+                    {
+                        var users = await this.usersService.GetUserAsync(sentNotificationDataEntity.RecipientId);
+
+                        userId = sentNotificationDataEntity.RecipientId;
+                        userName = users.DisplayName;
+                        upn = users.UserPrincipalName;
+                        teamId = string.Empty;
+                        teamName = string.Empty;
+                    }
+
+                    var notificationDetails = new NotificationDetailsExport
+                    {
+                        Id = notificationDataEntity.Id,
+                        Title = notificationDataEntity.Title,
+                        Summary = notificationDataEntity.Summary,
+                        Account = channelName,
+                        CreatedDateTime = notificationDataEntity.CreatedDate,
+                        SentDate = notificationDataEntity.SentDate,
+                        Edited = notificationDataEntity.Edited,
+                        SendingStartedDate = notificationDataEntity.SendingStartedDate,
+                        RecipientType = sentNotificationDataEntity.RecipientType,
+                        UserId = userId,
+                        Upn = upn,
+                        UserName = userName,
+                        TeamId = teamId,
+                        TeamName = teamName,
+                        DeliveryStatus = this.localizer.GetString(sentNotificationDataEntity.DeliveryStatus),
+                        StatusReason = this.GetStatusReason(sentNotificationDataEntity.ErrorMessage, sentNotificationDataEntity.StatusCode.ToString()),
+                    };
+                    notificationDetailsList.Add(notificationDetails);
+                }
+
+                yield return notificationDetailsList;
             }
         }
 
