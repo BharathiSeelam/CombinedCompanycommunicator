@@ -2,24 +2,26 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
+using Html2Markdown;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using Microsoft.Extensions.Localization;
+using Microsoft.Graph;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
+using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions;
+using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
+using Newtonsoft.Json;
+using System.Text.RegularExpressions;
+
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
-    using Microsoft.Extensions.Localization;
-    using Microsoft.Graph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MicrosoftGraph;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Extensions;
-    using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
-    using Newtonsoft.Json;
-
     /// <summary>
     /// Facade to get the data stream.
     /// </summary>
@@ -142,6 +144,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
             var teamId = string.Empty;
             var teamName = string.Empty;
             var channelName = string.Empty;
+            var summary = string.Empty;
 
             var channelDataEntity = await this.channelDataRepository.GetFilterAsync("RowKey eq '" + notificationDataEntity.Channel + "'", null);
             foreach (ChannelDataEntity channelData in channelDataEntity)
@@ -149,10 +152,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                 channelName = channelData.ChannelName;
             }
 
+           
+            if (!string.IsNullOrWhiteSpace(notificationDataEntity.Summary))
+            {
+               summary = Regex.Replace(notificationDataEntity.Summary, "<(.|\n)*?>", string.Empty);
+             }
+
             var sentNotificationDataEntitiesStream = this.sentNotificationDataRepository.GetStreamsAsync(notificationDataEntity.Id);
             await foreach (var sentNotificationDataEntities in sentNotificationDataEntitiesStream)
             {
                 var notificationDetailsList = new List<NotificationDetailsExport>();
+                
 
                 foreach (var sentNotificationDataEntity in sentNotificationDataEntities)
                 {
@@ -182,7 +192,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Streams
                     {
                         Id = notificationDataEntity.Id,
                         Title = notificationDataEntity.Title,
-                        Summary = notificationDataEntity.Summary,
+                        Summary = summary,
                         Account = channelName,
                         CreatedDateTime = notificationDataEntity.CreatedDate,
                         SentDate = notificationDataEntity.SentDate,
