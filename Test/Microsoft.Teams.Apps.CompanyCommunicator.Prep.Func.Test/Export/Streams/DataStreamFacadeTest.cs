@@ -9,6 +9,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
     using Microsoft.Extensions.Localization;
     using Microsoft.Extensions.Logging;
     using Microsoft.Graph;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -31,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         private readonly Mock<ITeamDataRepository> teamDataRepository = new Mock<ITeamDataRepository>();
         private readonly Mock<IUsersService> usersService = new Mock<IUsersService>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
+        private readonly Mock<IChannelDataRepository> channelDataRepository = new Mock<IChannelDataRepository>();
         private readonly string notificationId = "notificationId";
         private readonly IEnumerable<List<SentNotificationDataEntity>> data = new List<List<SentNotificationDataEntity>>()
             {
@@ -48,18 +50,20 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         public void DataStreamFacadeConstructorTest()
         {
             // Arrange
-            Action action1 = () => new DataStreamFacade(null /*sentNotificationDataRepository*/, teamDataRepository.Object, usersService.Object, localizer.Object);
-            Action action2 = () => new DataStreamFacade(sentNotificationDataRepository.Object, null /*teamDataRepository*/, usersService.Object, localizer.Object);
-            Action action3 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, null /*usersService*/, localizer.Object);
-            Action action4 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, null /*localizer*/);
-            Action action5 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, localizer.Object);
+            Action action1 = () => new DataStreamFacade(null /*sentNotificationDataRepository*/, teamDataRepository.Object, usersService.Object, channelDataRepository.Object, localizer.Object);
+            Action action2 = () => new DataStreamFacade(sentNotificationDataRepository.Object, null /*teamDataRepository*/, usersService.Object, channelDataRepository.Object, localizer.Object);
+            Action action3 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, null /*usersService*/, channelDataRepository.Object, localizer.Object);
+            Action action4 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, channelDataRepository.Object, null /*localizer*/);
+            Action action5 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, null /* channelDataservice */, localizer.Object);
+            Action action6 = () => new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object,  channelDataRepository.Object,localizer.Object);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("sentNotificationDataRepository is null.");
             action2.Should().Throw<ArgumentNullException>("teamDataRepository is null.");
             action3.Should().Throw<ArgumentNullException>("usersService is null.");
             action4.Should().Throw<ArgumentNullException>("localizer is null.");
-            action5.Should().NotThrow();
+            action5.Should().Throw<ArgumentNullException>("ChannelDataRepository is null.");
+            action6.Should().NotThrow();
         }
 
 
@@ -164,7 +168,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export.Streams
         /// <returns>return the instance of DataStreamFacade</returns>
         private DataStreamFacade GetDataStreamFacade()
         {
-            return new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, localizer.Object);
+            return new DataStreamFacade(sentNotificationDataRepository.Object, teamDataRepository.Object, usersService.Object, channelDataRepository.Object, localizer.Object);
         }
     }
 }
