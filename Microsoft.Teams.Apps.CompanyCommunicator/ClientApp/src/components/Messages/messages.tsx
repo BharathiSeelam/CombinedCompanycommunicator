@@ -1,19 +1,20 @@
-import * as React from 'react';
-import { connect } from 'react-redux';
-import { withTranslation, WithTranslation } from "react-i18next";
-import { TooltipHost } from 'office-ui-fabric-react';
-import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { Icon, Loader, List, Flex, Text, Image, Button, IconProps  } from '@stardust-ui/react';
 import * as microsoftTeams from "@microsoft/teams-js";
+import { Button, Flex, Icon, IconProps, List, Loader, Text } from '@stardust-ui/react';
+import { TFunction } from "i18next";
+import { TooltipHost } from 'office-ui-fabric-react';
 import { CommandBarButton } from 'office-ui-fabric-react/lib/Button';
-import { selectMessage, getMessagesList, getDraftMessagesList } from '../../actions';
+import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
+import * as React from 'react';
+import { CSVLink } from "react-csv";
+import { withTranslation, WithTranslation } from "react-i18next";
+import Modal from 'react-modal';
+import { connect } from 'react-redux';
+import { getDraftMessagesList, getMessagesList, selectMessage } from '../../actions';
 import { exportNotification } from '../../apis/messageListApi';
 import { getBaseUrl } from '../../configVariables';
+import { formatNumber } from '../../i18n';
 import Overflow from '../OverFlow/sentMessageOverflow';
 import './messages.scss';
-import { TFunction } from "i18next";
-import { formatNumber } from '../../i18n';
-import { CSVLink } from "react-csv";
 
 export interface ITaskInfo {
     title?: string;
@@ -47,7 +48,19 @@ export interface IMessageState {
     loader: boolean;
     page: string;
     teamId?: string;
+    pageOpen: boolean;
+    pageError: boolean;
 }
+const customStyles = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-20%',
+        transform: 'translate(-50%, -50%)'
+    }
+};
 
 class Messages extends React.Component<IMessageProps, IMessageState> {
     readonly localize: TFunction;
@@ -63,6 +76,8 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             loader: true,
             page: "",
             teamId: "",
+            pageOpen: false,
+            pageError:false,
         };
         this.escFunction = this.escFunction.bind(this);
     }
@@ -94,7 +109,13 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             });
         }
     }
-
+    
+    public toggleModalError() {
+        this.setState({ pageError: false });
+    }
+    public toggleModal() {
+        this.setState({ pageOpen: false});
+    }
     public render(): JSX.Element {
         let keyCount = 0;
         const processItem = (message: any) => {
@@ -110,7 +131,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             };
             return out;
         };
-
+      
         const csvLink = this.createCSV(this.state.message);
         const label = this.processLabels();
         const outList = this.state.message.map(processItem);
@@ -137,7 +158,60 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                                 <TooltipHost content={"Export All Notification Details"} calloutProps={{ gapSpace: 0 }}>
                                     <Button icon={downloadIcon} content={"Export Details"} id="exportBtn" onClick={this.onExportDetails} primary />
                                 </TooltipHost>
+                                <div>
+                                <Modal
+                                                            isOpen={this.state.pageOpen}
+                                        style={customStyles}
+                                    onDismiss={this.toggleModal}
+                                    isBlocking={false}
+                                      >
+                                        <div>
+                                            <div className="displayMessageField">
+                                                <br />
+                                                <br />
+                                            <span><Icon className="iconStyle" name="stardust-checkmark" xSpacing="before" size="largest" outline /></span>
+                                    <h1>{this.localize("ExportQueueTitle")}</h1></div>
+                                <span>{this.localize("ExportQueueSuccessMessage1")}</span>
+                                <br />
+                                <br />
+                                <span>{this.localize("ExportQueueSuccessMessage2")}</span>
+                                <br />
+                                            <span>{this.localize("ExportQueueSuccessMessage3")}</span>
+                                            <div className="footerContainer">
+                                                <div className="buttonContainer">
+                                                    <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.toggleModal.bind(this)} primary />
+                                                </div>
+                                            </div>
+                                            </div>
+                                        
+                                    </Modal>
+
+                                    <Modal
+                                        isOpen={this.state.pageError}
+                                        style={customStyles}
+                                        onDismiss={this.toggleModalError}
+                                        isBlocking={false}
+                                    >
+                                        <div>
+                                            <div className="displayMessageField">
+                                                <br />
+                                                <br />
+                                                <div><span><Icon className="iconStyle" name="stardust-close" xSpacing="before" size="largest" outline /></span>
+                                                    <h1 className="light">{this.localize("ExportErrorTitle")}</h1></div>
+                                                <span>{this.localize("ExportErrorMessage")}</span>
+                                            </div>
+                                            <div className="footerContainer">
+                                                <div className="buttonContainer">
+                                                    <Button content={this.localize("CloseText")} id="closeBtn" onClick={this.toggleModalError.bind(this)} primary />
+                                                </div>
+                                                </div>
+                                        </div>
+
+                                    </Modal>
+                                    </div>
                             </div>
+
+
                          </td>
                     </tr>
                     <List selectable items={allMessages} className="list" />
@@ -154,9 +228,9 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
             teamId: this.state.teamId
         };
         await exportNotification(payload).then(() => {
-            this.setState({ page: "SuccessPage" });
+            this.setState({ pageOpen: true });
         }).catch(() => {
-            this.setState({ page: "ErrorPage" });
+            this.setState({ pageError: true });
         });
     }
 
