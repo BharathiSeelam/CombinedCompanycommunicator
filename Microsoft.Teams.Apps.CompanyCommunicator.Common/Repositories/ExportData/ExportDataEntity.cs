@@ -36,6 +36,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportDat
         /// <summary>
         /// Gets or sets the status of the export.
         /// </summary>
+        public string UserType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status of the export.
+        /// </summary>
         public string ExportType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the status of the export.
+        /// </summary>
+        public string RequestedTeamId { get; set; }
     }
 }

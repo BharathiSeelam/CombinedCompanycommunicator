@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
@@ -34,6 +35,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ITeamMembersService memberService;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly IAppSettingsService appSettingsService;
+        private readonly IConfiguration configuration;
+        private string loggedinUser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportController"/> class.
@@ -45,6 +48,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="memberService">Teams member service.</param>
         /// <param name="teamDataRepository">Team data reporsitory.</param>
         /// <param name="appSettingsService">App Settings service.</param>
+        /// <param name="configuration">configuration.</param>
         public ExportController(
             ISentNotificationDataRepository sentNotificationDataRepository,
             IExportDataRepository exportDataRepository,
@@ -52,7 +56,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IExportQueue exportQueue,
             ITeamMembersService memberService,
             ITeamDataRepository teamDataRepository,
-            IAppSettingsService appSettingsService)
+            IAppSettingsService appSettingsService
+           // IConfiguration configuration
+            )
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
@@ -61,6 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
+            //this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         /// <summary>
@@ -72,11 +79,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> ExportNotificationAsync(
             [FromBody]ExportRequest exportRequest)
         {
+            //var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
+            var authorizedCreatorUpns = "homerun1 @nao365competency.onmicrosoft.com";
+             string[] superAdminsArray = authorizedCreatorUpns.Split(",");
+            var superAdmins = string.Join(",", superAdminsArray).ToLower();
+            this.loggedinUser = this.HttpContext.User?.Identity?.Name;
+            var sLoggedin = string.Empty + this.loggedinUser;
+            this.loggedinUser = sLoggedin.ToLower();
+            //var userType = "admin";
+            //if (superAdmins.Contains(this.loggedinUser))
+            //{
+            //    userType = "superAdmin";
+            //}
+            var userType = superAdmins.Contains(this.loggedinUser) ? "superAdmin" : "admin";
+
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
             if (user == null)
             {
-                await this.SyncAuthorAsync(exportRequest.TeamId, userId);
+               // await this.SyncAuthorAsync(exportRequest.TeamId, userId);               
             }
 
             // Ensure the data tables needed by the Azure Function to export the notification exist in Azure storage.
@@ -102,6 +123,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 SentDate = DateTime.UtcNow,
                 Status = ExportStatus.New.ToString(),
                 ExportType = exportType,
+                UserType = userType,
+                RequestedTeamId = exportRequest.TeamId,
             });
 
             var exportQueueMessageContent = new ExportQueueMessageContent

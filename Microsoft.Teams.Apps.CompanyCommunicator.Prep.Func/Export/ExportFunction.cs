@@ -5,14 +5,18 @@
 namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.WebJobs;
     using Microsoft.Azure.WebJobs.Extensions.DurableTask;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.MessageQueues.ExportQueue;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Model;
     using Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator;
     using Newtonsoft.Json;
@@ -29,6 +33,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly IExportDataRepository exportDataRepository;
         private readonly IStringLocalizer<Strings> localizer;
+        private readonly ITeamMembersService memberService;
+        private readonly IUserDataRepository userDataRepository;
+        private readonly ITeamDataRepository teamDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportFunction"/> class.
@@ -39,11 +46,18 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
         public ExportFunction(
             INotificationDataRepository notificationDataRepository,
             IExportDataRepository exportDataRepository,
-            IStringLocalizer<Strings> localizer)
+            IStringLocalizer<Strings> localizer,
+            ITeamMembersService memberService,
+            IUserDataRepository userDataRepository,
+            ITeamDataRepository teamDataRepository
+            )
         {
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.exportDataRepository = exportDataRepository ?? throw new ArgumentNullException(nameof(exportDataRepository));
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
+            this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
+            this.userDataRepository = userDataRepository ?? throw new ArgumentNullException(nameof(userDataRepository));
+            this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
         }
 
         /// <summary>
@@ -84,6 +98,15 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 //exportDataEntity.FileName = this.GetFileName("FileName_ExportDetails");
                 var fileName = this.localizer.GetString("FileName_ExportDetails") + "_" + exportDataEntity.RowKey+ ".zip";
                 exportDataEntity.FileName = fileName;
+
+                var userId = exportDataEntity.PartitionKey;
+                var requestedTeamId = exportDataEntity.RequestedTeamId;
+                var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
+                if (user == null)
+                {
+                    await this.SyncAuthorAsync(requestedTeamId, userId);
+
+                }
             }
             else
             {
@@ -107,6 +130,28 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             var guid = Guid.NewGuid().ToString();
             var fileName = this.localizer.GetString(resourceKey); // "FileName_ExportData"
             return $"{fileName}_{guid}.zip";
+        }
+
+        private async Task SyncAuthorAsync(string teamId, string userId)
+        {           
+            var teamData = await this.teamDataRepository.GetAsync("TeamData", teamId);
+            var tenantId = teamData.TenantId;
+            var serviceUrl = teamData.ServiceUrl;
+            // Sync members.
+            var userEntities = await this.memberService.GetAuthorsAsync(
+                teamId: teamId,
+                tenantId: tenantId,
+                serviceUrl: serviceUrl);
+
+            var userData = userEntities.FirstOrDefault(user => user.AadId.Equals(userId));
+            if (userData == null)
+            {
+                throw new ApplicationException("Unable to find user in Team roster");
+            }
+
+            userData.PartitionKey = UserDataTableNames.AuthorDataPartition;
+            userData.RowKey = userData.AadId;
+            await this.userDataRepository.CreateOrUpdateAsync(userData);
         }
     }
 }
