@@ -12,7 +12,7 @@
   "PlaceHolderChannelName": "Account Name",
   "PlaceHolderDescription": "Description of this Account is used to identify the purpose of this Account",
   "AdminsForThisChannel": "Admin Emails (Add more email with comma (',') separated text and no spacing before or after comma(',')",
-  "AdminUserNameLabel": "Admin User Names (This is a readonly input to diplay the admins User Names)",
+  "AdminUserNameLabel": "Admin User Names (This is a readonly input to display the admins User Names)",
   "SelectAMessageTemplate": "Select a message template",
   "Recipients": "Recipients",
   "Sent": "Sent",
