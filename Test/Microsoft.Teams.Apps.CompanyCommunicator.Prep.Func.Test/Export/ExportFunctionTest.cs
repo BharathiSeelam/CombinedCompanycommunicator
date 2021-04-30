@@ -10,6 +10,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
     using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.UserData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.Teams;
     using Moq;
     using System;
     using System.Threading.Tasks;
@@ -24,6 +27,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         private readonly Mock<IDurableOrchestrationClient> starter = new Mock<IDurableOrchestrationClient>();
         private readonly Mock<INotificationDataRepository> notificationDataRepository = new Mock<INotificationDataRepository>();
         private readonly Mock<IExportDataRepository> exportDataRepository = new Mock<IExportDataRepository>();
+        private readonly Mock<ITeamMembersService> memberService = new Mock<ITeamMembersService>();
+        private readonly Mock<ITeamDataRepository> teamDataRepository = new Mock<ITeamDataRepository>();
+        private readonly Mock<IUserDataRepository> userDataRepository = new Mock<IUserDataRepository>();
         private readonly Mock<IStringLocalizer<Strings>> localizer = new Mock<IStringLocalizer<Strings>>();
 
         /// <summary>
@@ -33,10 +39,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         public void ExportFunctionConstructorTest()
         {
             // Arrange
-            Action action1 = () => new ExportFunction(null /*notificationDataRepository*/, exportDataRepository.Object, localizer.Object);
-            Action action2 = () => new ExportFunction(notificationDataRepository.Object, null /*exportDataRepository*/, localizer.Object);
-            Action action3 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, null /*localizer*/);
-            Action action4 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object);
+            Action action1 = () => new ExportFunction(null /*notificationDataRepository*/, exportDataRepository.Object, localizer.Object,null,null,null);
+            Action action2 = () => new ExportFunction(notificationDataRepository.Object, null /*exportDataRepository*/, localizer.Object, null, null, null);
+            Action action3 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, null /*localizer*/, null, null, null);
+            Action action4 = () => new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object, null, null, null);
 
             // Act and Assert.
             action1.Should().Throw<ArgumentNullException>("notificationDataRepository is null.");
@@ -105,7 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Test.Export
         /// <returns>return the instance of ExportFunction</returns>
         private ExportFunction GetExportFunction()
         {
-            return new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object);
+            return new ExportFunction(notificationDataRepository.Object, exportDataRepository.Object, localizer.Object, memberService.Object, userDataRepository.Object, teamDataRepository.Object);
         }
     }
 }
