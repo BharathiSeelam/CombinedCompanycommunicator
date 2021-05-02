@@ -66,7 +66,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly ILogger<SentNotificationsController> logger;
         private readonly IStringLocalizer<Strings> localizer;
         private string account;
-        private string loggedinuser;
+        private string loggedinUser;
         private readonly IConfiguration configuration;
 
         /// <summary>
@@ -274,15 +274,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<IEnumerable<SentNotificationSummary>> GetSentNotificationsAsync()
         {
-            var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
-            string[] adminsarr = appsettingsadmin.Split(",");
-            var appadmins = string.Join(",", adminsarr).ToLower();
-            this.loggedinuser = this.HttpContext.User?.Identity?.Name;
-            var sloggedin = string.Empty + this.loggedinuser;
-            this.loggedinuser = sloggedin.ToLower();
+            var authorizedCreatorUpns = this.configuration["AuthorizedCreatorUpns"];
+            string[] superAdminsArray = authorizedCreatorUpns.Split(",");
+            var superAdmins = string.Join(",", superAdminsArray).ToLower();
+            this.loggedinUser = this.HttpContext.User?.Identity?.Name;
+            var sLoggedin = string.Empty + this.loggedinUser;
+            this.loggedinUser = sLoggedin;
+
             var result = new List<SentNotificationSummary>();
-            if (appadmins.Contains(this.loggedinuser))
+            if (superAdmins.Contains(this.loggedinUser.ToLower()))
             {
+
                 var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
                 foreach (var notificationEntity in notificationEntities)
                 {
@@ -313,32 +315,49 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
             else
             {
-                this.loggedinuser = sloggedin;
-                var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinuser + "'", "SentNotifications");
+                this.loggedinUser = sLoggedin;
+                string channelIds = string.Empty;
+                var channelDataEntity = await this.channelDataRepository.GetAllAsync();
+                foreach (ChannelDataEntity channelData in channelDataEntity)
+                {
+                    if (channelData.ChannelAdminEmail.ToLower().Contains(this.loggedinUser.ToLower()))
+                    {
+                        channelIds += channelData.RowKey;
+                        channelIds += ",";
+                    }
+                }
+
+                //var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinUser + "'", "SentNotifications");
+                var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
                 foreach (var notificationEntity in notificationEntities)
                 {
-                    string likes = await this.GetActivityIDandLikes(notificationEntity);
-                    var summary = new SentNotificationSummary
+                    if (channelIds.Contains(notificationEntity.Channel))
                     {
-                        Id = notificationEntity.Id,
-                        Title = notificationEntity.Title,
-                        Account = this.account,
-                        CreatedDateTime = notificationEntity.CreatedDate,
-                        SentDate = notificationEntity.SentDate,
-                        Succeeded = notificationEntity.Succeeded,
-                        Edited = notificationEntity.Edited,
-                        Failed = notificationEntity.Failed,
-                        Unknown = this.GetUnknownCount(notificationEntity),
-                        TotalMessageCount = notificationEntity.TotalMessageCount,
-                        SendingStartedDate = notificationEntity.SendingStartedDate,
-                        Status = notificationEntity.GetStatus(),
-                        Likes = likes,
-                        ImageLink = notificationEntity.ImageLink,
-                        Summary = notificationEntity.Summary,
-                    };
+                        string likes = await this.GetActivityIDandLikes(notificationEntity);
+                        var summary = new SentNotificationSummary
+                        {
+                            Id = notificationEntity.Id,
+                            Title = notificationEntity.Title,
+                            Account = this.account,
+                            CreatedDateTime = notificationEntity.CreatedDate,
+                            SentDate = notificationEntity.SentDate,
+                            Succeeded = notificationEntity.Succeeded,
+                            Edited = notificationEntity.Edited,
+                            Failed = notificationEntity.Failed,
+                            Unknown = this.GetUnknownCount(notificationEntity),
+                            TotalMessageCount = notificationEntity.TotalMessageCount,
+                            SendingStartedDate = notificationEntity.SendingStartedDate,
+                            Status = notificationEntity.GetStatus(),
+                            Likes = likes,
+                            ImageLink = notificationEntity.ImageLink,
+                            Summary = notificationEntity.Summary,
+                        };
 
-                    result.Add(summary);
-                }
+                        result.Add(summary);
+                    }
+                    else
+                    { continue; }
+            }
             }
 
             return result;

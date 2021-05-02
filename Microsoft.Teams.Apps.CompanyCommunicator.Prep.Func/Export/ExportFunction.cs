@@ -96,7 +96,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
             if (exportDataEntity.ExportType == "ExportAllNotifications")
             {
                 //exportDataEntity.FileName = this.GetFileName("FileName_ExportDetails");
-                var fileName = this.localizer.GetString("FileName_ExportDetails") + "_" + exportDataEntity.RowKey+ ".zip";
+                var fileName = this.localizer.GetString("FileName_ExportDetails") + "_" + exportDataEntity.RowKey  + ".zip";
                 exportDataEntity.FileName = fileName;
 
                 var userId = exportDataEntity.PartitionKey;
@@ -105,7 +105,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func
                 if (user == null)
                 {
                     await this.SyncAuthorAsync(requestedTeamId, userId);
-
                 }
             }
             else

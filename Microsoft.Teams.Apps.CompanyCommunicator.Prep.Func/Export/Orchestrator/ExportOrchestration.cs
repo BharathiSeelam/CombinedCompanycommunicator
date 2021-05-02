@@ -91,7 +91,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Orchestrator
                 if (exportType == "ExportAllNotifications")
                 {
                     //var metaData = await this.getMetadataActivity.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
-                    await this.uploadActivityAll.RunAsync(context, (sentNotificationDataEntity, null, exportDataEntity.FileName), log);
+                    await this.uploadActivityAll.RunAsync(context, (sentNotificationDataEntity, exportDataEntity), log);
                     consentId = await this.sendFileCardActivity.RunAsync(context, (exportRequiredData.UserId, exportRequiredData.ExportDataEntity.RowKey, exportDataEntity.FileName), log);
 
                 }
