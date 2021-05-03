@@ -20,6 +20,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ExportData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.SentNotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Resources;
@@ -39,6 +41,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         private readonly IStringLocalizer<Strings> localizer;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ISentNotificationDataRepository sentNotificationDataRepstry;
+        private readonly IChannelDataRepository channelDataRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UploadActivityAll"/> class.
@@ -48,18 +51,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <param name="localizer">Localization service.</param>
         /// <param name="notificationDataRepository">notificationDataRepository.</param>
         /// <param name="sentNotificationDataRepstry">sentNotificationDataRepstry.</param>
+        /// <param name="channelDataRepository">Channel data repository service that deals with the table storage in azure.</param>
         public UploadActivityAll(
             IOptions<RepositoryOptions> repositoryOptions,
             IDataStreamFacade userDataStream,
             IStringLocalizer<Strings> localizer,
             INotificationDataRepository notificationDataRepository,
-            ISentNotificationDataRepository sentNotificationDataRepstry)
+            ISentNotificationDataRepository sentNotificationDataRepstry,
+            IChannelDataRepository channelDataRepository)
         {
             this.storageConnectionString = repositoryOptions.Value.StorageAccountConnectionString;
             this.userDataStream = userDataStream;
             this.localizer = localizer ?? throw new ArgumentNullException(nameof(localizer));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.sentNotificationDataRepstry = sentNotificationDataRepstry ?? throw new ArgumentNullException(nameof(sentNotificationDataRepstry));
+            this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
         }
 
         private TimeSpan BackOffPeriod { get; set; } = TimeSpan.FromSeconds(3);
@@ -76,7 +82,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task RunAsync(
             IDurableOrchestrationContext context,
-            (NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData,
+            (NotificationDataEntity sentNotificationDataEntity, ExportDataEntity exportDataEntity) uploadData,
             ILogger log)
         {
             await context.CallActivityWithRetryAsync(
@@ -92,7 +98,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [FunctionName(nameof(UploadActivityAllAsync))]
         public async Task UploadActivityAllAsync(
-            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, Metadata metadata, string fileName) uploadData)
+            [ActivityTrigger](NotificationDataEntity sentNotificationDataEntity, ExportDataEntity exportDataEntity) uploadData)
         {
             CloudStorageAccount storage = CloudStorageAccount.Parse(this.storageConnectionString);
             CloudBlobClient client = storage.CreateCloudBlobClient();
@@ -105,7 +111,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
                 PublicAccess = BlobContainerPublicAccessType.Off,
             };
             await container.SetPermissionsAsync(permissions);
-            CloudBlockBlob blob = container.GetBlockBlobReference(uploadData.fileName);
+            CloudBlockBlob blob = container.GetBlockBlobReference(uploadData.exportDataEntity.FileName);
             var blobRequestOptions = new BlobRequestOptions()
             {
                 RetryPolicy = new ExponentialRetry(this.BackOffPeriod, this.MaxRetry),
@@ -115,39 +121,54 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Prep.Func.Export.Activities
 
             using var memorystream = await blob.OpenWriteAsync(new AccessCondition(), blobRequestOptions, new OperationContext());
             using var archive = new ZipArchive(memorystream, ZipArchiveMode.Create);
-
-            //// metadata CSV creation.
-            //var metadataFileName = string.Concat(this.localizer.GetString("FileName_Metadata"), ".csv");
-            //var metadataFile = archive.CreateEntry(metadataFileName, CompressionLevel.Optimal);
-            //using (var entryStream = metadataFile.Open())
-            //using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
-            //using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
-            //{
-            //    var metadataMap = new MetadataMap(this.localizer);
-            //    csv.Configuration.RegisterClassMap(metadataMap);
-            //    csv.WriteHeader(typeof(Metadata));
-            //    await csv.NextRecordAsync();
-            //    csv.WriteRecord(uploadData.metadata);
-            //}
-
+            string channelIds = string.Empty;
             // message delivery csv creation.
+            if (uploadData.exportDataEntity.UserType == "admin")
+            {
+                var channelDataEntity = await this.channelDataRepository.GetAllAsync();
+                foreach (ChannelDataEntity channelData in channelDataEntity)
+                {
+                    if (channelData.ChannelAdminEmail.ToLower().Contains(uploadData.exportDataEntity.LoggedinUserEmail))
+                    {
+                        channelIds += channelData.RowKey;
+                        channelIds += ",";
+                    }
+                }
+            }
+
             var messageDeliveryFileName = string.Concat(this.localizer.GetString("FileName_Message_DeliveryDetails"), ".csv");
             var messageDeliveryFile = archive.CreateEntry(messageDeliveryFileName, CompressionLevel.Optimal);
             using (var entryStream = messageDeliveryFile.Open())
             using (var writer = new StreamWriter(entryStream, System.Text.Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-                var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
                 var notificationDetailsMap = new NotificationDetailsExportMap(this.localizer);
                 csv.Configuration.RegisterClassMap(notificationDetailsMap);
-
+                var notificationEntities = await this.notificationDataRepository.GetMostRecentSentNotificationsAsync();
                 foreach (var notificationEntity in notificationEntities)
                 {
-                    var notificationDetailsStream = this.userDataStream.GetNotificationDetailsStreamAsync(notificationEntity);
-                    await foreach (var data in notificationDetailsStream)
+                    if (uploadData.exportDataEntity.UserType == "superAdmin")
                     {
-                        await csv.WriteRecordsAsync(data);
+                        var notificationDetailsStream = this.userDataStream.GetNotificationDetailsStreamAsync(notificationEntity);
+                        await foreach (var data in notificationDetailsStream)
+                        {
+                            await csv.WriteRecordsAsync(data);
+                        }
                     }
+                    else if (!string.IsNullOrEmpty(channelIds) && uploadData.exportDataEntity.UserType == "admin")
+                    {
+                        if (channelIds.Contains(notificationEntity.Channel))
+                        {
+                            var notificationDetailsStream = this.userDataStream.GetNotificationDetailsStreamAsync(notificationEntity);
+                            await foreach (var data in notificationDetailsStream)
+                            {
+                                await csv.WriteRecordsAsync(data);
+                            }
+                        }
+                        else
+                        { continue; }
+                    }
+
                 }
             }
         }

@@ -56,8 +56,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IExportQueue exportQueue,
             ITeamMembersService memberService,
             ITeamDataRepository teamDataRepository,
-            IAppSettingsService appSettingsService
-           // IConfiguration configuration
+            IAppSettingsService appSettingsService,
+            IConfiguration configuration
             )
         {
             this.sentNotificationDataRepository = sentNotificationDataRepository ?? throw new ArgumentNullException(nameof(sentNotificationDataRepository));
@@ -67,7 +67,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.memberService = memberService ?? throw new ArgumentNullException(nameof(memberService));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
-            //this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         /// <summary>
@@ -79,26 +79,23 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         public async Task<IActionResult> ExportNotificationAsync(
             [FromBody]ExportRequest exportRequest)
         {
-            //var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
-            var authorizedCreatorUpns = "homerun1 @nao365competency.onmicrosoft.com";
-             string[] superAdminsArray = authorizedCreatorUpns.Split(",");
+            var authorizedCreatorUpns = this.configuration["AuthorizedCreatorUpns"];
+           // var authorizedCreatorUpns = "homerun1 @nao365competency.onmicrosoft.com";
+            string[] superAdminsArray = authorizedCreatorUpns.Split(",");
             var superAdmins = string.Join(",", superAdminsArray).ToLower();
             this.loggedinUser = this.HttpContext.User?.Identity?.Name;
             var sLoggedin = string.Empty + this.loggedinUser;
             this.loggedinUser = sLoggedin.ToLower();
-            //var userType = "admin";
-            //if (superAdmins.Contains(this.loggedinUser))
-            //{
-            //    userType = "superAdmin";
-            //}
+            
             var userType = superAdmins.Contains(this.loggedinUser) ? "superAdmin" : "admin";
-
             var userId = this.HttpContext.User.FindFirstValue(Common.Constants.ClaimTypeUserId);
             var user = await this.userDataRepository.GetAsync(UserDataTableNames.AuthorDataPartition, userId);
-            if (user == null)
-            {
-               // await this.SyncAuthorAsync(exportRequest.TeamId, userId);               
-            }
+
+            // Moved this logic to Function App
+            // if (user == null)
+            // {
+            //   await this.SyncAuthorAsync(exportRequest.TeamId, userId);
+            // }
 
             // Ensure the data tables needed by the Azure Function to export the notification exist in Azure storage.
             await Task.WhenAll(
@@ -125,6 +122,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 ExportType = exportType,
                 UserType = userType,
                 RequestedTeamId = exportRequest.TeamId,
+                LoggedinUserEmail = this.loggedinUser,
             });
 
             var exportQueueMessageContent = new ExportQueueMessageContent
