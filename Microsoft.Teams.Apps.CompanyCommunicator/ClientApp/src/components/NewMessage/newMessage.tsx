@@ -22,10 +22,13 @@ import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 import axios from '../../apis/axiosJWTDecorator';
 import ReactQuill from 'react-quill';
+import { getAppsettings } from '../../apis/appSettingsApi';
 // Import Turndown module
 const TurndownService = require('turndown').default;
 const MarkdownIt = require('markdown-it');
 let loggedinUser;
+let superAdmin = false;
+let adminArr: string[] = [];
 
 type dropdownItem = {
     key: string,
@@ -160,6 +163,17 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             loggedinUser = context.loginHint;
             //alert(loggedinUser);
         });
+
+        await this.getAppSettingsList();
+
+        if (loggedinUser != 'undefined' && loggedinUser != null)
+        {
+            if (adminArr.includes(loggedinUser.toLowerCase()) == true) {
+                    superAdmin = true;
+                    //alert('Logged in user: ' + loggedinUser + ' \nUser Type : SuperAdmin User');
+                }
+                //else { alert('Logged in user: ' + loggedinUser + ' \nUser Type : Admin User') }
+          } 
         //- Handle the Esc key
         document.addEventListener("keydown", this.escFunction, false);
         let params = this.props.match.params;
@@ -831,23 +845,38 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             let remainingChannels = this.state.channel;
 
             //  this.state.channel.filter(x => this.state.selectedChannel.findIndex(y => y.key === x.id) < 0);
-
-
-            remainingChannels.forEach((element) => {
-                resultedChannels.push({
-                    key: element.id,
-                    header: element.channelName,
-                    content: "",
-                    image: "",
-                    team: {
-                        id: ""
-                    }
-                });
+           remainingChannels.forEach((element) => {
+                if ((superAdmin) || (element.channelAdminEmail.toLowerCase().includes(loggedinUser.toLowerCase())))
+                {
+                    resultedChannels.push({
+                        key: element.id,
+                        header: element.channelName,
+                        content: "",
+                        image: "",
+                        team: {
+                            id: ""
+                        }
+                    });
+                }                   
             });
         }
         return resultedChannels;
 
     }
+
+    private getAppSettingsList = async () => {
+        try {
+            const response = await getAppsettings();
+            var author = Object.values(response.data[0]);
+            var str = author[0];
+            adminArr = String(str).toLowerCase().split(",");
+            console.log(adminArr);
+
+        } catch (error) {
+            return error;
+        }
+    }
+
     private getMessageTemplateItems = () => {
         this.getTemplateData();
         if (this.state.templates) {
