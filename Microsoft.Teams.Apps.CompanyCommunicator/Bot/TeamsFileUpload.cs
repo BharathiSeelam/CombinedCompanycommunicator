@@ -161,7 +161,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Bot
                 notificationId);
 
             // Clean up activity such as deleting consent card, file from blob storage and table record.
-            await turnContext.DeleteActivityAsync(exportData.FileConsentId, cancellationToken);
+         //   await turnContext.DeleteActivityAsync(exportData.FileConsentId, cancellationToken);
             await this.DeleteFileAsync(fileName);
             await this.exportDataRepository.DeleteAsync(exportData);
         }
