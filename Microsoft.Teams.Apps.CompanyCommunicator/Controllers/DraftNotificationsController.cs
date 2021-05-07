@@ -201,6 +201,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 Rosters = notification.Rosters,
                 Groups = notification.Groups,
                 AllUsers = notification.AllUsers,
+                PublishOn = notification.PublishOn,
             };
 
             await this.notificationDataRepository.CreateOrUpdateAsync(notificationEntity);

@@ -54,6 +54,7 @@ export interface IDraftMessage {
     groups: any[],
     allUsers: boolean,
     templateId?: string,
+    PublishOn?: string,
 }
 
 export interface IUploadImage {
@@ -81,6 +82,7 @@ export interface formState {
     dls?: any[],
     exists?: boolean,
     templates?: any[],
+    publishOn: string,
     messageId: string,
     loader: boolean,
     groupAccess: boolean,
@@ -134,6 +136,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             groupsOptionSelected: false,
             messageId: "",
             loader: true,
+            publishOn:"",
             groupAccess: false,
             selectedFile: null,
             selectedFileName: "",
@@ -527,6 +530,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                         let userDLs = await getDistributionListsByName(Element);
                         responesofdl.push(userDLs.data[0]);
                     });
+                }
+                if (draftMessageDetail.publishOn !== null && draftMessageDetail.publishOn !== "") {
+                    this.setState({ publishOn: draftMessageDetail.publishOn.toString() });
                 }
                 let dlselectedGroups: any[] = [];
                 if (draftMessageDetail.groups.length > 0) {
@@ -1086,7 +1092,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             templateId: messageTemplate,
             rosters: selctedRosters,
             groups: selectedGroups,
-            allUsers: this.state.allUsersOptionSelected
+            allUsers: this.state.allUsersOptionSelected,
+            PublishOn: this.state.publishOn,
         };
 
         if (this.state.exists) {

@@ -47,9 +47,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Models
         public bool AllUsers { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether a notification should be sent on published date.
+        /// Gets or sets a value indicating whether a notification should be sent on published date.
         /// </summary>
-        public string PublishOn { get; internal set; }
+        public string PublishOn { get;  set; }
 
         /// <summary>
         /// Validates a draft notification.
