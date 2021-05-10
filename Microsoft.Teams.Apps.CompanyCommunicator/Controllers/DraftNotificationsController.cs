@@ -14,6 +14,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.NotificationData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.TeamData;
@@ -31,6 +32,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     [Authorize(PolicyNames.MustBeValidUpnPolicy)]
     public class DraftNotificationsController : ControllerBase
     {
+        private readonly IChannelDataRepository channelDataRepository;
         private readonly INotificationDataRepository notificationDataRepository;
         private readonly ITeamDataRepository teamDataRepository;
         private readonly DraftNotificationPreviewService draftNotificationPreviewService;
@@ -38,7 +40,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IAppSettingsService appSettingsService;
         private readonly IStringLocalizer<Strings> localizer;
         private readonly IDistributionListDataRepository distributionListDataRepository;
-        private string loggedinuser;
+        private string loggedinUser;
         private readonly IConfiguration configuration;
 
         /// <summary>
@@ -53,6 +55,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         /// <param name="configuration">The Configuration.</param>
         /// <param name="groupsService">group service.</param>
         public DraftNotificationsController(
+            IChannelDataRepository channelDataRepository,
             INotificationDataRepository notificationDataRepository,
             ITeamDataRepository teamDataRepository,
             IDistributionListDataRepository distributionListDataRepository,
@@ -62,6 +65,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IConfiguration configuration,
             IGroupsService groupsService)
         {
+            this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
             this.teamDataRepository = teamDataRepository ?? throw new ArgumentNullException(nameof(teamDataRepository));
             this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
@@ -235,17 +239,22 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var appsettingsadmin = this.configuration["AuthorizedCreatorUpns"];
-            string[] adminsarr = appsettingsadmin.Split(",");
-            var appadmins = string.Join(",", adminsarr).ToLower();
-            this.loggedinuser = this.HttpContext.User?.Identity?.Name;
-            var sloggedin = string.Empty + this.loggedinuser;
-            this.loggedinuser = sloggedin.ToLower();
+            var authorizedCreatorUpns = this.configuration["AuthorizedCreatorUpns"];
+            string[] superAdminsArray = authorizedCreatorUpns.Split(",");
+            var superAdmins = string.Join(",", superAdminsArray).ToLower();
+            this.loggedinUser = this.HttpContext.User?.Identity?.Name;
+            string channelIds = string.Empty;
+            if (!superAdmins.Contains(this.loggedinUser.ToLower()))
+            {
+                channelIds = await this.GetChannelIds();
+            }
+
             var result = new List<DraftNotificationSummary>();
-            if (appadmins.Contains(this.loggedinuser))
+            var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
+
+            foreach (var notificationEntity in notificationEntities)
             {
-                var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
-                foreach (var notificationEntity in notificationEntities)
+                if (channelIds == string.Empty || channelIds.Contains(notificationEntity.Channel))
                 {
                     var summary = new DraftNotificationSummary
                     {
@@ -257,28 +266,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     result.Add(summary);
                 }
 
-                return result;
             }
-            else
-            {
-                this.loggedinuser = sloggedin;
 
-                var notificationEntities = await this.notificationDataRepository.GetWithFilterAsync("CreatedBy eq '" + this.loggedinuser + "'", "DraftNotifications");
+            return result;
 
-                foreach (var notificationEntity in notificationEntities)
-                {
-                    var summary = new DraftNotificationSummary
-                    {
-                        Id = notificationEntity.Id,
-                        Title = notificationEntity.Title,
-                        PublishOn = notificationEntity.PublishOn,
-                    };
-
-                    result.Add(summary);
-                }
-
-                return result;
-            }
         }
 
         /// <summary>
@@ -408,6 +399,25 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             }
 
             return notificationEntity;
+        }
+
+        /// <summary>
+        /// Get Channel Ids
+        /// </summary>
+        /// <returns>string Channel Ids.</returns>
+        private async Task<string> GetChannelIds()
+        {
+            string channelIds = string.Empty;
+            var channelDataEntity = await this.channelDataRepository.GetAllAsync();
+            foreach (ChannelDataEntity channelData in channelDataEntity)
+            {
+                if (channelData.ChannelAdminEmail.ToLower().Contains(this.loggedinUser.ToLower()))
+                {
+                    channelIds += channelData.RowKey;
+                    channelIds += ",";
+                }
+            }
+            return channelIds;
         }
     }
 }

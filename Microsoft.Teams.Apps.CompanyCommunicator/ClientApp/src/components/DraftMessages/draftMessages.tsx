@@ -100,10 +100,10 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                 key: keyCount,
                 content: (
                     <Flex vAlign="center" fill gap="gap.small">
-                        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '60%' }}>
                             <Text>{message.title}</Text>
                         </Flex.Item>
-                        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '70%' }}>
+                        <Flex.Item size="size.quarter" variables={{ 'size.quarter': '34%' }}>
                             <Text>{message.publishOn}</Text>
                         </Flex.Item>
                         <Flex.Item shrink={0} hAlign="end" vAlign="center" >
@@ -143,7 +143,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
             key: "labels",
             content: (
                 <Flex vAlign="center" fill gap="gap.small">
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '24%' }}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '60%' }}>
                         <Text
                             truncated
                             weight="bold"
@@ -151,7 +151,7 @@ class DraftMessages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '70%' }}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '34%' }}>
                         <Text
                             truncated
                             weight="bold"
