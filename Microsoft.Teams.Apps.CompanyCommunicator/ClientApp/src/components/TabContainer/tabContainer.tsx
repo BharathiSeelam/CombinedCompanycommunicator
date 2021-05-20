@@ -15,6 +15,7 @@ import { getAppsettings } from '../../apis/appSettingsApi';
 import { getChannels } from '../../apis/channelListApi';
 import { connect } from 'react-redux';
 import { TFunction } from "i18next";
+import { Pivot, PivotItem } from '@fluentui/react';
 let loggedinUser;
 let sadmin;
 let adminArr: string[] = [];
@@ -144,39 +145,39 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
             <div className="tabContainer">
                 
                 {this.state.showTabs ?
-                    <Tabs defaultActiveKey="1" onChange={this.callback} >
-                        <TabPane tab="Messages" key="1">
+                    <Pivot >
+                        <PivotItem headerText="Messages">
                             <div className="newPostBtn">
                                 <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
                             </div>
                             <div className="messageContainer">
                                 <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
                             </div>
-                        </TabPane>
+                        </PivotItem>
 
-                        <TabPane tab="Account" key="2" >
+                        <PivotItem headerText="Account" >
                             <div className="newPostBtn">
                                 <Button className="new" content={this.localize("NewChannel")} onClick={this.onNewChannel} primary />
                             </div>
                             <div className="channelContainer">
                                 <Channels></Channels>
                             </div>
-                        </TabPane>
-                        <TabPane tab="Account Admin" key="3">
+                        </PivotItem>
+                        <PivotItem headerText="Account Admin" >
                             <div className="channelAdminContainer">
                                 <ChannelAdmins></ChannelAdmins>
                             </div>
-                        </TabPane>
-                    </Tabs> :  <Tabs defaultActiveKey="1" onChange={this.callback} >
-                            <TabPane tab="Messages" key="1">
+                        </PivotItem>
+                    </Pivot> :  <Pivot >
+                        <PivotItem headerText="Messages">
                                 <div className="newPostBtn">
                                     <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
                                 </div>
                                 <div className="messageContainer">
                                     <Accordion defaultActiveIndex={[0, 1]} panels={panels} />
                                 </div>
-                            </TabPane>
-                        </Tabs> }
+                        </PivotItem>
+                        </Pivot> }
             </div>
         );
     }

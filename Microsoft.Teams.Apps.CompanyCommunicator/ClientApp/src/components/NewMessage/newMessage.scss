@@ -1,3 +1,18 @@
+
+body {
+    background-color: inherit !important;
+}
+.darkContainer .ql-container {
+    background: #201F1F;
+    border: 0px !important;
+    ///border-bottom-color: #6264A7;
+}
+
+.highContrastContainer .ql-container {
+    background: #201F1F;
+    border: .2rem solid #FFFFFF !important;
+    // border-bottom-color: #6264A7;
+}
 .taskModule {
 
     .formContainer {

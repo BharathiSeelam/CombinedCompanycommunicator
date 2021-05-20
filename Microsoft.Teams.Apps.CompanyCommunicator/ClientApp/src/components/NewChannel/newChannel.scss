@@ -1,3 +1,23 @@
+.darkContainer .adminLabel {
+    color: #FFFFFF !important;
+    background: #201F1F;
+    border-bottom-color: #6264A7;
+}
+.darkContainer .label {
+   color:white !important;
+}
+.highContrastContainer .adminLabel {
+    color: #FFFFFF !important;
+    background: #000000;
+    border-bottom-color: #FFFF00;
+    border: 0.2rem solid #FFFFFF;
+}
+.highContrastContainer .label {
+    color: white !important;
+}
+.highContrastContainer .ui-button {
+    background-color: rgb(26, 235, 255);
+}
 .taskModule {
     .formContainer {
         overflow-y: auto;
