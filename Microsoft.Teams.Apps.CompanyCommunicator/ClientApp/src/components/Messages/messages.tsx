@@ -267,7 +267,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                     <Flex.Item>
                         <Text></Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '63%' }} >
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '25%' }} >
                         <Text
                             truncated
                             content={this.localize("Recipients")}
@@ -275,7 +275,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         >
                         </Text>
                     </Flex.Item>
-                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '43%' }}>
+                    <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }}>
                         <Text
                             truncated
                             content={this.localize("Likes")}
@@ -356,7 +356,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                 <Flex.Item>
                     {this.renderSendingText(message)}
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '70%' }}>
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '30%' }}>
                     <div>
                         <TooltipHost content={this.props.t("TooltipSuccess")} calloutProps={{ gapSpace: 0 }}>
                             <Icon name="stardust-checkmark" xSpacing="after" className="succeeded" outline />
@@ -375,7 +375,7 @@ class Messages extends React.Component<IMessageProps, IMessageState> {
                         }
                     </div>
                 </Flex.Item>
-                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '40%' }} >
+                <Flex.Item size="size.quarter" variables={{ 'size.quarter': '20%' }} >
                     <Text
                         truncated
                         className="semiBold"

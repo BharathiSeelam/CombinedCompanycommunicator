@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
-using Html2Markdown;
 using System;
 using System.Collections.Generic;
 using System.Linq;
