@@ -2,6 +2,11 @@
 body {
     background-color: inherit !important;
 }
+.defaultContainer{
+    .quill{
+        margin: 0rem 3.2rem;
+    }
+}
 .darkContainer .ql-container {
     background: #201F1F;
     border: 0px !important;
