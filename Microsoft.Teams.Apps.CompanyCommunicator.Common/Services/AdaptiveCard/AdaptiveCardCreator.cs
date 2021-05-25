@@ -163,19 +163,21 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Services.AdaptiveCard
             else
             {
                 JToken jToken = JToken.Parse(templateJson);
-                var result = jToken["actions"].ToList();
-                foreach (var item in result)
+                if (jToken["actions"] != null)
                 {
-                    if (item["url"] != null)
+                    var result = jToken["actions"].ToList();
+                    foreach (var item in result)
                     {
-                        var url = item["url"];
-                        if (url.ToString() == "${ActionUri}")
+                        if (item["url"] != null)
                         {
-                            item.Remove();
+                            var url = item["url"];
+                            if (url.ToString() == "${ActionUri}")
+                            {
+                                item.Remove();
+                            }
                         }
                     }
                 }
-
                 var output = jToken.ToString(Formatting.Indented);
                 templateJson = output.ToString();
             }
