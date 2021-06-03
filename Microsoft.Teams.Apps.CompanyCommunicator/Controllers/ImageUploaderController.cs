@@ -5,6 +5,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
@@ -72,6 +73,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         {
             CloudStorageAccount storageAccount = null;
             CloudBlobContainer cloudBlobContainer = null;
+            string uri = string.Empty;
 
             // Check whether the connection string can be parsed.
             if (CloudStorageAccount.TryParse(this.storageAccount, out storageAccount))
@@ -80,7 +82,6 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 {
                     // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
                     CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
-
                     cloudBlobContainer = cloudBlobClient.GetContainerReference(this.blobContainerName);
                     bool isExist = await cloudBlobContainer.CreateIfNotExistsAsync().ConfigureAwait(false);
 
@@ -93,15 +94,38 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                     // }
 
                     // Set the permissions so the blobs are public.
-                    BlobContainerPermissions permissions = new BlobContainerPermissions
+
+                    // BlobContainerPermissions permissions = new BlobContainerPermissions
+                    // {
+                    //    PublicAccess = BlobContainerPublicAccessType.Blob, };
+                    var permissions = await cloudBlobContainer.GetPermissionsAsync();
+                    var storedPolicy = new SharedAccessBlobPolicy()
                     {
-                        PublicAccess = BlobContainerPublicAccessType.Blob,
+                        SharedAccessExpiryTime = DateTime.UtcNow.AddMonths(5),
+                        Permissions = SharedAccessBlobPermissions.Read |
+                                      SharedAccessBlobPermissions.Write |
+                                      SharedAccessBlobPermissions.List,
                     };
+
+                    permissions.SharedAccessPolicies.Clear();
+
+                    // add in the new one
+                    permissions.SharedAccessPolicies.Add("blobPolicy", storedPolicy);
 
                     await cloudBlobContainer.SetPermissionsAsync(permissions);
 
+                    var containerSignature = cloudBlobContainer.GetSharedAccessSignature(null, "blobPolicy");
+
+                    // create the URI a client can use to get access to just this container
+                    uri = cloudBlobContainer.Uri + containerSignature;
+
+                    var sasUri = new Uri(uri);
+                    var queries = sasUri.Query;
+
+                    var sasBlobContainer = new CloudBlobContainer(sasUri);
+
                     // Get a reference to the blob address, then upload the file to the blob.
-                    CloudBlockBlob cloudBlockBlob = cloudBlobContainer.GetBlockBlobReference(DateTime.Now.ToString("yyyyMMddHHmmss") + filename);
+                    CloudBlockBlob cloudBlockBlob = sasBlobContainer.GetBlockBlobReference(DateTime.Now.ToString("yyyyMMddHHmmss") + filename);
 
                     var bytes = Convert.FromBase64String(stream.Replace("data:image/jpeg;base64,", string.Empty).Replace("data:image/png;base64,", string.Empty).Replace("data:image/bmp;base64,", string.Empty));
 
@@ -110,9 +134,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                         await cloudBlockBlob.UploadFromStreamAsync(fileStream);
                     }
 
-                    return (true, cloudBlockBlob.SnapshotQualifiedStorageUri.PrimaryUri.ToString());
+                    return (true, cloudBlockBlob.SnapshotQualifiedStorageUri.PrimaryUri.ToString() + queries);
                 }
-                catch (StorageException)
+                catch (StorageException ex)
                 {
                     return (false, null);
                 }
@@ -129,6 +153,37 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             {
                 return (false, null);
             }
+        }
+
+        /// <summary>
+        /// Method for getting SAS Url.
+        /// </summary>
+        /// <param name="connectionString">storage connection string param.</param>
+        /// <param name="blobName">blob container name param.</param>
+        private string GetSASUrl(string connectionString, string blobName)
+        {
+            string sasUriToken = string.Empty;
+            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);
+
+            // Create an instance of the CloudBlobClient
+            CloudBlobClient client = storageAccount.CreateCloudBlobClient();
+
+            // Retrieve an instance of the container using our hard-coded container name
+            CloudBlobContainer container = client.GetContainerReference("my-samples");
+
+            // Define Access Policy
+            SharedAccessBlobPolicy accessPolicy = new SharedAccessBlobPolicy
+            {
+                // Define expiration to be 30 minutes from now in UTC
+                SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(30),
+
+                // Add permissions
+                Permissions = SharedAccessBlobPermissions.Create | SharedAccessBlobPermissions.Write,
+            };
+
+            sasUriToken = $"{container.Uri}{container.GetSharedAccessSignature(accessPolicy)}";
+
+            return sasUriToken;
         }
     }
 }
