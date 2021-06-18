@@ -96,7 +96,7 @@ class SendConfirmationTaskModule extends React.Component<SendConfirmationTaskMod
         if ('id' in params) {
             let id = params['id'];
             this.getItem(id).then(() => {
-                if (this.state.message.publishOn !== null) {
+                if (this.state.message.publishOn !== null && this.state.message.publishOn !== "") {
                     this.setState({
                         selectedPublishBtn: "publishOn",
                         startDate: this.state.message.publishOn,
