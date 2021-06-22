@@ -131,8 +131,10 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator
                     options.ProactivelyInstallUserApp =
                         configuration.GetValue<bool>("ProactivelyInstallUserApp", true);
 
-                    options.UserAppExternalId =
-                        configuration.GetValue<string>("UserAppExternalId", "148a66bb-e83d-425a-927d-09f4299a9274");
+                    options.UserAppExternalId = configuration.GetValue<string>("UserAppExternalId");
+                    //options.UserAppExternalId =
+                    //    configuration.GetValue<string>("UserAppExternalId", "148a66bb-e83d-425a-927d-09f4299a9274");
+
                 });
 
             services.AddOptions();
