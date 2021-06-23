@@ -13,6 +13,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Localization;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
@@ -42,6 +43,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         private readonly IDistributionListDataRepository distributionListDataRepository;
         private string loggedinUser;
         private readonly IConfiguration configuration;
+        private readonly ILogger<SentNotificationsController> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DraftNotificationsController"/> class.
@@ -63,7 +65,8 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             IAppSettingsService appSettingsService,
             IStringLocalizer<Strings> localizer,
             IConfiguration configuration,
-            IGroupsService groupsService)
+            IGroupsService groupsService,
+            ILoggerFactory loggerFactory)
         {
             this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
             this.notificationDataRepository = notificationDataRepository ?? throw new ArgumentNullException(nameof(notificationDataRepository));
@@ -74,6 +77,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             this.groupsService = groupsService ?? throw new ArgumentNullException(nameof(groupsService));
             this.appSettingsService = appSettingsService ?? throw new ArgumentNullException(nameof(appSettingsService));
             this.configuration = configuration;
+            this.logger = loggerFactory?.CreateLogger<SentNotificationsController>() ?? throw new ArgumentNullException(nameof(loggerFactory));
         }
 
         /// <summary>
@@ -239,36 +243,46 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DraftNotificationSummary>>> GetAllDraftNotificationsAsync()
         {
-            var authorizedCreatorUpns = this.configuration["AuthorizedCreatorUpns"];
-            string[] superAdminsArray = authorizedCreatorUpns.Split(",");
-            var superAdmins = string.Join(",", superAdminsArray).ToLower();
-            this.loggedinUser = this.HttpContext.User?.Identity?.Name;
-            string channelIds = string.Empty;
-            if (!superAdmins.Contains(this.loggedinUser.ToLower()))
-            {
-                channelIds = await this.GetChannelIds();
-            }
-
-            var result = new List<DraftNotificationSummary>();
-            var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
-
-            foreach (var notificationEntity in notificationEntities)
-            {
-                if (channelIds == string.Empty || channelIds.Contains(notificationEntity.Channel))
+            try 
+            { 
+                var authorizedCreatorUpns = this.configuration["AuthorizedCreatorUpns"];
+                string[] superAdminsArray = authorizedCreatorUpns.Split(",");
+                var superAdmins = string.Join(",", superAdminsArray).ToLower();
+                this.loggedinUser = this.HttpContext.User?.Identity?.Name;
+                string channelIds = string.Empty;
+                if (!superAdmins.Contains(this.loggedinUser.ToLower()))
                 {
-                    var summary = new DraftNotificationSummary
-                    {
-                        Id = notificationEntity.Id,
-                        Title = notificationEntity.Title,
-                        PublishOn = notificationEntity.PublishOn,
-                    };
-
-                    result.Add(summary);
+                    channelIds = await this.GetChannelIds();
                 }
 
+                var result = new List<DraftNotificationSummary>();
+                var notificationEntities = await this.notificationDataRepository.GetAllDraftNotificationsAsync();
+
+                foreach (var notificationEntity in notificationEntities)
+                {
+                    if (channelIds == string.Empty || channelIds.Contains(notificationEntity.Channel))
+                    {
+                        var summary = new DraftNotificationSummary
+                        {
+                            Id = notificationEntity.Id,
+                            Title = notificationEntity.Title,
+                            PublishOn = notificationEntity.PublishOn,
+                        };
+
+                        result.Add(summary);
+                    }
+
+                }
+                return result;
+            }
+            catch (Exception exception)
+            {
+                // Failed to fetch Draft Notification.
+                this.logger.LogError(exception, $"Failed to get Draft notifications. Error message: {exception.Message}.");
+                var result = new List<DraftNotificationSummary>();
+                return result;
             }
 
-            return result;
 
         }
 
