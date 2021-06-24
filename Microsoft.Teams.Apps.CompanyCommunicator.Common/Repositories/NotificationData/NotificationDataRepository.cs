@@ -41,9 +41,16 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.Notificat
         /// <inheritdoc/>
         public async Task<IEnumerable<NotificationDataEntity>> GetAllDraftNotificationsAsync()
         {
-            var result = await this.GetAllAsync(NotificationDataTableNames.DraftNotificationsPartition);
-
-            return result;
+            try
+            {
+                var result = await this.GetAllAsync(NotificationDataTableNames.DraftNotificationsPartition);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, $"Error in NotificationDataRepository.cs. Failed to get Draft notifications. Error message:{NotificationDataTableNames.DraftNotificationsPartition} + {ex.Message}");
+                throw;
+            }
         }
 
         /// <inheritdoc/>
