@@ -74,7 +74,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
         [HttpGet("{DLName}")]
         public async Task<ActionResult<IEnumerable<DistributionList>>> GetDLByNameAsync(string dLName)
         {
-            var distributionListEntities = await this.distributionListDataRepository.GetWithFilterAsync("DLName eq '" + dLName + "'", "Default");
+            var distributionListEntities = await this.distributionListDataRepository.GetWithFilterAsync("DLMail eq '" + dLName.ToLower() + "'", "Default");
 
             var result = new List<DistributionList>();
             foreach (var distributionListEntity in distributionListEntities)

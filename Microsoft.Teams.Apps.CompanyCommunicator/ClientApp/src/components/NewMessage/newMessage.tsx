@@ -247,7 +247,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 resultedTeams.push({
                     key: element.dlid,
                     header: element.dlName,
-                    content: "",
+                    content: element.dlMail,
                     image: ImageUtil.makeInitialImage(element.dlName),
                     team: {
                         id: element.dlid

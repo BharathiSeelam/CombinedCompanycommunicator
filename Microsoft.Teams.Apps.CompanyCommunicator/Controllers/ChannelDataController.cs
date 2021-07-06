@@ -10,6 +10,7 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Teams.Apps.CompanyCommunicator.Authentication;
     using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.ChannelData;
+    using Microsoft.Teams.Apps.CompanyCommunicator.Common.Repositories.DistributionListData;
     using Microsoft.Teams.Apps.CompanyCommunicator.Models;
     using Microsoft.Teams.Apps.CompanyCommunicator.Repositories.Extensions;
 
@@ -21,15 +22,17 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
     public class ChannelDataController : Controller
     {
         private readonly IChannelDataRepository channelDataRepository;
-
+        private readonly IDistributionListDataRepository distributionListDataRepository;
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelDataController"/> class.
         /// </summary>
         /// <param name="channelDataRepository">Channel data repository instance.</param>
+        /// <param name="distributionListDataRepository">distributionList data repository instance.</param>
         public ChannelDataController(
-            IChannelDataRepository channelDataRepository)
+            IChannelDataRepository channelDataRepository, IDistributionListDataRepository distributionListDataRepository)
         {
             this.channelDataRepository = channelDataRepository ?? throw new ArgumentNullException(nameof(channelDataRepository));
+            this.distributionListDataRepository = distributionListDataRepository ?? throw new ArgumentNullException(nameof(distributionListDataRepository));
         }
 
         /// <summary>
@@ -44,13 +47,24 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
             var result = new List<ChannelData>();
             foreach (var channelEntity in channelEntities)
             {
+                string dlNames = string.Empty;
+                Array dlEmails = channelEntity.ChannelAdminDLs.Split(",");
+                foreach (var dlEmail in dlEmails)
+                {
+                    var distributionListEntities = await this.distributionListDataRepository.GetWithFilterAsync("DLMail eq '" + dlEmail.ToString().ToLower() + "'", "Default");
+                    foreach (var dl in distributionListEntities)
+                    {
+                        dlNames += dl.DLName + ",";
+                    }
+                }
+
                 var channels = new ChannelData
                 {
                     Id = channelEntity.Id,
                     ChannelName = channelEntity.ChannelName,
                     ChannelDescription = channelEntity.ChannelDescription,
                     ChannelAdmins = channelEntity.ChannelAdmins,
-                    ChannelAdminDLs = channelEntity.ChannelAdminDLs,
+                    ChannelAdminDLs = dlNames.Remove(dlNames.Length - 1, 1),
                     ChannelAdminEmail = channelEntity.ChannelAdminEmail,
                 };
 
@@ -110,9 +124,9 @@ namespace Microsoft.Teams.Apps.CompanyCommunicator.Controllers
                 var loggedinUser = channelEntity.ChannelAdminEmail.Split(",");
                 if (loggedinUser.Length >= 0)
                 {
-                foreach (var loggedin in loggedinUser)
+                    foreach (var loggedin in loggedinUser)
                     {
-                    if (loggedin.ToLower() == channelAdminEmail.ToLower())
+                        if (loggedin.ToLower() == channelAdminEmail.ToLower())
                         {
                             var channels = new ChannelData
                             {

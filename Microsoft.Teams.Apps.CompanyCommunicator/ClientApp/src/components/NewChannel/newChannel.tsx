@@ -11,12 +11,13 @@ import './teamTheme.scss';
 import { getChannel, createChannel, updateChannel, getTeams } from '../../apis/channelListApi';
 import { getDLUsers, getDLUser } from '../../apis/dlUserListApi';
 import { getBaseUrl } from '../../configVariables';
-import { getDistributionLists } from '../../apis/distributionListApi';
+import { getDistributionListsByName } from '../../apis/distributionListApi';
 import {
     getInitAdaptiveCard
 } from '../AdaptiveCard/adaptiveCard';
 import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
+import { channelListReducer } from '../../reducers';
 type dropdownItem = {
     key: string,
     header: string,
@@ -50,10 +51,13 @@ export interface formState {
     admins?: any[],
     dls?: any[],
     selectedAdmins: string,
-    selectedDLs: dropdownItem[],
+    selectedDLs: string,
     selectedAdminEmail: string,
     dlAdminEmail: string,
-    userNameReadonly:boolean,
+    userNameReadonly: boolean,
+    invalidDlEmailErrorMessageLabel: boolean;
+    invalidDlEmailErrorMessage: string;
+    selectedDlNames: string;
 }
 export interface INewChannelProps extends RouteComponentProps, WithTranslation {
     getChannelsList?: any;
@@ -70,7 +74,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             channelName: "",
             channelDescription: "",
             selectedAdmins: "",
-            selectedDLs: [],
+            selectedDLs: "",
             card: this.card,
             page: "ChannelCreation",
             channelId: "",
@@ -81,11 +85,14 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             dlAdminLabel: "",
             dlAdminEmail: "",
             selectedAdminEmail: "",
-            userNameReadonly:true,
+            userNameReadonly: true,
+            invalidDlEmailErrorMessageLabel: false,
+            invalidDlEmailErrorMessage: "",
+            selectedDlNames: ""
         }
-       // this.onChannelAdminChanged = this.onChannelAdminChanged.bind(this);
-       // this.getAdminData();
-        this.getDLData();
+        // this.onChannelAdminChanged = this.onChannelAdminChanged.bind(this);
+        // this.getAdminData();
+        //this.getDLData();
     }
     public async componentDidMount() {
         microsoftTeams.initialize();
@@ -96,14 +103,15 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             if ('id' in params) {
                 let id = params['id'];
                 this.getItem(id).then(() => {
-                    const selectedDLs = this.makeDLDropdownItemList(this.state.selectedDLs, this.state.teams);
+                    //const selectedDLs = this.makeDLDropdownItemList(this.state.selectedDLs, this.state.teams);
                     //const selectedAdmins = this.makeDropdownItemList(this.state.selectedAdmins, this.state.selectedAdminEmail, this.state.teams);
                     this.setState({
                         exists: true,
                         channelId: id,
-                        selectedDLs: selectedDLs,
+                        selectedDLs: this.state.selectedDLs,
                         selectedAdmins: this.state.selectedAdmins,
                         selectedAdminEmail: this.state.selectedAdminEmail,
+                        selectedDlNames: this.state.selectedDlNames
                     })
                 });
             } else {
@@ -117,83 +125,83 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             }
         });
     }
-    private makeDropdownItems = (items: any[] | undefined) => {
-        const resultedTeams: dropdownItem[] = [];
-        if (items) {
-            const key = 'userName';
-            //const uniqueItems = [...new Map(items.map(item => [item[key], item])).values()];
-            items.forEach((element) => {
-                if (element.userEmail !== null || element.userName !== null) {
-                    resultedTeams.push({
-                        key: element.userName,
-                        header: element.userName,
-                        content: element.userEmail,
-                        image: ImageUtil.makeInitialImage(element.userName),
-                        team: {
-                            id: element.userID
-                        },
+    //private makeDropdownItems = (items: any[] | undefined) => {
+    //    const resultedTeams: dropdownItem[] = [];
+    //    if (items) {
+    //        const key = 'userName';
+    //        //const uniqueItems = [...new Map(items.map(item => [item[key], item])).values()];
+    //        items.forEach((element) => {
+    //            if (element.userEmail !== null || element.userName !== null) {
+    //                resultedTeams.push({
+    //                    key: element.userName,
+    //                    header: element.userName,
+    //                    content: element.userEmail,
+    //                    image: ImageUtil.makeInitialImage(element.userName),
+    //                    team: {
+    //                        id: element.userID
+    //                    },
 
-                    });
-                }
-            });
-        }
-        return resultedTeams;
-    }
-    private makeDropdownItemList = (items: any[], emailItems: any[], fromItems: any[] | undefined) => {
-        items = items.toString().split(',');
-        emailItems = emailItems.toString().split(',');
-        const dropdownItemList: dropdownItem[] = [];
-        if (items) {
-            items.forEach((element, index) => {
-                dropdownItemList.push({
-                    key: element,
-                    header: element,
-                    content: emailItems[index],
-                    image: ImageUtil.makeInitialImage(element),
-                    team: {
-                        id: element
-                    },
-                })
-            });
-        }
-        return dropdownItemList;
-    }
+    //                });
+    //            }
+    //        });
+    //    }
+    //    return resultedTeams;
+    //}
+    //private makeDropdownItemList = (items: any[], emailItems: any[], fromItems: any[] | undefined) => {
+    //    items = items.toString().split(',');
+    //    emailItems = emailItems.toString().split(',');
+    //    const dropdownItemList: dropdownItem[] = [];
+    //    if (items) {
+    //        items.forEach((element, index) => {
+    //            dropdownItemList.push({
+    //                key: element,
+    //                header: element,
+    //                content: emailItems[index],
+    //                image: ImageUtil.makeInitialImage(element),
+    //                team: {
+    //                    id: element
+    //                },
+    //            })
+    //        });
+    //    }
+    //    return dropdownItemList;
+    //}
 
-    private makeDLDropdownItems = (items: any[] | undefined) => {
-        const resultedTeams: dropdownItem[] = [];
-        if (items) {
-            items.forEach((element) => {
-                resultedTeams.push({
-                    key: element.dlid,
-                    header: element.dlName + "(" + element.dlMemberCount + ")",
-                    content: element.dlMail,
-                    image: ImageUtil.makeInitialImage(element.dlName),
-                    team: {
-                        id: element.dlid
-                    },
-                });
-            });
-        }
-        return resultedTeams;
-    }
-    private makeDLDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
-        items = items.toString().split(',');
-        const dropdownItemList: dropdownItem[] = [];
-        if (items) {
-            items.forEach((element) => {
-                dropdownItemList.push({
-                    key: element,
-                    header: element,
-                    content: "",
-                    image: ImageUtil.makeInitialImage(element),
-                    team: {
-                        id: element
-                    },
-                })
-            });
-        }
-        return dropdownItemList;
-    }
+    //private makeDLDropdownItems = (items: any[] | undefined) => {
+    //    const resultedTeams: dropdownItem[] = [];
+    //    if (items) {
+    //        items.forEach((element) => {
+    //            resultedTeams.push({
+    //                key: element.dlid,
+    //                header: element.dlName + "(" + element.dlMemberCount + ")",
+    //                content: element.dlMail,
+    //                image: ImageUtil.makeInitialImage(element.dlName),
+    //                team: {
+    //                    id: element.dlid
+    //                },
+    //            });
+    //        });
+    //    }
+    //    return resultedTeams;
+    //}
+    //private makeDLDropdownItemList = (items: any[], fromItems: any[] | undefined) => {
+    //    items = items.toString().split(',');
+    //    const dropdownItemList: dropdownItem[] = [];
+    //    if (items) {
+    //        items.forEach((element) => {
+    //            dropdownItemList.push({
+    //                key: element,
+    //                header: element,
+    //                content: "",
+    //                image: ImageUtil.makeInitialImage(element),
+    //                team: {
+    //                    id: element
+    //                },
+    //            })
+    //        });
+    //    }
+    //    return dropdownItemList;
+    //}
     private getTeamList = async () => {
         try {
             const response = await getTeams();
@@ -204,39 +212,48 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             return error;
         }
     }
-    private getAdminData = async () => {
-        try {
-            const response = await getDLUsers();
-            this.setState({
-                admins: response.data
-            });
-        }
-        catch (error) {
-            return error;
-        }
-    }
+    //private getAdminData = async () => {
+    //    try {
+    //        const response = await getDLUsers();
+    //        this.setState({
+    //            admins: response.data
+    //        });
+    //    }
+    //    catch (error) {
+    //        return error;
+    //    }
+    //}
 
-    private getDLData = async () => {
-        try {
-            const response = await getDistributionLists();
-            this.setState({
-                dls: response.data
-            });
-        }
-        catch (error) {
-        }
-    }
+    //private getDLData = async () => {
+    //    try {
+    //        const response = await getDistributionLists();
+    //        this.setState({
+    //            dls: response.data
+    //        });
+    //    }
+    //    catch (error) {
+    //    }
+    //}
     private getItem = async (id: string) => {
         try {
             const response = await getChannel(id);
             const ChannelDetail = response.data;
-            this.setState({
-                channelName: ChannelDetail.channelName,
-                channelDescription: ChannelDetail.channelDescription,
-                selectedAdmins: ChannelDetail.channelAdmins,
-                selectedDLs: ChannelDetail.channelAdminDLs,
-                selectedAdminEmail: ChannelDetail.channelAdminEmail,
-                loader: false
+            let dlNames: any[] = [];
+            let dlEmails: any[] = ChannelDetail.channelAdminDLs.split(",");
+            await Promise.all(dlEmails.map(async (data) => {
+                await getDistributionListsByName(data).then(result => {
+                    dlNames.push(result.data[0]["dlName"] + "(" + result.data[0]["dlMemberCount"] + ")");
+                });
+            })).then(result => {
+                this.setState({
+                    channelName: ChannelDetail.channelName,
+                    channelDescription: ChannelDetail.channelDescription,
+                    selectedAdmins: ChannelDetail.channelAdmins,
+                    selectedDLs: ChannelDetail.channelAdminDLs,
+                    selectedAdminEmail: ChannelDetail.channelAdminEmail,
+                    selectedDlNames: dlNames.join(","),
+                    loader: false
+                });
             });
         } catch (error) {
             return error;
@@ -283,11 +300,11 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                                     placeholder={this.localize("ChannelAdmin")}
                                     defaultValue={this.state.selectedAdminEmail}
                                     onChange={this.onChannelAdminChanged}
-                                    
-                                   // onBlur={this.onChannelAdminChanged.bind(this)}
-                                   autoComplete="off"
+
+                                    // onBlur={this.onChannelAdminChanged.bind(this)}
+                                    autoComplete="off"
                                 />
-                                <br/>
+                                <br />
                                 <Label className="inputField label">{this.localize("AdminUserNameLabel")}</Label>
                                 <br />
                                 <Label className="inputField adminLabel">{this.state.selectedAdmins}</Label>
@@ -307,20 +324,34 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
                         <div className="formContainer">
                             <div className="formChannelContainer" >
                                 <br />
-                                <Label className="inputField label">{this.localize("AddDLsFor")}{this.state.dlAdminLabel}</Label>
-                                <Dropdown
-                                    className="channelDropdown"
+                                <Label className="inputField label">{this.localize("AddDLsFor")}</Label>
+                                {/*<Dropdown*/}
+                                {/*    className="channelDropdown"*/}
+                                {/*    placeholder={this.localize("ChannelDLs")}*/}
+                                {/*    search*/}
+                                {/*    multiple*/}
+                                {/*    loading={this.state.loading}*/}
+                                {/*    loadingMessage={this.localize("LoadingText")}*/}
+                                {/*    items={this.getAdminDLItems()}*/}
+                                {/*    value={this.state.selectedDLs}*/}
+                                {/*    onSelectedChange={this.onAdminDLChanged.bind(this)}*/}
+                                {/*    unstable_pinned={this.state.unstablePinned}*/}
+                                {/*    noResultsMessage={this.localize("NoMatchMessage")}*/}
+                                {/*/>*/}
+                                <Input
+                                    className="inputField"
                                     placeholder={this.localize("ChannelDLs")}
-                                    search
-                                    multiple
-                                    loading={this.state.loading}
-                                    loadingMessage={this.localize("LoadingText")}
-                                    items={this.getAdminDLItems()}
-                                    value={this.state.selectedDLs}
-                                    onSelectedChange={this.onAdminDLChanged.bind(this)}
-                                    unstable_pinned={this.state.unstablePinned}
-                                    noResultsMessage={this.localize("NoMatchMessage")}
+                                    defaultValue={this.state.selectedDLs}
+                                    onChange={this.onAdminDLChanged}
+
+                                    // onBlur={this.onChannelAdminChanged.bind(this)}
+                                    autoComplete="off"
                                 />
+                                {this.state.invalidDlEmailErrorMessageLabel ? <Label className="inputField dlLabel">{this.state.invalidDlEmailErrorMessage}</Label> : ""}
+                                <br />
+                                <Label className="inputField label">{this.localize("DLNameLabel")}</Label>
+                                <br />
+                                <Label className="inputField adminLabel">{this.state.selectedDlNames}</Label>
                             </div>
                         </div>
                         <div className="footerContainer">
@@ -337,7 +368,7 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
         }
     }
     private isSaveBtnDisabled = () => {
-        return !(this.state.channelName !== "" && this.state.selectedAdmins.length !== 0 && this.state.selectedDLs.length !== 0);
+        return !(this.state.channelName !== "" && this.state.selectedAdmins.length !== 0 && this.state.selectedDLs.length !== 0 && this.state.invalidDlEmailErrorMessage.length == 0);
     }
     private isNextBtnDisabled = () => {
         return !(this.state.channelName !== "" && this.state.selectedAdmins.length !== 0);
@@ -345,15 +376,15 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
     private onSave = () => {
 
         let channelAdmins: string = this.state.selectedAdmins;
-        
+
         let channelAdminsEmail: string = this.state.selectedAdminEmail;
-        let channelAdminDLs: any[] = this.state.selectedDLs.map(a => a.header);
+        let channelAdminDLs: string = this.state.selectedDLs;
         const channel: IChannel = {
             id: this.state.channelId,
             channelName: this.state.channelName,
             channelDescription: this.state.channelDescription,
             channelAdmins: channelAdmins,
-            channelAdminDLs: channelAdminDLs.join(','),
+            channelAdminDLs: channelAdminDLs,
             channelAdminEmail: channelAdminsEmail
         };
         if (this.state.exists) {
@@ -366,20 +397,20 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             });
         }
     }
-    private getAdminItems = () => {
-        if (this.state.admins) {
-            return this.makeDropdownItems(this.state.admins);
-        }
-        const dropdownItems: dropdownItem[] = [];
-        return dropdownItems;
-    }
-    private getAdminDLItems = () => {
-        if (this.state.dls) {
-            return this.makeDLDropdownItems(this.state.dls);
-        }
-        const dropdownItems: dropdownItem[] = [];
-        return dropdownItems;
-    }
+    //private getAdminItems = () => {
+    //    if (this.state.admins) {
+    //        return this.makeDropdownItems(this.state.admins);
+    //    }
+    //    const dropdownItems: dropdownItem[] = [];
+    //    return dropdownItems;
+    //}
+    //private getAdminDLItems = () => {
+    //    if (this.state.dls) {
+    //        return this.makeDLDropdownItems(this.state.dls);
+    //    }
+    //    const dropdownItems: dropdownItem[] = [];
+    //    return dropdownItems;
+    //}
     private editChannel = async (id: string, channel: IChannel) => {
         try {
             await updateChannel(id, channel);
@@ -425,8 +456,8 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
     }
     private onChannelAdminChanged = async (event: any) => {
         var dlUserEmails = event.target.value;
-        this.setState({ userNameReadonly :false });
-        if (dlUserEmails.endsWith(".com")) {
+        this.setState({ userNameReadonly: false });
+        if (dlUserEmails.endsWith(".com") || dlUserEmails.endsWith(".COM")) {
             this.setState({
                 selectedAdminEmail: dlUserEmails.toString(),
             });
@@ -452,18 +483,68 @@ class NewChannel extends React.Component<INewChannelProps, formState> {
             if (dlUserEmails == "") {
                 this.setState({
                     selectedAdmins: "",
-                    selectedAdminEmail:""
+                    selectedAdminEmail: ""
                 });
             }
         }
-                   
-                
+
+
     }
-   
-    private onAdminDLChanged = (event: any, itemsData: any) => {
-        this.setState({
-            selectedDLs: itemsData.value
-        })
+
+    private onAdminDLChanged = async (event: any) => {
+        var dlEmails = event.target.value;
+        var dlNames: any[] = [];
+        let invalidDLEmails: any[] = [];
+        if (dlEmails.endsWith(".com") || dlEmails.endsWith(".COM")) {
+            var emails = dlEmails.split(",");
+            await Promise.all(emails.map(async function (obj) {
+                await getDistributionListsByName(obj).then(result => {
+                    let data = result.data;
+                    if (data.length === 0) {
+                        invalidDLEmails.push(obj);
+                    }
+                    else {
+                        dlNames.push(data[0]["dlName"] + "(" + data[0]["dlMemberCount"] + ")");
+                    }
+                    return invalidDLEmails;
+                });
+            })).then(result => {
+                if (invalidDLEmails.length > 1) {
+                    let invalidDLEmailString: string = invalidDLEmails.join(",");
+                    this.setState({
+                        selectedDLs: dlEmails.toString(),
+                        invalidDlEmailErrorMessage: "Please verify the Dl Emails " + invalidDLEmailString + " are valid",
+                        invalidDlEmailErrorMessageLabel: true,
+                        selectedDlNames: dlNames.join(",")
+                    });
+                }
+                else if (invalidDLEmails.length == 1) {
+                    let invalidDLEmailString: string = invalidDLEmails[0];
+                    this.setState({
+                        selectedDLs: dlEmails.toString(),
+                        invalidDlEmailErrorMessage: "Please verify the Dl Emails " + invalidDLEmailString + " is valid",
+                        invalidDlEmailErrorMessageLabel: true,
+                        selectedDlNames: dlNames.join(",")
+                    });
+                }
+                else {
+                    this.setState({
+                        selectedDLs: dlEmails.toString(),
+                        invalidDlEmailErrorMessage: "",
+                        invalidDlEmailErrorMessageLabel: false,
+                        selectedDlNames: dlNames.join(",")
+                    });
+                }
+            });
+        }
+        else {
+            if (dlEmails == "") {
+                this.setState({
+                    selectedDLs: "",
+                    selectedDlNames: ""
+                });
+            }
+        }
     }
 }
 const newChannelWithTranslation = withTranslation()(NewChannel);

@@ -3,21 +3,26 @@
     background: #201F1F;
     border-bottom-color: #6264A7;
 }
+
 .darkContainer .label {
-   color:white !important;
+    color: white !important;
 }
+
 .highContrastContainer .adminLabel {
     color: #FFFFFF !important;
     background: #000000;
     border-bottom-color: #FFFF00;
     border: 0.2rem solid #FFFFFF;
 }
+
 .highContrastContainer .label {
     color: white !important;
 }
+
 .highContrastContainer .newPostBtn {
     background-color: rgb(26, 235, 255);
 }
+
 .taskModule {
     .formContainer {
         overflow-y: auto;
@@ -49,6 +54,14 @@
                 height: 3.2rem;
                 padding: 6px 0px 0px 13px;
                 color: black;
+                margin-top: 10px !important;
+            }
+
+            .dlLabel {
+                background-color: white !important;
+                color: red;
+                font-weight: bold;
+                font-size: 1.2rem;
                 margin-top: 10px !important;
             }
 
